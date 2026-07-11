@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Политика приватности — Kaspa Гарант</title>
+<meta name="description" content="Приватность Kaspa Гарант: некостодиально, без аккаунтов. Ключи в браузере, чат сделки E2E-зашифрован; что видит сервер и что видит арбитр — только если вы раскрыли переписку.">
+<link rel="canonical" href="https://kaspaforge.org/ru/privacy-escrow.html">
+<link rel="alternate" hreflang="en" href="https://kaspaforge.org/privacy-escrow.html">
+<link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/privacy-escrow.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest-escrow.json">
+<meta name="theme-color" content="#0E1116">
+<link rel="apple-touch-icon" href="/assets/icons-escrow/apple-touch-icon.png">
+<link rel="stylesheet" href="/assets/safe.css?v=14">
+<script src="/assets/nav.js?v=5" defer></script>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <a class="brand" href="/ru/">
+    <img class="brand-k" src="/assets/brand/emblem-flat-header.png" alt="">
+    <span class="brand-name">Kaspa <b>Гарант</b></span>
+  </a>
+  <a class="by-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="Сделано OfficeForge"><img src="/assets/of-wordmark.png" alt="OfficeForge"></a>
+  <nav><a href="/ru/deal.html">Мои сделки</a><a class="cta" href="/ru/escrow.html">Создать сделку</a></nav>
+</header>
+
+<div style="max-width:760px;margin:36px auto 0">
+  <div class="eyebrow">Приватность</div>
+  <h1 style="font-size:clamp(28px,4vw,40px);margin:10px 0 8px">Kaspa Гарант — политика приватности</h1>
+  <p class="hint">Относится к эскроу-страницам kaspaforge.org (начиная с <a href="/ru/escrow-index.html">/ru/escrow-index.html</a>) и его устанавливаемому PWA (Kaspa Гарант). Это эскроу-сервис; у сейфа на <a href="/ru/">kaspaforge.org</a> своя <a href="https://kaspaforge.org/ru/privacy.html">политика</a>. Действует с 6 июля 2026. Оператор: OfficeForge (связь: kaspa@officeforge.co).</p>
+
+  <div class="plate" style="margin-top:22px">
+    <h2 style="font-size:20px">Коротко</h2>
+    <p>Kaspa Гарант некостодиален и без аккаунтов. <b>Ключи вашей стороны сделки (ключ сделки, закладки и чата) рождаются и используются только в браузере и нам не передаются.</b> Чат сделки зашифрован сквозным шифрованием — сервер релеит шифртекст, который прочитать не может. Единственное осознанное исключение — спор: чтобы арбитр рассудил, вы можете раскрыть свой <i>чат</i>-ключ (никогда не эскроу-ключ), и только тогда переписку можно расшифровать для арбитра. Без регистрации, рекламы и сторонней аналитики.</p>
+  </div>
+
+  <div class="plate">
+    <h2 style="font-size:20px">Что остаётся только в вашем браузере</h2>
+    <p>Приватные ключи вашей стороны — эскроу-ключ (подписывает релиз/возврат/спор), ключ закладки (у покупателя) и ключ чата, — плюс сервисный токен. Живут в локальном хранилище этого браузера (в зашифрованном мастер key-file), удаляются кнопкой «Забыть сделку». Бэкап мастер key-file делаешь сам в Деске (Экспорт файла ключей); это единственная копия ключей, и к нам она не попадает.</p>
+  </div>
+
+  <div class="plate">
+    <h2 style="font-size:20px">Что получает и хранит сервер</h2>
+    <ul style="margin:0;padding-left:20px;line-height:1.7;color:var(--ash)">
+      <li><b>Условия сделки</b> — тип, сумма и текст условий, который вы вводите. Хранятся в открытом виде (не шифруются): вторая сторона видит их в превью приглашения до входа, а арбитр — в споре.</li>
+      <li><b>Публичные параметры</b> — публичные ключи сторон и адреса ковенанта, нужные чтобы собрать и отслеживать ончейн-сделку.</li>
+      <li><b>Сервисные токены</b> — случайный токен на каждую сторону, дающий право читать/действовать по сделке. Кто им владеет — действует за эту сторону; он хранится в мастер key-file (бэкап в Деске).</li>
+      <li><b>Ссылка-приглашение / код</b> — это capability: кто откроет, тот присоединится как контрагент. Истекает через 72 часа, если не использована.</li>
+      <li><b>Шифртекст чата и зашифрованные медиа</b> — чат сделки идёт по BlockDAG Kaspa (протокол Kasia); сервер релеит и хранит только <b>шифртекст</b> и уже зашифрованные медиа-блобы. Сообщения, фото и видео он прочитать не может.</li>
+      <li><b>Заявления в споре</b> — если открыт спор, заявление каждой стороны «что требую и почему».</li>
+      <li><b>Telegram chat ID</b> — только если вы подключили Telegram-уведомления по сделке.</li>
+      <li>Обычные логи веб-сервера (IP, путь запроса, user agent) — кратко, для защиты от абьюза, не для профилирования.</li>
+    </ul>
+    <p style="margin-top:10px">Все ончейн-транзакции и балансы ковенанта — публичные данные блокчейна Kaspa по своей природе.</p>
+  </div>
+
+  <div class="plate">
+    <h2 style="font-size:20px">Споры: раскрытие и что видит арбитр</h2>
+    <p>До спора сервер держит только шифртекст, и переписку никто прочитать не может. В споре для развязки нужны доказательства, поэтому сторона может <b>осознанно раскрыть свой ключ чата</b> (отправляется на <code>/dispute/reveal</code>) — это единственный случай, когда ключ покидает устройство, и ключ чата не может двигать средства. При раскрытии сервер расшифровывает тред этой стороны и хранит расшифровку <b>только для арбитра</b>, вместе с медиа, которые арбитр расшифровывает ключами внутри раскрытых сообщений. ИИ-медиатор читает это, чтобы предложить <b>необязывающий</b> исход; человек-арбитр — только если дело эскалируется. <b>Расшифрованный тред стирается при закрытии сделки</b>, зашифрованные медиа-блобы удаляются по таймеру ретеншна после закрытия. Ончейн-шифртекст остаётся (это защищённая от подделки запись), но без раскрытого ключа он нечитаем.</p>
+  </div>
+
+  <div class="plate">
+    <h2 style="font-size:20px">Что мы никогда не собираем</h2>
+    <p>Ваши <i>приватные</i> ключи эскроу, закладки или чата, seed-фразы, recovery-листы (мы их не спрашиваем); имена, документы, KYC (аккаунтов нет); контакты, геолокацию или файлы сверх медиа, которые вы прикрепили к сделке; рекламные идентификаторы.</p>
+  </div>
+
+  <div class="plate">
+    <h2 style="font-size:20px">Третьи стороны</h2>
+    <p>Шрифты сайта грузятся с Google Fonts (ваш IP виден Google при загрузке). Виджет поддержки использует Cloudflare Turnstile (Cloudflare обрабатывает проверку). Telegram доставляет уведомления по сделке, если вы подключили. ИИ-медиатор работает на стороннем LLM-провайдере, который получает только условия сделки, раскрытый тред и заявления — никогда ни один приватный ключ. Сеть Kaspa — публичная инфраструктура. Мы не продаём и не передаём данные кому-либо ещё.</p>
+  </div>
+
+  <div class="plate">
+    <h2 style="font-size:20px">Хранение и удаление</h2>
+    <p>Записи сделки существуют, чтобы сделка работала и отслеживалась. Расшифрованный тред стирается при закрытии; медиа-блобы удаляются по таймеру ретеншна после закрытия. Чтобы удалить оставшиеся записи сделки (включая Telegram-привязку), напишите на <a href="mailto:kaspa@officeforge.co">kaspa@officeforge.co</a>, указав сделку. Ончейн-данные удалить нельзя — такова природа блокчейна.</p>
+  </div>
+
+  <div class="plate">
+    <h2 style="font-size:20px">Изменения</h2>
+    <p>Обновления этой политики публикуются на этой странице с новой датой вступления в силу.</p>
+  </div>
+</div>
+
+<footer><div class="row wrap"><a class="foot-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="OfficeForge"><img src="/assets/logo.png" alt="OfficeForge"></a><span>Kaspa Гарант · некостодиальная бета · <a href="https://officeforge.co">OfficeForge</a> · связь: kaspa@officeforge.co · <a href="/ru/privacy-escrow.html">Приватность</a></span></div></footer>
+</div>
+<script src="/assets/kaspa-widget.js?v=3" defer></script>
+<script>if("serviceWorker" in navigator&&/(^|\.)kaspaforge\.org$|(^|\.)officeforge\.co$/.test(location.hostname))navigator.serviceWorker.register("/sw-escrow.js");</script>
+</body>
+</html>

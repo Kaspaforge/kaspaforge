@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kaspa Forge Blog — Kaspa, PoW and self-custody, explained</title>
+<meta name="description" content="News analysis and guides from the Kaspa Forge team: Kaspa protocol, proof-of-work, mining economics, covenants and non-custodial tooling.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://kaspaforge.org/blog/">
+<link rel="alternate" hreflang="en" href="https://kaspaforge.org/blog/">
+<link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/blog/">
+<link rel="alternate" hreflang="x-default" href="https://kaspaforge.org/blog/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Kaspa Forge">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Kaspa Forge Blog — Kaspa, PoW and self-custody, explained">
+<meta property="og:description" content="News analysis and guides from the Kaspa Forge team: Kaspa protocol, proof-of-work, mining economics, covenants and non-custodial tooling.">
+<meta property="og:url" content="https://kaspaforge.org/blog/">
+<meta property="og:image" content="https://kaspaforge.org/assets/og-forge.png?v=1">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest-forge.json">
+<meta name="theme-color" content="#0E1116">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="stylesheet" href="/assets/safe.css?v=14">
+<script src="/assets/nav.js?v=4" defer></script>
+<style>
+  .accent{color:var(--kaspa)}
+  .posts{display:flex;flex-direction:column;gap:14px;margin-top:26px}
+  .postcard{display:block;background:var(--steel);border:1px solid var(--bd);border-radius:12px;padding:22px 24px;text-decoration:none;transition:border-color .15s,transform .15s}
+  .postcard:hover{border-color:rgba(0,193,175,.4);transform:translateY(-2px)}
+  .pc-meta{display:flex;gap:14px;font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--kaspa);margin-bottom:8px}
+  .pc-meta .date{color:var(--ash2)}
+  .postcard h2{font-size:20px;margin:0 0 8px;color:var(--ingot);line-height:1.3}
+  .postcard p{font-size:15px;color:var(--ash);margin:0 0 12px;line-height:1.6}
+  .pc-more{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--kaspa)}
+  .empty{color:var(--ash);margin-top:30px}
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Blog",
+  "@id": "https://kaspaforge.org/blog/#blog",
+  "name": "Kaspa Forge Blog",
+  "url": "https://kaspaforge.org/blog/",
+  "inLanguage": "en",
+  "publisher": {
+    "@type": "Organization",
+    "name": "OfficeForge",
+    "url": "https://officeforge.co/"
+  },
+  "blogPost": [
+    {
+      "@type": "BlogPosting",
+      "headline": "Kaspa BlockDAG & GHOSTDAG: How Parallel Blocks Are Ordered",
+      "url": "https://kaspaforge.org/blog/kaspa-blockdag-ghostdag-explained.html",
+      "datePublished": "2026-07-11"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "Kaspa Toccata Node Upgrade Checklist for Operators",
+      "url": "https://kaspaforge.org/blog/kaspa-post-toccata-operator-checklist.html",
+      "datePublished": "2026-07-11"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "How Kaspa Covenants Work: Programmable Rules on PoW",
+      "url": "https://kaspaforge.org/blog/kaspa-covenants-how-they-work.html",
+      "datePublished": "2026-07-11"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "Robinhood Launches Tokenized Stocks on New Arbitrum L2",
+      "url": "https://kaspaforge.org/blog/robinhood-chain-tokenized-stocks.html",
+      "datePublished": "2026-07-10"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "Toccata Fork Brings Covenants to Kaspa Mainnet",
+      "url": "https://kaspaforge.org/blog/kaspa-toccata-launch-covenants-live.html",
+      "datePublished": "2026-07-10"
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <a class="brand" href="/">
+    <img class="brand-k" src="/assets/brand/emblem-flat-header.png" alt="">
+    <span class="brand-name">Kaspa <b>Forge</b></span>
+  </a>
+  <nav><a class="cta" href="/create.html">Create a vault</a></nav>
+</header>
+
+<div style="max-width:820px;margin:32px auto 0">
+  <div class="eyebrow">Blog</div>
+  <h1 style="font-size:clamp(28px,4vw,40px);margin:10px 0 6px">Kaspa Forge <span class="accent">Blog</span></h1>
+  <p class="lead">Kaspa, proof-of-work and self-custody — news with our angle, and guides that go one level deeper.</p>
+
+  <div class="posts">
+    <a class="postcard" href="/blog/kaspa-blockdag-ghostdag-explained.html">
+      <div class="pc-meta"><span>Deep dive</span><span class="date">11 Jul 2026</span></div>
+      <h2>Kaspa BlockDAG &amp; GHOSTDAG: How Parallel Blocks Are Ordered</h2>
+      <p>How Kaspa's GHOSTDAG protocol orders parallel blocks in a BlockDAG — and what it means for fast confirmations, time-lock covenants, and on-chain tooling.</p>
+      <span class="pc-more">Read →</span>
+    </a>
+    <a class="postcard" href="/blog/kaspa-post-toccata-operator-checklist.html">
+      <div class="pc-meta"><span>News</span><span class="date">11 Jul 2026</span></div>
+      <h2>Kaspa Toccata Node Upgrade Checklist for Operators</h2>
+      <p>Post-activation guide to Toccata: fee-policy changes, one-way DB upgrade, hardware specs, and what happens if you don't upgrade before the deadline.</p>
+      <span class="pc-more">Read →</span>
+    </a>
+    <a class="postcard" href="/blog/kaspa-covenants-how-they-work.html">
+      <div class="pc-meta"><span>Deep dive</span><span class="date">11 Jul 2026</span></div>
+      <h2>How Kaspa Covenants Work: Programmable Rules on PoW</h2>
+      <p>Learn how Kaspa covenants (Toccata) enforce programmable spending rules on-chain. See how Kaspa Safe and Escrow build vaults and P2P deals on them.</p>
+      <span class="pc-more">Read →</span>
+    </a>
+    <a class="postcard" href="/blog/robinhood-chain-tokenized-stocks.html">
+      <div class="pc-meta"><span>News</span><span class="date">10 Jul 2026</span></div>
+      <h2>Robinhood Launches Tokenized Stocks on New Arbitrum L2</h2>
+      <p>Robinhood Chain mainnet brings tokenized equities to DeFi via Arbitrum. Analysis of what this permissioned L2 model means for PoW settlers and self-custody.</p>
+      <span class="pc-more">Read →</span>
+    </a>
+    <a class="postcard" href="/blog/kaspa-toccata-launch-covenants-live.html">
+      <div class="pc-meta"><span>News</span><span class="date">10 Jul 2026</span></div>
+      <h2>Toccata Fork Brings Covenants to Kaspa Mainnet</h2>
+      <p>Kaspa's Toccata upgrade activates native L1 covenants and ZK verification on mainnet. What programmable spending rules mean for self-custody and PoW.</p>
+      <span class="pc-more">Read →</span>
+    </a>
+  </div>
+</div>
+
+<footer><div class="row wrap"><a class="foot-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="OfficeForge"><img src="/assets/logo.png" alt="OfficeForge"></a><span>Kaspa Forge · non-custodial beta · <a href="https://officeforge.co">OfficeForge</a> · feedback: kaspa@officeforge.co · <a href="/privacy.html">Privacy</a></span></div></footer>
+</div>
+
+<script src="/assets/kaspa-widget.js?v=3" defer></script>
+</body>
+</html>

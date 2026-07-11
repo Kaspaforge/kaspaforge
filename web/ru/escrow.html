@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Создать эскроу-сделку — Kaspa Гарант</title>
+<meta name="description" content="Некостодиальный эскроу для Kaspa. Арбитр решает споры, но может отправить средства только покупателю или продавцу — никогда себе и никогда третьим лицам.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#0E1116">
+<link rel="manifest" href="/manifest-escrow.json">
+<link rel="apple-touch-icon" href="/assets/icons-escrow/apple-touch-icon.png">
+<script src="/assets/nav.js?v=5" defer></script>
+<link rel="stylesheet" href="/assets/safe.css?v=14">
+<link rel="stylesheet" href="/assets/escrow.css?v=7">
+<script src="/assets/qrcode.min.js"></script>
+<style>
+/* Пикер географии доставки (физтовар + продавец): 4 пресета в ряд, на телефоне 2×2.
+   Страничный скоуп — escrow.css шарится другими страницами, не трогаем. */
+.pick4{display:grid;gap:10px;margin-top:6px;grid-template-columns:repeat(4,1fr)}
+@media(max-width:520px){.pick4{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <a class="brand" href="/">
+    <img class="brand-k" src="/assets/brand/emblem-flat-header.png" alt="">
+    <span class="brand-name" id="brand">Kaspa <b>Гарант</b></span>
+  </a>
+  <a class="by-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="Сделано OfficeForge"><img src="/assets/of-wordmark.png" alt="OfficeForge"></a>
+  <nav><a href="/ru/deal.html">Мои сделки</a></nav>
+</header>
+
+<div style="max-width:760px;margin:40px auto 0">
+  <div class="eyebrow">Новая эскроу-сделка</div>
+  <h1 style="font-size:clamp(28px,4vw,40px);margin:10px 0 8px">Сделка под гаранта</h1>
+  <p class="lead">Гарант, который <b>физически не может сбежать с деньгами</b>. Арбитр может решить спор — покупателю, продавцу или разделом, — но ковенант гарантирует: монеты уйдут только покупателю или продавцу.</p>
+  <div class="note alarm" style="margin-top:16px"><b>Открытая бета.</b> Контракт без внешнего аудита (аудит впереди). Держите сделки небольшими (лимит 10 000 KAS). Некостодиально: мы никогда не держим ваши средства.</div>
+  <div id="err" class="note alarm" style="display:none" role="alert"></div>
+
+  <div style="margin-top:30px">
+    <!-- STEP 1: parameters -->
+    <div class="step active" id="st1" data-n="1">
+      <h3>Условия сделки</h3>
+      <div class="body">
+        <label>Ваша роль</label>
+        <div class="pick2">
+          <button type="button" class="pick active" data-role="buyer" id="r-buyer">🛒 <span></span></button>
+          <button type="button" class="pick" data-role="seller" id="r-seller">📦 <span></span></button>
+        </div>
+        <label style="margin-top:16px">Тип сделки</label>
+        <div class="pick3">
+          <button type="button" class="pick active" data-tpl="goods" id="t-goods">📱 <span></span></button>
+          <button type="button" class="pick" data-tpl="otc" id="t-otc">💱 <span></span></button>
+          <button type="button" class="pick" data-tpl="service" id="t-service">🛠️ <span></span></button>
+        </div>
+        <!-- География доставки — только физтовар + продавец (Майк 10.07). Уходит первой строкой
+             в условия сделки (descr): её видит покупатель ещё ДО вступления, панель обеих сторон
+             и арбитр при споре — отдельное поле на сервере не нужно. -->
+        <div id="ship-block" style="display:none">
+          <label style="margin-top:16px">Доставка — куда можете отправить</label>
+          <div class="pick4">
+            <button type="button" class="pick active" data-ship="world">🌍 <span>Весь мир</span></button>
+            <button type="button" class="pick" data-ship="eu">🇪🇺 <span>Только ЕС</span></button>
+            <button type="button" class="pick" data-ship="eu_us">🇪🇺🇺🇸 <span>ЕС + США</span></button>
+            <button type="button" class="pick" data-ship="custom">✍️ <span>Свои страны</span></button>
+          </div>
+          <input type="text" id="ship-countries" maxlength="200" style="display:none;margin-top:8px" placeholder="например: Германия, Австрия, Швейцария">
+        </div>
+        <label style="margin-top:16px">Окно споров</label>
+        <div class="pick6">
+          <button type="button" class="pick" data-win="24">24 ч<span>1 день</span></button>
+          <button type="button" class="pick" data-win="48">48 ч<span>2 дня</span></button>
+          <button type="button" class="pick active" data-win="72">72 ч<span>3 дня</span></button>
+          <button type="button" class="pick" data-win="96">96 ч<span>4 дня</span></button>
+          <button type="button" class="pick" data-win="120">120 ч<span>5 дней</span></button>
+          <button type="button" class="pick" data-win="168">168 ч<span>7 дней</span></button>
+        </div>
+        <div class="hint" id="win-hint" style="margin-top:4px"></div>
+        <label for="amount" style="margin-top:16px">Сумма, которую получит продавец (KAS)</label>
+        <input type="number" id="amount" min="50" max="10000" step="0.01" placeholder="100" inputmode="decimal">
+        <div class="hint" id="cap-hint" style="margin-top:4px"></div>
+        <div id="fund-summary" style="display:none;margin-top:6px;font-family:var(--mono);font-size:12.5px;color:var(--ash)"></div>
+        <table class="fee-tbl" aria-live="polite">
+          <thead><tr><th id="fee-head" colspan="3"></th></tr></thead>
+          <tbody>
+            <tr><td id="fee-r1"></td><td class="f-rate" id="fee-rate1"></td><td class="f-val" id="fee-val1">—</td></tr>
+            <tr><td id="fee-r2"></td><td class="f-rate" id="fee-rate2"></td><td class="f-val" id="fee-val2">—</td></tr>
+          </tbody>
+        </table>
+        <div class="hint" id="fee-note" style="margin-top:4px"></div>
+        <label for="descr" style="margin-top:16px">Условия / что продаётся</label>
+        <textarea id="descr" rows="3" placeholder="напр. iPhone 15 Pro, запечатан. Отправка в течение 3 дней после финансирования. Доставку оплачивает продавец."></textarea>
+        <div style="margin-top:20px"><button class="btn btn-kaspa" id="b1">Создать ссылку-приглашение</button></div>
+      </div>
+    </div>
+
+    <!-- STEP 2: key + invite -->
+    <div class="step" id="st2" data-n="2">
+      <h3>Ключ и инвайт</h3>
+      <div class="body">
+        <p class="note"><b>🔑 Recovery-лист сохранять не нужно.</b> Твой ключ и эта сделка автоматически сохраняются в зашифрованный <b>мастер key-file</b> — твой профиль в <a href="/ru/desk.html">Деске</a>. Сделай бэкап один раз в Деске («Экспорт файла ключей»); один файл покрывает все сделки, сейфы и объявления.</p>
+        <div class="keycard">
+          <div class="kc-role"><span class="dot"></span><span id="key-label"></span></div>
+          <code id="k-key"></code>
+          <div class="kc-note" id="key-hint"></div>
+        </div>
+        <div class="keycard" id="chat-keycard" style="display:none">
+          <div class="kc-role"><span class="dot"></span><span id="chat-key-label"></span></div>
+          <code id="k-chat"></code>
+          <div class="kc-note" id="chat-key-hint"></div>
+        </div>
+
+        <div id="invite-block" style="display:none;margin-top:18px">
+          <label id="invite-lead"></label>
+          <div class="addr"><code id="invite-link"></code><button id="invite-copy" aria-label="Скопировать ссылку">копир.</button></div>
+          <div class="qr" id="invite-qr"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: to the panel -->
+    <div class="step" id="st3" data-n="3">
+      <h3>Панель сделки</h3>
+      <div class="body">
+        <p class="hint" id="st3-hint"></p>
+        <div style="margin-top:12px"><a class="btn btn-kaspa" id="to-panel"></a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer><div class="row wrap"><a class="foot-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="OfficeForge"><img src="/assets/logo.png" alt="OfficeForge"></a><span>Kaspa Гарант · некостодиальная бета · собран ИИ-офисом <a href="https://officeforge.co">OfficeForge</a> · связь: kaspa@officeforge.co</span></div></footer>
+</div>
+
+<script type="module">
+import { boot, core, net, api, usdStr, genToken, L, $, copyText, qrInto, showErr, hideErr,
+         saveDeal, chatSupported } from '/assets/escrow.js?v=30';
+import { requireUnlock } from '/assets/lock-ui.js';
+import * as session from '/assets/session.js';
+
+const err = $('err');
+let role = 'buyer', tpl = 'goods', keys = null, token = genToken(), deal = null;
+let win = 72, winManual = false;                      // окно споров: пресет (дефолт — от типа)
+const WIN_DEFAULT = { goods: 72, otc: 24, service: 120 };
+
+// подписи из i18n
+$('r-buyer').querySelector('span').textContent = L('role_buyer');
+$('r-seller').querySelector('span').textContent = L('role_seller');
+$('t-goods').querySelector('span').textContent = L('tpl_goods');
+$('t-otc').querySelector('span').textContent = L('tpl_otc');
+$('t-service').querySelector('span').textContent = L('tpl_service');
+$('cap-hint').textContent = L('beta_cap');
+$('win-hint').textContent = L('win_pick_hint');
+$('key-label').textContent = L('key_label');
+$('key-hint').textContent = L('hot_role_hint');
+$('chat-key-label').textContent = L('chat_key_label');
+$('chat-key-hint').textContent = L('chat_hint');
+$('fee-head').textContent = L('fee_head');
+$('fee-r1').textContent = L('fee_amicable');
+$('fee-r2').textContent = L('fee_arb');
+$('fee-rate1').textContent = L('fee_rate_resolve');
+$('fee-rate2').textContent = L('fee_rate_dispute');
+$('fee-note').textContent = L('fee_enter_amount');
+$('b1').textContent = L('gen_invite');
+$('st3-hint').textContent = L('step3_hint');
+
+try { await boot(); await requireUnlock(net()); } catch (e) { showErr(err, e); }
+
+// пикеры
+for (const b of document.querySelectorAll('[data-role]')) b.onclick = () => {
+  role = b.dataset.role; document.querySelectorAll('[data-role]').forEach((x) => x.classList.toggle('active', x === b));
+  updateShipVis();
+};
+for (const b of document.querySelectorAll('[data-tpl]')) b.onclick = () => {
+  tpl = b.dataset.tpl; document.querySelectorAll('[data-tpl]').forEach((x) => x.classList.toggle('active', x === b));
+  if (!winManual) setWin(WIN_DEFAULT[tpl]);   // дефолт окна следует за типом, пока не выбрали руками
+  updateShipVis();
+};
+// география доставки: блок виден только продавцу физтовара; «Свои страны» открывает ввод
+let ship = 'world';
+const SHIP_LABEL = { world: 'Весь мир', eu: 'Только Евросоюз', eu_us: 'ЕС + США' };
+function updateShipVis() { $('ship-block').style.display = (tpl === 'goods' && role === 'seller') ? 'block' : 'none'; }
+for (const b of document.querySelectorAll('[data-ship]')) b.onclick = () => {
+  ship = b.dataset.ship;
+  document.querySelectorAll('[data-ship]').forEach((x) => x.classList.toggle('active', x === b));
+  $('ship-countries').style.display = ship === 'custom' ? 'block' : 'none';
+  if (ship === 'custom') $('ship-countries').focus();
+};
+function setWin(h) {
+  win = h;
+  document.querySelectorAll('[data-win]').forEach((x) => x.classList.toggle('active', Number(x.dataset.win) === h));
+}
+for (const b of document.querySelectorAll('[data-win]')) b.onclick = () => { winManual = true; setWin(Number(b.dataset.win)); };
+// живой fee-калькулятор: release 0.5% (мин 0.2 KAS) / dispute 2% (мин 5 KAS)
+function updateFee() {
+  const amt = Number($('amount').value);
+  if (!(amt > 0)) { $('fee-val1').textContent = '—'; $('fee-val2').textContent = '—'; $('fee-note').style.display = 'block'; $('fund-summary').style.display = 'none'; return; }
+  const fr = Math.max(1.2, amt * 0.005), fd = Math.max(5, amt * 0.02);
+  $('fee-val1').textContent = fr.toFixed(2) + ' KAS';
+  $('fee-val2').textContent = fd.toFixed(2) + ' KAS';
+  // покупатель платит сумму + базовую комиссию (сверху); продавец получает полную сумму
+  const usd = (k) => usdStr(Math.round(k * 1e8));
+  $('fund-summary').style.display = 'block';
+  $('fund-summary').innerHTML = `${L('fund_you_pay')}: <b>${(amt + fr).toFixed(2)} KAS${usd(amt + fr)}</b> · ${L('fund_seller_gets')}: <b>${amt.toFixed(2)} KAS${usd(amt)}</b>`;
+  // предупреждение: если спор дойдёт до арбитра, его комиссия — заметная доля суммы
+  const share = Math.round(fd / amt * 100);
+  if (share >= 10) { $('fee-note').style.display = 'block'; $('fee-note').style.color = '#E0A93E'; $('fee-note').textContent = L('fee_arb_share')(share); }
+  else { $('fee-note').style.display = 'none'; $('fee-note').style.color = ''; }
+}
+$('amount').addEventListener('input', updateFee);
+
+$('b1').onclick = async () => {
+  try {
+    hideErr(err);
+    const amt = Number($('amount').value);
+    if (!(amt >= 50 && amt <= 10000)) { showErr(err, new Error(L('amount_err'))); return; }
+    let descr = $('descr').value.trim();
+    if (tpl === 'goods' && role === 'seller') {
+      const shipTxt = ship === 'custom' ? $('ship-countries').value.trim() : SHIP_LABEL[ship];
+      if (!shipTxt) { showErr(err, new Error('Укажите страны, куда можете отправить')); return; }
+      descr = `📦 Доставка: ${shipTxt}` + (descr ? '\n' + descr : '');
+    }
+    // Профиль v3: ключи сделки и owner-token деривируются из мастер-seed —
+    // сделка восстановима из любого экспорта бэкапа, даже сделанного до её создания.
+    const dd = session.takeDeriv('deal');
+    if (dd) {
+      const k = JSON.parse(core.derive_keys(dd.seed, 'deal/key', dd.index));
+      const f = JSON.parse(core.derive_keys(dd.seed, 'deal/funding', dd.index));
+      keys = { sk: k.sk, pk: k.pk, funding_sk: f.sk, funding_pk: f.pk };
+      token = core.derive_token(dd.seed, 'deal', dd.index);
+    } else {
+      keys = JSON.parse(core.escrow_gen_keys());   // профиль до-v3 без seed — как раньше
+    }
+    $('k-key').textContent = keys.sk;
+    $('b1').disabled = true; $('b1').textContent = L('creating');
+    // чат-ключ (ОТДЕЛЬНАЯ пара, не двигает средства) — если ядро поддерживает чат
+    const chat = !chatSupported() ? null
+      : (dd && core.derive_chat_keys) ? JSON.parse(core.derive_chat_keys(dd.seed, 'deal/chat', dd.index))
+      : JSON.parse(core.chat_gen_keys());
+    if (chat) { $('chat-keycard').style.display = 'block'; $('k-chat').textContent = chat.sk; }
+    const r = await api('/api/safe/escrow', { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ role, template: tpl, amount: Math.round(amt * 1e8), descr, pk: keys.pk, token, chat_pk: chat ? chat.pk : '', dispute_hours: win }) });
+    deal = { id: r.id, role, token, network: net(), amount: Math.round(amt * 1e8), template: tpl, descr, deriv_i: dd ? dd.index : null,
+             sk: keys.sk, pk: keys.pk, funding_sk: role === 'buyer' ? keys.funding_sk : null,
+             funding_pk: role === 'buyer' ? keys.funding_pk : null, join_code: r.join_code,
+             chat_sk: chat ? chat.sk : null, chat_pk: chat ? chat.pk : null };
+    saveDeal(deal);
+    $('st1').classList.remove('active'); $('st1').classList.add('done');
+    $('st2').classList.add('active');
+    const link = `${location.origin}/${lang2()}deal.html?join=${r.join_code}`;
+    $('invite-lead').textContent = L('invite_ready');
+    $('invite-link').textContent = link;
+    copyText($('invite-copy'), () => link);
+    qrInto($('invite-qr'), link);
+    $('to-panel').textContent = L('open_panel');
+    $('to-panel').href = `/${lang2()}deal.html?id=${r.id}`;
+    // recovery-лист убран: ключи уже в мастер key-file (saveDeal выше) — сразу показываем инвайт
+    $('invite-block').style.display = 'block'; $('st3').classList.add('active'); $('st2').classList.add('done');
+    $('st2').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (e) { showErr(err, e); $('b1').disabled = false; $('b1').textContent = L('gen_invite'); }
+};
+function lang2() { return document.documentElement.lang === 'ru' ? 'ru/' : ''; }
+
+updateFee();
+</script>
+<script src="/assets/kaspa-widget.js?v=3" defer></script>
+<script>if("serviceWorker" in navigator&&/(^|\.)kaspaforge\.org$|(^|\.)officeforge\.co$/.test(location.hostname))navigator.serviceWorker.register("/sw-escrow.js");</script>
+</body>
+</html>

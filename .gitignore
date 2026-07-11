@@ -1,0 +1,7 @@
+target/
+.keys/
+*.txt.bak
+app/node_modules/
+app/web/
+app/src-tauri/gen/
+app/src-tauri/target/

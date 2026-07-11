@@ -1,0 +1,147 @@
+pragma silverscript ^0.1.0;
+
+// Kaspa Safe — vault covenant v3 (inheritance: auto/signed mode chosen at creation).
+// One template, state = { mode, dest }:
+//   mode 0 = VAULT      — funds sit in the vault (dest = 36 zero bytes, the vault address is stable);
+//   mode 1 = UNVAULTING — a withdrawal was initiated, the delay window is running.
+// Paths:
+//   initiate (hot):      VAULT -> UNVAULTING, the destination address is fixed into the state;
+//   cancel   (alarm):    UNVAULTING -> VAULT at any point in the window (anti-theft);
+//   complete (anyone):   UNVAULTING -> dest, only after `delay` DAA blocks;
+//   checkin  (hot):      VAULT -> VAULT — "I'm alive", resets the UTXO age (the inheritance timer);
+//   inheritAuto (anyone): VAULT -> heir, only if autoInherit == 1 and vault age >= inheritDelay
+//                        (the owner has not checked in for longer than the term); output is
+//                        hard-bound to P2PK(heir), so anyone may broadcast;
+//   inheritSigned (heir): VAULT -> heir, only if autoInherit == 0 — the heir claims with their
+//                        own signature. Exactly one inherit path is live per vault.
+//                        heir = 32 zero bytes => inheritance disabled entirely.
+//   migrate (hot+alarm): ANY mode -> anywhere, instantly — both signatures = full owner
+//                        authority by definition (version upgrade, hot-key rotation, exit).
+// TOOLING GOTCHAS (see spike/API-NOTES.md):
+//   - this.age = DAA blocks (sequence relative lock), NOT seconds, contrary to the TUTORIAL;
+//   - tx.outputs[i].scriptPubKey and new ScriptPubKey* use version-prefixed encoding
+//     (2 version bytes BE + script): P2PK = 36 bytes, not 34 as the docs claim.
+// SINGLE-INPUT INVARIANT: every path reasons about tx.inputs[this.activeInputIndex] as THE
+// input and binds outputs to it; a P2SH address can carry several UTXOs, so without a guard two
+// UTXOs spent together could share one output and leak the smaller input's excess to the network
+// fee (multi-UTXO siphon, proven by `vaultctl multi-utxo`). Every entrypoint therefore asserts
+// require(tx.inputs.length == 1). A stray plain top-up on the address is swept on its own, one
+// input at a time (see the recovery sweep in vaultctl/wasm).
+
+contract Vault(
+    pubkey hot,
+    pubkey alarm,
+    int delay,
+    pubkey heir,
+    int inheritDelay,
+    int autoInherit,
+    int initMode,
+    byte[36] initDest,
+    int feeBudget
+) {
+    int mode = initMode;
+    byte[36] dest = initDest; // version-prefixed spk of the recipient (0x0000 || script), 36 bytes
+    // feeBudget: network fee budget for a transition tx, sompi — a CONSTRUCTOR PARAM (was a
+    // hardcoded constant), so a future network-cost bump changes only new vaults' default
+    // without re-issuing the contract; each vault keeps its value and recomputes its own address.
+    // Off-chain bindings gate it to [1_000_000, 10_000_000]; ON-CHAIN every entrypoint additionally
+    // asserts 0 < feeBudget <= MAX_FEE_BUDGET so a third-party deploy off this open-source template
+    // can't set a griefing budget that drains a transition into the network fee (keyless paths —
+    // complete/inheritAuto — are broadcastable by anyone). Silverscript has no constructor body,
+    // hence the check lives in each path (cheap: a param compare, no introspection).
+    int constant MAX_FEE_BUDGET = 10000000; // 0.1 KAS — cap on the per-transition fee budget
+
+    // Path 1: initiate a withdrawal with the hot key; dest is fixed into the successor state
+    entrypoint function initiate(sig hotSig, pubkey destPk) {
+        require(tx.inputs.length == 1); // single-input invariant (multi-UTXO anti-siphon)
+        require(feeBudget > 0 && feeBudget <= MAX_FEE_BUDGET); // griefing-cap (audit 11.07)
+        require(mode == 0);
+        require(checkSig(hotSig, hot));
+        // compiler gotcha: the result of new ScriptPubKeyP2PK is typed as byte[]
+        // in the state literal — an explicit byte[36](...) cast is required
+        byte[] newDest = new ScriptPubKeyP2PK(destPk); // 36 bytes at runtime
+        validateOutputState(0, { mode: 1, dest: byte[36](newDest) });
+        require(tx.outputs[0].value >= tx.inputs[this.activeInputIndex].value - feeBudget);
+    }
+
+    // Path 2: cancel with the alarm key — funds back into the vault (dest is reset to zeros,
+    // so the vault's P2SH address is canonical and constant)
+    entrypoint function cancel(sig alarmSig) {
+        require(tx.inputs.length == 1); // single-input invariant (multi-UTXO anti-siphon)
+        require(feeBudget > 0 && feeBudget <= MAX_FEE_BUDGET); // griefing-cap (audit 11.07)
+        require(mode == 1);
+        require(checkSig(alarmSig, alarm));
+        validateOutputState(0, { mode: 0, dest: 0x000000000000000000000000000000000000000000000000000000000000000000000000 });
+        require(tx.outputs[0].value >= tx.inputs[this.activeInputIndex].value - feeBudget);
+    }
+
+    // Path 3: complete the withdrawal after the timelock — only to the fixed dest
+    entrypoint function complete() {
+        require(tx.inputs.length == 1); // single-input invariant (multi-UTXO anti-siphon)
+        require(feeBudget > 0 && feeBudget <= MAX_FEE_BUDGET); // griefing-cap (audit 11.07)
+        require(mode == 1);
+        require(this.age >= delay);
+        require(tx.outputs[0].scriptPubKey == byte[](dest));
+        require(tx.outputs[0].value >= tx.inputs[this.activeInputIndex].value - feeBudget);
+    }
+
+    // Path 4: check-in — the hot key recreates the vault, resetting the UTXO age ("I'm alive").
+    // Any other transition also resets the age; checkin is the explicit way to do it without moving funds.
+    entrypoint function checkin(sig hotSig) {
+        require(tx.inputs.length == 1); // single-input invariant (multi-UTXO anti-siphon)
+        require(feeBudget > 0 && feeBudget <= MAX_FEE_BUDGET); // griefing-cap (audit 11.07)
+        require(mode == 0);
+        require(checkSig(hotSig, hot));
+        validateOutputState(0, { mode: 0, dest: 0x000000000000000000000000000000000000000000000000000000000000000000000000 });
+        require(tx.outputs[0].value >= tx.inputs[this.activeInputIndex].value - feeBudget);
+    }
+
+    // Inheritance (mode chosen at creation via autoInherit):
+    // funds always go STRICTLY to the heir's address; heir = zero key => the path is dead.
+    //
+    // Path 5a — AUTO (autoInherit == 1): no signature required. The transaction is fully
+    // bound to P2PK(heir), so once the term expires anyone (our server) can broadcast it —
+    // the money still goes only to the heir. The heir needs no key.
+    entrypoint function inheritAuto() {
+        require(tx.inputs.length == 1); // single-input invariant (multi-UTXO anti-siphon)
+        require(feeBudget > 0 && feeBudget <= MAX_FEE_BUDGET); // griefing-cap (audit 11.07)
+        require(autoInherit == 1);
+        require(mode == 0);
+        require(this.age >= inheritDelay);
+        require(byte[32](heir) != 0x0000000000000000000000000000000000000000000000000000000000000000);
+        byte[] heirSpk = new ScriptPubKeyP2PK(heir);
+        require(tx.outputs[0].scriptPubKey == heirSpk);
+        require(tx.outputs[0].value >= tx.inputs[this.activeInputIndex].value - feeBudget);
+    }
+
+    // Path 5b — MANUAL (autoInherit == 0): the heir claims with THEIR OWN signature.
+    // Funds will not move automatically — the heir must actively claim.
+    entrypoint function inheritSigned(sig heirSig) {
+        require(tx.inputs.length == 1); // single-input invariant (multi-UTXO anti-siphon)
+        require(feeBudget > 0 && feeBudget <= MAX_FEE_BUDGET); // griefing-cap (audit 11.07)
+        require(autoInherit == 0);
+        require(mode == 0);
+        require(this.age >= inheritDelay);
+        // explicit zero-heir guard (don't rely on checkSig implicitly failing a null pubkey)
+        require(byte[32](heir) != 0x0000000000000000000000000000000000000000000000000000000000000000);
+        require(checkSig(heirSig, heir));
+        byte[] heirSpk = new ScriptPubKeyP2PK(heir);
+        require(tx.outputs[0].scriptPubKey == heirSpk);
+        require(tx.outputs[0].value >= tx.inputs[this.activeInputIndex].value - feeBudget);
+    }
+
+    // Path 6: migrate — both signatures = full owner authority by definition; outputs are FREE
+    // (instant move into a new-version vault, rotation of a compromised hot key, or exit).
+    // Works from BOTH modes (from UNVAULTING too — a mid-withdrawal rescue).
+    // No feeBudget assert: the griefing-cap protects keyless paths, while migrate requires both
+    // signatures — the owner themselves dictates the outputs (free-output precedent: escrow mutual).
+    // THREAT-MODEL (for the audit docs, honestly): if BOTH keys are compromised, the v3
+    // "cancellation war" (stalemate: thief initiates — owner cancels — round and round) turns
+    // into an instant first-move loss. Accepted deliberately: separate key storage is the
+    // product's red line, a thief with one key still gets zero exactly as before.
+    entrypoint function migrate(sig hotSig, sig alarmSig) {
+        require(tx.inputs.length == 1); // single-input invariant (multi-UTXO anti-siphon)
+        require(checkSig(hotSig, hot));
+        require(checkSig(alarmSig, alarm));
+    }
+}

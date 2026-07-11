@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://kaspaforge.org/escrow-index.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/escrow-index.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/escrow-index.html"/>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/ru/escrow-index.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/escrow-index.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/escrow-index.html"/>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/recover-escrow.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/recover-escrow.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/recover-escrow.html"/>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/ru/recover-escrow.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/recover-escrow.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/recover-escrow.html"/>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/privacy-escrow.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/privacy-escrow.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/privacy-escrow.html"/>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/ru/privacy-escrow.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/privacy-escrow.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/privacy-escrow.html"/>
+  </url>
+</urlset>

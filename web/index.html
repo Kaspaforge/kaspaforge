@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kaspa Safe — a vault for KAS with a cancel window</title>
+<meta name="description" content="Non-custodial KAS vault on Kaspa covenants: every withdrawal waits out a delay you set — cancel a theft with a separate alarm key. Keys never leave your browser.">
+<link rel="canonical" href="https://kaspaforge.org/safe.html">
+<link rel="alternate" hreflang="en" href="https://kaspaforge.org/safe.html">
+<link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/safe.html">
+<link rel="alternate" hreflang="x-default" href="https://kaspaforge.org/safe.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Kaspa Safe">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Kaspa Safe — a stolen key isn't stolen coins yet">
+<meta property="og:description" content="A vault for KAS with a cancel window: withdrawals wait out your delay, theft gets cancelled with an alarm key. Non-custodial, on-chain, optional inheritance.">
+<meta property="og:url" content="https://kaspaforge.org/safe.html">
+<meta property="og:image" content="https://kaspaforge.org/assets/og-safe.png?v=1">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Kaspa Safe — a stolen key isn't stolen coins yet">
+<meta name="twitter:description" content="A vault for KAS with a cancel window: withdrawals wait out your delay, theft gets cancelled with an alarm key.">
+<meta name="twitter:image" content="https://kaspaforge.org/assets/og-safe.png?v=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0E1116">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="stylesheet" href="/assets/safe.css?v=14">
+<script src="/assets/nav.js?v=5" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Kaspa Safe","url":"https://kaspaforge.org/","applicationCategory":"FinanceApplication","operatingSystem":"Web","inLanguage":"en","description":"Non-custodial vault for KAS with a withdrawal delay and cancel window, built on Kaspa Toccata covenants.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD","description":"On-chain vault operations are free; optional Telegram monitoring is 100 KAS/year, first 30 days free; Kaspa network fees apply (fractions of a KAS)"}}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"Do you hold my coins?","acceptedAnswer":{"@type":"Answer","text":"No. Keys are generated and live only in your browser; the vault rules are a Kaspa on-chain script. We physically can't move your funds — and can't help withdraw them if you lose both keys."}},
+{"@type":"Question","name":"What if your site disappears?","acceptedAnswer":{"@type":"Answer","text":"The vault is an on-chain contract — it doesn't need us to exist. The recovery guide and the open-source vaultctl tool let you do everything from a terminal against any Kaspa node."}},
+{"@type":"Question","name":"What does it cost?","acceptedAnswer":{"@type":"Answer","text":"On-chain operations are free forever — you pay only the Kaspa network fee (fractions of a KAS). Telegram monitoring is 100 KAS/year, first 30 days free."}},
+{"@type":"Question","name":"Do I have to stay online for the vault to work?","acceptedAnswer":{"@type":"Answer","text":"No. The rules are enforced by the blockchain itself. Our watcher handles the conveniences — auto-completing withdrawals and delivering inheritance. And if we ever vanish, every step can be done by hand or with vaultctl."}},
+{"@type":"Question","name":"How often do I have to check in for inheritance?","acceptedAnswer":{"@type":"Answer","text":"There's no separate schedule — the inheritance period you chose at creation is the deadline. Every check-in resets the timer to zero, so check in at least once within each period. With the alerts subscription, Telegram reminds you once ~80% of the period has passed; without it, watch the timer in the vault panel yourself."}},
+{"@type":"Question","name":"What if a thief gets both keys?","acceptedAnswer":{"@type":"Answer","text":"Then the window won't save you — that's why keeping the keys apart is the foundation. The hot key lives where you use it; the alarm key belongs on paper in a different place. A thief with just the hot key gets nothing."}},
+{"@type":"Question","name":"How is this different from a hardware wallet?","acceptedAnswer":{"@type":"Answer","text":"A hardware wallet protects the key, but a signed transaction is final. Kaspa Safe protects the coins themselves: even with a stolen key, every withdrawal waits out your delay and can be cancelled. The two work great together."}},
+{"@type":"Question","name":"How tested is it?","acceptedAnswer":{"@type":"Answer","text":"Beta. The contract passed our full on-chain cycle plus adversarial attacks on our test range; an external audit is still ahead. Don't store more than you'd trust to a beta — suggested cap 5,000 KAS."}},
+{"@type":"Question","name":"Which network?","acceptedAnswer":{"@type":"Answer","text":"Kaspa mainnet, Toccata covenants (active since June 30, 2026). No tokens, no bridges — plain KAS in a covenant script."}}
+]}
+</script>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <a class="brand" href="/">
+    <img class="brand-k" src="/assets/brand/emblem-flat-header.png" alt="">
+    <span class="brand-name">Kaspa <b>Safe</b></span>
+  </a>
+  <nav>
+    <a href="#cases">When it saves</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#faq">FAQ</a>
+    <a class="cta" href="https://kaspaforge.org/create.html">Create a vault</a>
+  </nav>
+</header>
+
+<div class="netstat" id="netstat">
+  <span class="ns-item"><span class="ns-l">Network</span><span class="ns-v" id="ns-net">…</span></span>
+  <span class="ns-item"><span class="ns-l">DAA score</span><span class="ns-v ns-daa" id="ns-daa">…</span></span>
+  <span class="ns-item"><span class="ns-l">Node status</span><span class="ns-v"><span class="ns-dot" id="ns-dot"></span><span id="ns-status">…</span></span></span>
+</div>
+<script src="/assets/netstat.js?v=1" defer></script>
+
+<div class="hero">
+  <div class="txt">
+    <div class="eyebrow">Non-custodial · Toccata covenants · mainnet beta</div>
+    <h1 style="margin-top:12px">A stolen key isn't<br>stolen coins yet</h1>
+    <p class="lead" style="margin-top:16px">
+      Kaspa Safe is a vault for KAS right on the blockchain. Every withdrawal starts
+      with a delay you set — from an hour to 90 days. If a thief started it, you have
+      time to hit "cancel" with your alarm key, and the coins return to the vault.
+    </p>
+    <div class="actions">
+      <a class="btn btn-kaspa" href="https://kaspaforge.org/create.html">Create a vault</a>
+      <a class="btn btn-ghost" href="#how">How is this possible</a>
+    </div>
+    <div class="sub">Keys never leave your browser · rules baked into an on-chain script · <b id="net-badge">…</b></div>
+  </div>
+  <div class="hero-coin-wrap" style="position:relative;padding-bottom:36px">
+    <div class="coin" id="hero-coin" style="--coin-size:250px"></div>
+  </div>
+</div>
+
+<div class="note" style="max-width:760px">
+  <b>Don't have KAS? Swap it on the spot.</b> Fund your vault straight from BTC, ETH, SOL, USDT
+  or USDC — across all their major networks — right at the deposit step. No separate exchange,
+  no extra tab.
+  <div style="margin-top:8px;font-size:12.5px;color:var(--ash2)">
+    Swaps are handled by <a href="https://simpleswap.io" target="_blank" rel="noopener">SimpleSwap</a>,
+    an independent third-party exchange — not part of Kaspa Safe. Your funds are in SimpleSwap's
+    custody only for the duration of the swap; our non-custodial guarantee begins once KAS lands
+    on your vault's funding address. Rates and available currencies are set by SimpleSwap and may
+    change. Not financial advice.
+  </div>
+</div>
+
+<section id="how">
+  <div class="eyebrow">Mechanics</div>
+  <h2>Three ways out of the vault — all under your control</h2>
+  <div class="grid cols-3" style="margin-top:22px">
+    <div class="path">
+      <div class="glyph">1 · Delayed withdrawal</div>
+      <p>The hot key starts a withdrawal. The destination is locked into the contract, the coins queue for the delay you chose — presets from 6 hours to 14 days, or any window from 1 hour to 90 days. No one can take them early.</p>
+    </div>
+    <div class="path alarm">
+      <div class="glyph">2 · Cancel a theft</div>
+      <p>While the delay runs, the alarm key (kept apart — on paper, elsewhere) sends everything back to the vault in one move. A thief with the hot key gets nothing.</p>
+    </div>
+    <div class="path">
+      <div class="glyph">3 · Calm withdrawal</div>
+      <p>The window passed without a cancel — so it was you. The coins are delivered strictly to the address locked at the start — automatically, if auto-complete is on (recommended). Swapping the address is impossible.</p>
+    </div>
+  </div>
+
+  <div class="window-bar" aria-hidden="true">
+    <div class="rail"></div>
+    <div class="tick" style="left:0"></div><div class="lbl" style="left:0">withdrawal started</div>
+    <div class="tick" style="left:68%"></div><div class="lbl mid" style="left:68%">cancel window closed</div>
+    <div class="tick" style="left:99%"></div><div class="lbl end">coins at destination</div>
+  </div>
+</section>
+
+<section id="cases">
+  <div class="eyebrow">When it saves you</div>
+  <h2>Set up once — hold a serious sum calmly, at home or on the road</h2>
+  <div class="grid cols-3" style="margin-top:22px">
+    <div class="path">
+      <div class="glyph">Theft &amp; coercion</div>
+      <p>Your phone is taken — or you're forced to send coins. The thief starts a withdrawal, but the coins are still in the vault for hours. One move with the alarm key (kept apart — at home, on paper) and everything comes back. At home or travelling, the money never leaves instantly.</p>
+    </div>
+    <div class="path">
+      <div class="glyph">Hacks, phishing, leaked seed</div>
+      <p>Malware, a phishing site or a leaked seed phrase — the attacker still can't drain the vault instantly. You get an alert, cancel the withdrawal and calmly move the coins to a fresh vault.</p>
+    </div>
+    <div class="path">
+      <div class="glyph">Inheritance without notaries</div>
+      <p>You want your KAS to reach your family if something happens to you. Set a periodic check-in — say, once a month. If you stop checking in, after your chosen term the coins open to your heir: delivered automatically — your heir needs no key and no software — or claimed with their own key. <a href="#inherit">How inheritance works ↓</a></p>
+    </div>
+    <div class="path">
+      <div class="glyph">Your own mistakes</div>
+      <p>Pasted the wrong address? Changed your mind? While the window is open, the withdrawal can be cancelled and the coins return to the vault. A mistake stops being irreversible.</p>
+    </div>
+    <div class="path">
+      <div class="glyph">A project or business treasury</div>
+      <p>Your company keeps KAS in a shared vault: every withdrawal is visible in advance and runs with a delay. A hacked employee laptop can't walk away with the treasury — the founder's alarm key stops the withdrawal.</p>
+    </div>
+    <div class="path">
+      <div class="glyph">Insurance against a lost key</div>
+      <p>Name your own second address as the heir. Lose the hot key — just stop checking in: after the period, the coins come back to you through the inheritance path. In a plain wallet a lost key means lost coins; here you have a road back.</p>
+    </div>
+  </div>
+</section>
+
+<section id="inherit">
+  <div class="eyebrow">Inheritance</div>
+  <h2>Your coins reach your family — without handing anyone your keys</h2>
+  <div class="grid cols-2" style="margin-top:22px">
+    <div class="plate">
+      <div class="kv"><span class="k">Check in</span><span class="v">a periodic "I'm alive" tap keeps the vault yours</span></div>
+      <div class="kv"><span class="k">If you stop</span><span class="v">after your chosen period — anything up to 5 years — the vault opens to your heir</span></div>
+      <div class="kv"><span class="k">Auto-delivery</span><span class="v">the coins reach your heir on their own — they need no key and no software</span></div>
+      <div class="kv"><span class="k">Or by their key</span><span class="v">manual mode: the heir claims the funds themselves — nothing moves on its own</span></div>
+      <div class="kv"><span class="k">Heir sees nothing</span><span class="v">until the timer runs out — no early access</span></div>
+      <div class="kv"><span class="k">Optional</span><span class="v">leave it off and the vault is a pure anti-theft safe</span></div>
+    </div>
+    <div class="plate">
+      <div class="kv"><span class="k">Keys</span><span class="v">generated and living only in your browser</span></div>
+      <div class="kv"><span class="k">Vault rules</span><span class="v">an on-chain Kaspa script (Toccata covenant)</span></div>
+      <div class="kv"><span class="k">Our role</span><span class="v">interface + monitoring + Telegram alerts</span></div>
+      <div class="kv"><span class="k">If our site vanishes</span><span class="v"><a href="/recover.html">offline recovery</a> — the vault lives without us</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="pricing">
+  <div class="eyebrow">Pricing</div>
+  <h2>The vault is free. Pay only if you want us watching</h2>
+  <div class="grid cols-2" style="margin-top:22px">
+    <div class="plate price">
+      <div class="price-line"><span class="price-big">Free</span><span class="price-sub">forever, on-chain</span><span class="price-sub">+ network fee only</span></div>
+      <p>Creating the vault, withdrawals, cancels, check-ins, inheritance — every on-chain operation costs nothing beyond the Kaspa network fee (fractions of a KAS).</p>
+    </div>
+    <div class="plate price">
+      <div class="price-line"><span class="price-big">100 KAS<span class="price-per">/year</span></span><span class="price-sub">monitoring · first 30 days free</span></div>
+      <p>A Telegram alert the moment anything happens to your vault, plus check-in reminders. The vault works without the subscription too — but without alerts you'll learn about someone else's withdrawal later than you'd like.</p>
+    </div>
+  </div>
+</section>
+
+<!-- "Mobile / Android app" section removed (decision 2026-07-10): relic from when Safe was the only
+     product. APK, /dl/ and the F-Droid repo remain live (the #apk block on recover.html was removed 2026-07-10, direct /dl/ links work) —
+     only the promo was dropped from the vault landing page. -->
+
+<section id="faq">
+  <div class="eyebrow">FAQ</div>
+  <h2>Fair questions</h2>
+  <div class="faq" style="margin-top:18px">
+    <details>
+      <summary>Do you hold my coins?</summary>
+      <p>No. Keys are generated and live only in your browser; the vault rules are a Kaspa on-chain script. We physically can't move your funds — and can't help withdraw them if you lose both keys.</p>
+    </details>
+    <details>
+      <summary>What if your site disappears?</summary>
+      <p>The vault is an on-chain contract — it doesn't need us to exist. The <a href="/recover.html">recovery guide</a> and the open-source vaultctl tool let you do everything from a terminal against any Kaspa node.</p>
+    </details>
+    <details>
+      <summary>What does it cost?</summary>
+      <p>On-chain operations are free forever — you pay only the Kaspa network fee (fractions of a KAS). Telegram monitoring is 100 KAS/year, first 30 days free.</p>
+    </details>
+    <details>
+      <summary>Do I have to stay online for the vault to work?</summary>
+      <p>No. The rules are enforced by the blockchain itself. Our watcher handles the conveniences — auto-completing withdrawals and delivering inheritance. And if we ever vanish, every step can be done by hand or with vaultctl.</p>
+    </details>
+    <details>
+      <summary>How often do I have to check in for inheritance?</summary>
+      <p>There's no separate schedule — the inheritance period you chose at creation is the deadline. Every check-in resets the timer to zero, so check in at least once within each period (picked 12 months — show up more often than once a year). Cancelling a withdrawal resets the timer too. With the alerts subscription, Telegram reminds you once ~80% of the period has passed; without it, watch the timer in the vault panel yourself.</p>
+    </details>
+    <details>
+      <summary>What if a thief gets both keys?</summary>
+      <p>Then the window won't save you — that's why keeping the keys apart is the foundation. The hot key lives where you use it; the alarm key belongs on paper in a different place. A thief with just the hot key gets nothing.</p>
+    </details>
+    <details>
+      <summary>How is this different from a hardware wallet?</summary>
+      <p>A hardware wallet protects the key, but a signed transaction is final. Kaspa Safe protects the coins themselves: even with a stolen key, every withdrawal waits out your delay and can be cancelled. The two work great together.</p>
+    </details>
+    <details>
+      <summary>How tested is it?</summary>
+      <p>Beta. The contract passed our full on-chain cycle plus adversarial attacks on our test range; an external audit is still ahead. Don't store more than you'd trust to a beta — suggested cap 5,000 KAS.</p>
+    </details>
+    <details>
+      <summary>Which network?</summary>
+      <p>Kaspa mainnet, Toccata covenants (active since June 30, 2026). No tokens, no bridges — plain KAS in a covenant script.</p>
+    </details>
+  </div>
+  <div class="note alarm" style="margin-top:26px">
+    <b>Beta.</b> The contract passed our test range (full on-chain cycle + adversarial attacks), but external audit is still ahead.
+    Don't store more than you'd trust to a beta. Suggested cap — 5,000 KAS.
+  </div>
+</section>
+
+<footer>
+  <div class="row">
+    <a class="foot-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="OfficeForge"><img src="/assets/logo.png" alt="OfficeForge"></a>
+    <span>Kaspa Safe — built by the <a href="https://officeforge.co" target="_blank" rel="noopener">OfficeForge</a> AI office on Kaspa Toccata covenants · feedback: kaspa@officeforge.co · <a href="/docs/">Docs</a> · <a href="/blog/">Blog</a> · <a href="/privacy.html">Privacy</a></span>
+  </div>
+</footer>
+
+</div>
+<script type="module">
+  import { boot, renderCoin, $ } from '/assets/app.js?v=15';
+  renderCoin($('hero-coin'), 'vault', 0, 'in vault');
+  boot().then(i => { $('net-badge').textContent = i.network === 'mainnet' ? 'mainnet' : i.network + ' (test)'; })
+        .catch(() => { $('net-badge').textContent = 'node unavailable'; });
+</script>
+<script src="/assets/kaspa-widget.js?v=3" defer></script>
+<script>if("serviceWorker" in navigator&&/(^|\.)kaspaforge\.org$|(^|\.)officeforge\.co$/.test(location.hostname))navigator.serviceWorker.register("/sw.js");</script>
+</body>
+</html>

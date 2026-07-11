@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>New listing — Kaspa Marketplace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#0E1116">
+<link rel="stylesheet" href="/assets/safe.css?v=14">
+<script src="/assets/nav.js?v=5" defer></script>
+<style>
+/* Page-scoped, same discipline as market.html's own <style> block — don't touch safe.css. */
+.trust-strip{display:flex;align-items:flex-start;gap:12px;margin-bottom:18px}
+.trust-strip svg{flex:none;margin-top:2px}
+.trust-strip b{color:var(--ingot)}
+.type-tag{display:inline-flex;align-items:center;font-family:var(--mono);font-size:10.5px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--ash);border:1px solid var(--bd);
+  border-radius:4px;padding:3px 7px;white-space:nowrap}
+.field{display:block;margin-top:16px}
+.field label{display:block;font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ash2);margin-bottom:6px}
+/* safe.css only styles input[type=text|password] and select — Title here is an <input> with NO type,
+   Price is type=number, and textarea is not styled at all → browser default ~150px (tiny box,
+   owner feedback 2026-07-09). We style this form's own fields in the house style. */
+.field input,.field textarea{width:100%;background:var(--iron);border:1px solid var(--bd);
+  border-radius:6px;color:var(--ingot);padding:12px 13px;font-family:var(--mono);font-size:13.5px}
+.field textarea{min-height:120px;resize:vertical}
+.field textarea:focus{outline:none;border-color:var(--kaspa)}
+@media(max-width:640px){.field input,.field select,.field textarea{font-size:16px}} /* prevents iOS zoom */
+/* photo previews */
+#ph-row{display:none;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.ph-thumb{position:relative;display:block}
+.ph-thumb img{width:92px;height:92px;object-fit:cover;border-radius:8px;border:1px solid var(--bd);display:block}
+.ph-del{position:absolute;top:-7px;right:-7px;width:22px;height:22px;border-radius:50%;border:1px solid var(--bd);
+  background:var(--iron);color:var(--ash);cursor:pointer;font-size:11px;line-height:1;padding:0}
+.ph-del:hover{color:var(--kaspa);border-color:var(--kaspa)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <a class="brand" href="/"><img class="brand-k" src="/assets/brand/emblem-flat-header.png" alt=""><span class="brand-name">New <b>Listing</b></span></a>
+  <nav><a href="/market.html">Marketplace</a><a href="/desk.html">My Desk</a></nav>
+</header>
+
+<div class="note trust-strip">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3Z" stroke="#00C1AF" stroke-width="1.6" stroke-linejoin="round"/>
+    <path d="M9 12l2 2 4-4.5" stroke="#00C1AF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  <span><b>Every response goes through escrow.</b> Buyers pay into the same non-custodial covenant as any other Kaspa Escrow deal — you never have to chase payment or trust a stranger off-platform.</span>
+</div>
+
+<p id="err" class="note alarm" style="display:none" role="alert"></p>
+
+<div class="step active" data-n="1" id="step-1">
+  <h3>What are you selling</h3>
+  <div class="body">
+    <p class="note"><b>Publication rules.</b> A listing stays on the marketplace for <b>30 days</b> — extend it anytime from your <a href="/desk.html">Desk</a> (Listings → Extend 30d). A <b>single-sale</b> listing is hidden from the storefront while a funded escrow deal is in progress, and closes once it completes. A <b>repeatable</b> listing stays on the storefront: each funded deal automatically gets a fresh buy link for the next buyer. You can close a listing from the Desk at any time, unless a funded deal is in flight.</p>
+    <div class="field"><label for="l-title">Title</label><input id="l-title" maxlength="200"></div>
+    <!-- 4 options = type × repeatability (decision 2026-07-10: an item can also sell repeatedly).
+         The server receives listing_type (item|service) + repeatable (bool) — see l1-next. -->
+    <div class="field"><label for="l-type">Type</label>
+      <select id="l-type">
+        <option value="item">Physical item — single sale</option>
+        <option value="item_repeat">Physical item — sells repeatedly (in stock)</option>
+        <option value="service">Service — repeatable</option>
+        <option value="service_once">Service — one-time</option>
+      </select>
+    </div>
+    <div class="field"><label for="l-category">Category</label>
+      <select id="l-category"><option value="goods">Physical goods</option><option value="otc">OTC / crypto trade</option><option value="services">Service / freelance</option></select>
+    </div>
+    <!-- Shipping geography — physical goods category only (decision 2026-07-10). Goes as the first
+         line of the description: visible on the marketplace card, in the buyer's deal terms and
+         to the arbiter in a dispute — same as escrow.html. -->
+    <div class="field" id="ship-block" style="display:none"><label for="l-ship">Shipping — where you can send</label>
+      <select id="l-ship">
+        <option value="world">🌍 Worldwide</option>
+        <option value="eu">🇪🇺 EU only</option>
+        <option value="eu_us">🇪🇺🇺🇸 EU + USA</option>
+        <option value="custom">✍️ Specific countries…</option>
+      </select>
+      <input id="l-ship-countries" maxlength="200" style="display:none;margin-top:8px" placeholder="e.g. Germany, Austria, Switzerland">
+    </div>
+    <div class="field"><label for="l-price">Price (KAS)</label><input id="l-price" type="number" min="50" max="10000"></div>
+    <div class="field"><label for="l-window">Dispute window</label>
+      <select id="l-window">
+        <option value="24">24 h</option><option value="48">48 h</option><option value="72" selected>72 h</option>
+        <option value="96">96 h</option><option value="120">120 h</option><option value="168">168 h</option>
+      </select>
+    </div>
+    <div class="field"><label for="l-descr">Description</label><textarea id="l-descr" maxlength="2000"></textarea></div>
+    <div class="field"><label>Photos (optional, up to 3)</label>
+      <div id="ph-row"></div>
+      <input id="l-photo" type="file" accept="image/*" multiple style="display:none">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <button id="ph-add" class="btn btn-ghost" type="button">Add photo</button>
+        <span class="hint" style="margin:0">JPG / PNG, up to 8 MB each</span>
+      </div>
+      <p id="ph-err" class="note alarm" style="display:none"></p>
+    </div>
+    <p id="l1-err" class="note alarm" style="display:none"></p>
+    <button id="l1-next" class="btn btn-kaspa" style="margin-top:18px">Next: generate your key</button>
+  </div>
+</div>
+
+<div class="step" data-n="2" id="step-2">
+  <h3>Your key</h3>
+  <div class="body">
+    <p class="note"><b>🔑 No recovery sheet to save.</b> This listing's escrow key is saved automatically to your encrypted <b>master key file</b> — your profile in the <a href="/desk.html">Desk</a>. Back it up once from the Desk ("Export key file"); one file covers every listing, deal and vault.</p>
+    <div style="margin:14px 0">
+      <div class="kv"><span class="k">Price</span><span class="v" id="l2-price"></span></div>
+      <div class="kv"><span class="k">Dispute window</span><span class="v" id="l2-window"></span></div>
+    </div>
+    <p id="l2-err" class="note alarm" style="display:none"></p>
+    <button id="l2-publish" class="btn btn-kaspa" style="margin-top:14px">Publish (pending AI review)</button>
+  </div>
+</div>
+
+<div class="step" data-n="3" id="step-3">
+  <h3>Published</h3>
+  <div class="body" id="step-3-body"></div>
+</div>
+
+</div>
+<script type="module">
+import { getDeals, setDeals, getListings, setListings } from '/assets/identity.js';
+import { $, genToken, kas } from '/assets/app.js?v=15';
+import { core, boot, net, chatSupported } from '/assets/escrow.js?v=30';
+import { requireUnlock } from '/assets/lock-ui.js';
+import * as session from '/assets/session.js';
+
+// Same boot-error discipline as escrow.html/create.html (#err + showErr) — swallowing this
+// silently would leave step 1's "Next" throwing an unhandled error with zero user feedback the
+// moment core.escrow_gen_keys() is called on an uninitialized wasm core.
+try { await boot(); await requireUnlock(net()); } catch (e) { showErr('err', (e && e.message) || String(e)); }
+
+function stepTo(n) {
+  for (const el of document.querySelectorAll('.step')) {
+    const sn = Number(el.dataset.n);
+    el.classList.toggle('active', sn === n);
+    el.classList.toggle('done', sn < n);
+  }
+}
+
+let draft = null; // { title, descr, priceKas, priceSompi, category, listingType, repeatable, windowHours, keys, chat, token }
+
+// ── type ↔ category ↔ shipping ────────────────────────────────────────────
+// Matrix (decision 2026-07-10): an item is ONLY "Physical goods" (an OTC swap is a service,
+// a physical thing can't be a "crypto trade"); a service is "Service / freelance" or "OTC".
+// The shipping block appears for physical goods only. The server validates the same matrix.
+const isItem = () => $('l-type').value.startsWith('item');
+function syncTypeFields() {
+  const item = isItem();
+  const cat = $('l-category');
+  for (const [val, forItem] of [['goods', true], ['otc', false], ['services', false]]) {
+    const opt = cat.querySelector(`option[value=${val}]`);
+    opt.hidden = item !== forItem; opt.disabled = item !== forItem;
+  }
+  if (item) cat.value = 'goods';
+  else if (cat.value === 'goods') cat.value = 'services';
+  cat.disabled = item;   // an item has exactly one category — lock the select so it doesn't look interactive
+  $('ship-block').style.display = item ? 'block' : 'none';
+}
+$('l-type').onchange = syncTypeFields;
+$('l-category').onchange = syncTypeFields;
+$('l-ship').onchange = () => {
+  const custom = $('l-ship').value === 'custom';
+  $('l-ship-countries').style.display = custom ? 'block' : 'none';
+  if (custom) $('l-ship-countries').focus();
+};
+syncTypeFields();
+
+// One session token for the whole flow: photo uploads are authorized by X-Listing-Token BEFORE
+// any listing exists (photos-first, see listings.rs routes()), and the SAME token then creates
+// the listing — so the server's audit sidecars (<photo>.owner = hash of this token) correlate
+// the photos with the listing they end up on. Header, not query param: query strings leak into
+// access logs.
+// Profile v3: the derivation index is taken ONCE per page — it ties together the token (needed
+// already at photo upload) and the listing keys (forged at step 1→2). try/catch: if unlock
+// didn't happen (the catch above swallowed the error), fall back to the old random token without crashing the module.
+let dl = null; try { dl = session.takeDeriv('listing'); } catch {}
+const listingToken = dl ? core.derive_token(dl.seed, 'listing', dl.index) : genToken();
+
+// ── Photos (up to 3) ───────────────────────────────────────────────────────
+const photos = []; // { id } — server-issued sha256-hex photo_ids
+const phAddLabel = $('ph-add').textContent;
+$('ph-add').onclick = () => $('l-photo').click();
+$('l-photo').onchange = async () => {
+  $('ph-err').style.display = 'none';
+  const files = [...$('l-photo').files];
+  $('l-photo').value = ''; // re-selecting the same file must fire onchange again
+  if (!files.length) return;
+  $('ph-add').disabled = true; $('ph-add').textContent = 'Uploading…';
+  for (const f of files) {
+    if (photos.length >= 3) { showErr('ph-err', 'Up to 3 photos per listing.'); break; }
+    if (f.size > 8 * 1024 * 1024) { showErr('ph-err', `${f.name}: file is too large (8 MB max).`); continue; }
+    try {
+      // Body IS the raw image bytes (server sniffs the format from magic bytes itself) —
+      // that's why the token rides in a header instead of a JSON field here.
+      const res = await fetch('/api/safe/listings/photos', { method: 'POST', headers: { 'x-listing-token': listingToken }, body: f });
+      let j = null; try { j = await res.json(); } catch {}
+      if (!res.ok || !j || !j.photo_id) { showErr('ph-err', (j && j.error) || 'Photo upload failed.'); continue; }
+      // photo_id = sha256 of the bytes — the same file twice dedupes to one entry
+      if (!photos.some((p) => p.id === j.photo_id)) { photos.push({ id: j.photo_id }); renderPhotos(); }
+    } catch { showErr('ph-err', 'Photo upload failed — network error.'); }
+  }
+  $('ph-add').disabled = false; $('ph-add').textContent = phAddLabel;
+};
+function renderPhotos() {
+  const row = $('ph-row');
+  row.innerHTML = '';
+  for (const p of photos) {
+    const cell = document.createElement('span');
+    cell.className = 'ph-thumb';
+    const img = document.createElement('img');
+    // src from the server round-trip (not a local blob) — the preview doubles as proof the
+    // upload is actually stored and downloadable.
+    img.src = `/api/safe/listings/photos/${encodeURIComponent(p.id)}`;
+    img.alt = '';
+    const del = document.createElement('button');
+    del.type = 'button'; del.className = 'ph-del'; del.textContent = '✕';
+    del.setAttribute('aria-label', 'Remove photo');
+    del.onclick = () => { photos.splice(photos.indexOf(p), 1); renderPhotos(); };
+    cell.append(img, del);
+    row.appendChild(cell);
+  }
+  row.style.display = photos.length ? 'flex' : 'none';
+}
+
+$('l1-next').onclick = () => {
+  $('l1-err').style.display = 'none';
+  const title = $('l-title').value.trim();
+  let descr = $('l-descr').value.trim();
+  const priceKas = Number($('l-price').value);
+  if (!title) return showErr('l1-err', 'Title is required.');
+  if (!(priceKas >= 50 && priceKas <= 10000)) return showErr('l1-err', 'Price must be between 50 and 10,000 KAS.');
+  // shipping geography → first line of the description (marketplace card, deal terms, arbiter)
+  if (isItem() && $('l-category').value === 'goods') {
+    const SHIP_LABEL = { world: 'Worldwide', eu: 'European Union only', eu_us: 'EU + USA' };
+    const shipTxt = $('l-ship').value === 'custom' ? $('l-ship-countries').value.trim() : SHIP_LABEL[$('l-ship').value];
+    if (!shipTxt) return showErr('l1-err', 'List the countries you can ship to.');
+    descr = `📦 Ships to: ${shipTxt}` + (descr ? '\n' + descr : '');
+  }
+
+  // Same two-call key pattern escrow.html uses to create a deal (escrow_gen_keys for the deal,
+  // separate chat_gen_keys for chat — NOT one combined field). Runs right here at the 1→2
+  // transition; draft.keys/draft.chat are then just read (never regenerated) by every later step.
+  // Profile v3: derivation from the master seed at index dl.index (shared with the page token) —
+  // the listing is recoverable from any backup export; re-running step 1→2 is idempotent.
+  const keys = dl ? JSON.parse(core.derive_keys(dl.seed, 'listing/key', dl.index))
+                  : JSON.parse(core.escrow_gen_keys()); // { pk, sk }
+  const chat = !chatSupported() ? null
+    : (dl && core.derive_chat_keys) ? JSON.parse(core.derive_chat_keys(dl.seed, 'listing/chat', dl.index))
+    : JSON.parse(core.chat_gen_keys()); // { pk, sk } | null
+  // UI value (item|item_repeat|service|service_once) → server-side pair listing_type+repeatable
+  const t = $('l-type').value;
+  draft = {
+    title, descr, priceKas, priceSompi: Math.round(priceKas * 1e8),
+    category: $('l-category').value, listingType: isItem() ? 'item' : 'service',
+    repeatable: t === 'item_repeat' || t === 'service',
+    windowHours: Number($('l-window').value), keys, chat, token: listingToken,
+  };
+  $('l2-price').textContent = kas(draft.priceSompi);
+  $('l2-window').textContent = draft.windowHours + ' h';
+  stepTo(2);
+};
+
+const l2PublishLabel = $('l2-publish').textContent;
+$('l2-publish').onclick = async () => {
+  $('l2-err').style.display = 'none';
+  // Disable for the duration of the request — same double-submit guard escrow.html's own
+  // "generate invite" button uses for the identical class of action (POST that creates a real
+  // escrow deal with real money); without it a fast double-click could fire two creates off the
+  // same seller key.
+  $('l2-publish').disabled = true; $('l2-publish').textContent = 'Publishing…';
+  try {
+    const resp = await fetch('/api/safe/listings', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        title: draft.title, description: draft.descr, price_sompi: draft.priceSompi,
+        category: draft.category, listing_type: draft.listingType, repeatable: draft.repeatable, dispute_hours: draft.windowHours,
+        photo_ids: photos.map((p) => p.id),
+        pk: draft.keys.pk, token: draft.token, chat_pk: draft.chat ? draft.chat.pk : '',
+      }),
+    });
+    const listing = await resp.json();
+    if (!resp.ok) { showErr('l2-err', listing.error || 'Server error'); $('l2-publish').disabled = false; $('l2-publish').textContent = l2PublishLabel; return; }
+
+    // Save both the underlying deal AND the listing itself into the shared profile — same
+    // pattern saveDeal already uses (Phase 0), plus a third entity type (listings).
+    const dealsArr = getDeals();
+    dealsArr.push({
+      id: listing.deal_id, role: 'seller', token: draft.token, amount: listing.price_sompi, template: listing.category, descr: draft.descr, deriv_i: dl ? dl.index : null,
+      sk: draft.keys.sk, chat_sk: draft.chat ? draft.chat.sk : null, chat_pk: draft.chat ? draft.chat.pk : null,
+    });
+    setDeals(dealsArr);
+    const listingsArr = getListings();
+    // listing.listing_type (snake_case) — the server's listing_json() (listings.rs) does not
+    // emit a "listingType" field; that mismatch would have silently stored `listing_type:
+    // undefined` in every saved listing.
+    listingsArr.push({ id: listing.id, title: draft.title, price_sompi: listing.price_sompi, status: listing.status, deal_id: listing.deal_id, join_code: listing.join_code, listing_type: listing.listing_type, deriv_i: dl ? dl.index : null });
+    setListings(listingsArr);
+
+    renderResult(listing);
+    stepTo(3);
+  } catch (e) {
+    showErr('l2-err', (e && e.message) || 'Network error');
+    $('l2-publish').disabled = false; $('l2-publish').textContent = l2PublishLabel;
+  }
+};
+
+function renderResult(listing) {
+  const box = $('step-3-body');
+  // listings.rs::create_listing calls Deals::create_deal (and attach_deal) BEFORE it ever runs
+  // moderation — so listing.deal_id is a real, already-persisted deal id here in EVERY branch
+  // below, published/pending/rejected alike (verified against the handler, not assumed). This is
+  // also the ONLY screen the seller ever sees that deal id on, so the recovery-sheet re-download
+  // (real id, unlike l2-download's placeholder id:0) belongs in all three, not just "published".
+  if (listing.status === 'published') {
+    box.innerHTML = `<p class="note" style="border-left-color:#00C1AF"><b>Live on the marketplace.</b> Buyers can find and respond to it now.</p>
+      <p class="hint" style="margin-top:8px">🔑 Your key is saved in your master key file — back it up from the <a href="/desk.html">Desk</a>.</p>
+      <p><a href="/market.html?id=${listing.id}" class="btn btn-ghost">View your listing</a> <a href="/desk.html" class="btn btn-ghost">Go to My Desk</a></p>`;
+  } else if (listing.status === 'rejected') {
+    box.innerHTML = `<p class="note alarm"><b>Not published.</b> ${listing.moderation_reason ? esc(listing.moderation_reason) : 'It didn’t pass review.'}</p>
+      <p class="hint" style="margin-top:8px">🔑 Your key is saved in your master key file — back it up from the <a href="/desk.html">Desk</a>.</p>
+      <p><a href="/desk.html" class="btn btn-ghost">Go to My Desk</a></p>`;
+  } else {
+    box.innerHTML = `<p class="hint">Your listing is queued for a quick automated review before it goes live — this usually takes a few seconds to a couple of minutes.</p>
+      <p class="hint" style="margin-top:8px">🔑 Your key is saved in your master key file — back it up from the <a href="/desk.html">Desk</a>.</p>
+      <p><a href="/desk.html" class="btn btn-ghost">Go to My Desk</a></p>`;
+  }
+}
+
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+function showErr(id, msg) { $(id).style.display = 'block'; $(id).textContent = '⚠ ' + msg; }
+</script>
+<script src="/assets/kaspa-widget.js?v=3" defer></script>
+</body>
+</html>

@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Recovery — Kaspa Safe</title>
+<meta name="description" content="Kaspa Safe emergency page: cancel a thief's withdrawal with the alarm key from your alarm card, reopen the vault in a new browser, claim an inheritance, recover without the website via vaultctl.">
+<link rel="canonical" href="https://kaspaforge.org/recover.html">
+<link rel="alternate" hreflang="en" href="https://kaspaforge.org/recover.html">
+<link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/recover.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0E1116">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="stylesheet" href="/assets/safe.css?v=14">
+<script src="/assets/nav.js?v=5" defer></script>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <a class="brand" href="/">
+    <img class="brand-k" src="/assets/brand/emblem-flat-header.png" alt="">
+    <span class="brand-name">Kaspa <b>Safe</b></span>
+  </a>
+  <!-- no menu of its own: navigation (Desk/Safe/Docs/…) is provided by the nav.js tab strip above the header -->
+</header>
+
+<div style="max-width:780px;margin:32px auto 0">
+  <div class="eyebrow">Recovery</div>
+  <h1 style="font-size:clamp(28px,4vw,40px);margin:10px 0 6px">Get your coins back</h1>
+  <p class="lead">Find your situation below and follow the steps. Take your time — nothing bad is happening while you read.</p>
+
+  <!-- EMERGENCY -->
+  <div class="emergency">
+    <div class="siren">🚨 A withdrawal has started</div>
+    <h2 style="font-size:22px;margin:8px 0 4px">Cancel it with your alarm key</h2>
+    <p class="hint">Got a "withdrawal started" alert and it wasn't you? You have the entire cancel window from the moment it started (you chose its length at creation; the timer is visible in "My vault"). And you don't need your own device: any computer or a borrowed phone works — your <b>alarm card</b> is enough.</p>
+    <ol class="steps">
+      <li><b>Don't panic.</b> The coins can't move until the cancel window ends.</li>
+      <li>Open <a href="/manage.html"><b>My vault</b></a> — from any device (check the address bar first — see below).</li>
+      <li>Find the active withdrawal and how much time is left.</li>
+      <li>Press <b>⛔ Cancel withdrawal</b> and enter the alarm key from your <b>alarm card</b> — the "Alarm key" line on the card you saved at creation (it is deliberately not stored in the key file). Older vaults that kept the alarm key in the profile: it's already inside — you only confirm with your password, or import your master key file on another device (<a href="/desk.html">Desk</a> → Import).</li>
+      <li>Never enter keys or your Desk password on any site other than <span class="mono">kaspaforge.org</span>.</li>
+      <li><b>After the cancel — don't relax.</b> If you didn't start that withdrawal, the thief has your hot key and will try again. <a href="/create.html">Create a new vault</a> right away and withdraw everything into it with a normal withdrawal: the thief can't cancel <i>your</i> withdrawal — they don't have the alarm key. Keep the alarm card at hand until the window closes.</li>
+      <li><b>Faster escape (advanced):</b> since you hold <i>both</i> keys — the hot key in your key file and the alarm key on your card — the covenant's <b>migrate</b> path can move the whole vault to a fresh one <b>instantly, without waiting out any window</b>. It's available in the open-source CLI: <span class="mono">vaultctl migrate</span> (block below). The thief can't use it: migrate demands both signatures, and the alarm key exists only on your card.</li>
+    </ol>
+  </div>
+
+  <!-- DOMAIN CHECK -->
+  <div class="domain">
+    <span class="lock">🔒</span>
+    <div>
+      <div style="font-size:13px;color:var(--ash)">You are on the real site only if the address bar shows exactly:</div>
+      <div class="u">kaspaforge.org</div>
+    </div>
+    <div class="hint" style="flex:1;min-width:220px">Don't enter keys on lookalike copies (e.g. <span class="mono">kaspa-forge.help</span>). Our old address <span class="mono">safe.officeforge.co</span> simply redirects here. In doubt — use the offline <span class="mono">vaultctl</span> below, it doesn't need the site at all. And to just <i>watch</i> the vault, any Kaspa explorer works: paste the vault address (from the Desk, your key file or an old recovery sheet) into <span class="mono">kaspa.stream</span> — balance and transactions are visible without us and without keys.</div>
+  </div>
+
+  <!-- BLOCK 0: master key file (primary path) -->
+  <div class="plate" style="margin-top:28px;border-left:3px solid var(--kaspa)">
+    <h2 style="font-size:20px">Recover from your master key file (the simple way)</h2>
+    <p class="hint">Your vaults, deals and listings all live in one encrypted <b>master key file</b> — your Desk profile. On any device, open your <a href="/desk.html"><b>Desk</b></a>, choose <b>Import / restore</b> and load your master key file (<span class="mono">.age</span>) with its password — everything comes back at once. Back it up from the Desk ("Export key file"); that one file is your recovery. Even things you created <b>after</b> that export come back: keys are derived from the master seed inside the file, and the Desk automatically re-discovers your vaults, deals and listings from the server on import.</p>
+    <p class="hint" style="margin-top:8px"><b>The one deliberate exception: vault alarm keys.</b> They live on the <b>alarm cards</b> you saved at creation — not in the file and not derivable from it (so stealing the file and password is never enough to empty a vault). The Desk marks such vaults "alarm: card"; cancelling a theft or migrating asks for the key from the card.</p>
+    <p class="hint" style="margin-top:8px">Have an older <span class="mono">.txt</span> recovery sheet from before this change, or just one vault to reopen? The manual steps below still work.</p>
+    <p class="hint" style="margin-top:8px"><b>Need the raw keys out of the file — even if this site is gone?</b>
+      <a href="/keyfile-decrypt.html" download="kaspa-keyfile-decrypt.html">Download the offline key-file decryptor</a>
+      (a single HTML file, ~3 MB): open it from disk with your internet off, load the <span class="mono">.age</span> file and its
+      password — it shows every private key inside (except alarm keys of card vaults — those exist only on their cards) without any network requests. The file is standard
+      <a href="https://age-encryption.org" rel="noopener">age</a>, so the CLI works too: <span class="mono">age -d keyfile.age</span>.
+      Also mirrored in the open-source repo: <a href="https://github.com/pcdoctormsk-ctrl/kaspa-safe" rel="noopener">github.com/pcdoctormsk-ctrl/kaspa-safe</a>.</p>
+  </div>
+
+  <!-- BLOCK 1: new browser (legacy single vault / old sheet) -->
+  <div class="plate" style="margin-top:28px">
+    <h2 style="font-size:20px">Reopen a single vault from an old recovery sheet (legacy)</h2>
+    <p class="hint">For vaults created in the era of paper <span class="mono">.txt</span> recovery sheets, before the master key file. Your vault isn't stored in a browser — it lives on the blockchain, so it reopens from the sheet's public values. Just to look, no private keys are needed. (For key-file vaults you don't need this: import the file on the <a href="/desk.html">Desk</a>.)</p>
+    <div style="margin-top:8px;font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--kaspa)">What you need (all printed on the recovery sheet)</div>
+    <ul class="need">
+      <li>public hot key — the "Hot pubkey" line</li>
+      <li>public alarm key — the "Alarm pubkey" line</li>
+      <li>withdrawal delay — the number from the "Withdrawal delay" line (DAA are Kaspa's time "ticks", ~10 per second; enter the number as printed)</li>
+      <li>if inheritance was on: the heir's pubkey, the period (DAA number) and the <b>mode</b> — the "mode: automatic / manual" part</li>
+      <li>newer sheets also print a <b>"Fee budget"</b> line — it is part of the address; sheets without it mean the default (1,000,000). If your sheet has a different value, load the sheet as a file ("Load recovery sheet") instead of typing — it applies everything automatically</li>
+      <li>private keys — only when you actually act (withdraw / cancel / check in)</li>
+    </ul>
+    <div style="margin-top:14px;font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--kaspa)">Steps</div>
+    <ol class="steps">
+      <li>Open <a href="/manage.html"><b>My vault</b></a>.</li>
+      <li>Enter the hot pubkey and the alarm pubkey.</li>
+      <li>Enter the delay (DAA); if inheritance was on — the heir's pubkey and the period.</li>
+      <li>Set the <b>"Automatic inheritance"</b> checkbox exactly as the sheet says: mode "automatic" — checked, "manual" — unchecked.</li>
+      <li>Press <b>Open</b> — the panel recomputes the vault address.</li>
+      <li>Compare the address with the sheet and check the balance. Match? You're in.</li>
+    </ol>
+    <div class="note" style="margin-top:12px"><b>Address doesn't match the sheet, or balance shows 0?</b> Almost always it's the inheritance-mode checkbox or a typo in the period. Nothing is broken or lost: fix it and press "Open" again. Still off with inheritance disabled? Type the sheet into a plain <span class="mono">.txt</span> file and use "Load recovery sheet" — it matches the printed address automatically.</div>
+  </div>
+
+  <!-- BLOCK 2: I'm the heir -->
+  <div class="plate">
+    <h2 style="font-size:20px">I'm the heir</h2>
+    <p class="hint">Someone left you a Kaspa Safe vault. The owner set a period: as long as they kept checking in ("I'm alive"), the vault was theirs alone. If the check-ins stopped — after the period, the vault opens to you. Before that you can't see or take anything; that's how the contract is designed.</p>
+    <div style="margin-top:6px">
+      <div class="kv"><span class="k" style="min-width:130px">"Automatic" mode</span><span class="v" style="text-align:left">Nothing to do. After the period, the coins arrive at your Kaspa address on their own — the one the owner entered at creation. Just watch your wallet.</span></div>
+    </div>
+    <div style="margin-top:10px">
+      <div class="kv"><span class="k" style="min-width:130px">"Manual" mode</span><span class="v" style="text-align:left">Open the vault in <a href="/manage.html">"My vault"</a> — from the owner's master key file (import it on the <a href="/desk.html">Desk</a>) or from an old recovery sheet (block above). Once the period expires, an <b>"Inheritance"</b> block appears: enter the private key of <i>your own</i> address (export it from your wallet — Kaspium and kaspa-ng can) and press "Claim the inheritance". The funds go strictly to your address — the contract allows nothing else.</span></div>
+    </div>
+    <p class="hint" style="margin-top:10px">How long is left — visible in the panel (the "Timer" row) or via <span class="mono">vaultctl status</span>. No permission from us is needed: the blockchain enforces the rules. Site down — <span class="mono">vaultctl inherit</span> does the same (block below).</p>
+  </div>
+
+  <!-- BLOCK 3: vaultctl offline -->
+  <div class="plate">
+    <h2 style="font-size:20px">If the site is unavailable — offline recovery with vaultctl</h2>
+    <p class="hint">Kaspa Safe doesn't depend on us: the vault is an on-chain contract, and it checks only your keys and time. The open-source <span class="mono">vaultctl</span> tool does everything the site does, from a terminal, against any Kaspa v2+ node (running with <span class="mono">--utxoindex</span>). The code is published: <a href="https://github.com/pcdoctormsk-ctrl/kaspa-safe" target="_blank" rel="noopener"><span class="mono">github.com/pcdoctormsk-ctrl/kaspa-safe</span></a> — keep a copy (Code → Download ZIP) and you won't depend even on GitHub.</p>
+    <div class="cmd"><pre><span class="c"># once: build it (needs Rust from rustup.rs, protobuf-compiler, clang)</span>
+<span class="p">git clone</span> https://github.com/pcdoctormsk-ctrl/kaspa-safe
+<span class="p">cd</span> kaspa-safe/vaultctl && <span class="p">cargo build --release</span>
+
+<span class="c"># cargo build also produces kaspa-unlock. Have only the master key file (.age)?</span>
+<span class="c"># decrypt it once, then pull out the vault you need — vaultctl reads JSON too:</span>
+<span class="p">kaspa-unlock</span> decrypt kaspa-office-profile.age profile.json   <span class="c"># asks your Desk password</span>
+<span class="p">jq</span> '.vaults[0]' profile.json &gt; vault.json                 <span class="c"># pick a vault; use vault.json below in place of sheet.txt</span>
+
+<span class="c"># the recovery input is fed AS IS — an old .txt sheet OR the vault.json above</span>
+<span class="c"># vault state: balance, age, inheritance timer</span>
+<span class="p">vaultctl status</span>   --recovery kaspa-safe-recovery-XXXX.txt
+
+<span class="c"># start a withdrawal to your address (needs the hot key — it's on the sheet)</span>
+<span class="p">vaultctl initiate</span> --recovery sheet.txt --to kaspa:q...
+
+<span class="c"># cancel an in-flight withdrawal (alarm key; --dest = the address the</span>
+<span class="c"># withdrawal is going TO — yours you know, a thief's is in the TG alert / panel)</span>
+<span class="p">vaultctl cancel</span>   --recovery sheet.txt --dest kaspa:q...
+
+<span class="c"># deliver a matured withdrawal to its destination (no key needed)</span>
+<span class="p">vaultctl complete</span> --recovery sheet.txt --dest kaspa:q...
+
+<span class="c"># "I'm alive" check-in · deliver the inheritance after the period</span>
+<span class="p">vaultctl checkin</span>  --recovery sheet.txt
+<span class="p">vaultctl inherit</span>  --recovery sheet.txt              <span class="c"># "automatic": no key</span>
+<span class="p">vaultctl inherit</span>  --recovery sheet.txt --heir-sk KEY <span class="c"># "manual": heir's key</span>
+
+<span class="c"># migrate — BOTH keys (hot + alarm) = instant full authority: move the whole vault</span>
+<span class="c"># anywhere with no delay (rotate a leaked key, upgrade the contract version, escape).</span>
+<span class="c"># --dest rescues a mid-withdrawal UTXO from the unvault address.</span>
+<span class="p">vaultctl migrate</span>  --recovery vault.json --to kaspa:q... [--dest kaspa:q...]</pre></div>
+    <p class="hint" style="margin-top:10px"><b>Card vaults:</b> <span class="mono">vault.json</span> extracted from the profile deliberately has no alarm key — before <span class="mono">cancel</span> or <span class="mono">migrate</span>, add it from your alarm card as an <span class="mono">"alarm_sk"</span> field (or feed an old-style .txt sheet, which carries it).</p>
+    <p class="hint" style="margin-top:10px">Useful flags: <span class="mono">--node grpc://your-node:16110</span> — any Kaspa v2+ node with <span class="mono">--utxoindex</span> (defaults to the public OfficeForge node <span class="mono">grpc://node.kaspaforge.org:16110</span> — or run your own); <span class="mono">--dry-run</span> — build and sign the transaction, print its txid, but do NOT broadcast (try this first). To verify the contract itself: <span class="mono">vaultctl selftest</span> — 25 checks of every path and attack inside the node VM.</p>
+  </div>
+
+  <!-- BLOCK 4: lost key -->
+  <div class="plate">
+    <h2 style="font-size:20px">If a key is lost</h2>
+    <div style="margin-top:6px">
+      <div class="kv"><span class="k" style="min-width:150px">Hot key lost</span><span class="v" style="text-align:left">The coins are not stolen, but you can't start a normal withdrawal anymore. <b>If inheritance is on — simply stop checking in:</b> after the period the coins go to the heir automatically ("automatic" mode) or the heir claims them with their key ("manual"). The heir can be you — if you named your own second address. If inheritance is off — honestly: the coins are frozen forever, nobody (including us) can reach them. That's why we recommend enabling inheritance even "to yourself". <b>Keep your master key file and its Desk password backed up.</b></span></div>
+    </div>
+    <div style="margin-top:10px">
+      <div class="kv"><span class="k" style="min-width:150px">Alarm card lost</span><span class="v" style="text-align:left">Your money is safe: withdrawing with the hot key and inheritance still work. What's gone is the ability to cancel a theft and the instant migrate path. Don't wait: move the KAS with a normal withdrawal (sit out the window) into a new vault with a fresh alarm card.</span></div>
+    </div>
+    <div style="margin-top:10px">
+      <div class="kv"><span class="k bad" style="min-width:150px">Both keys lost</span><span class="v bad" style="text-align:left">Access is gone forever (unless inheritance is on — see "hot key lost"). OfficeForge cannot recover keys — nobody can. That's why you keep your master key file (and its password) backed up.</span></div>
+    </div>
+  </div>
+
+  <!-- BLOCK 5: never ask -->
+  <div class="never" style="margin-top:16px">
+    <h2 style="margin-bottom:8px">What we will never ask for</h2>
+    <p class="big">If anyone asks you to send a <b>private key</b>, a <b>seed phrase</b>, your <b>Desk password</b>, your <b>master key file</b> or your <b>alarm card</b> — it's a scammer.</p>
+    <p class="hint" style="margin-top:10px">The alarm card deserves special care: together with the key file it gives <b>instant</b> full control of the vault (the migrate path). Nobody legitimate will ever ask to "check" or "verify" it.</p>
+    <p class="hint" style="margin-top:14px">Your master key file does <b>not</b> give OfficeForge access to your coins — it's encrypted with your password and exists for <i>you</i> alone, to sign actions with your own keys. We don't store private keys or your password and can't recover them for you. And we will never ask for them — not in chat, not by email, not "for verification". Support (kaspa@officeforge.co) can explain the steps, but physically has no access to keys or coins.</p>
+  </div>
+
+</div>
+
+<footer><div class="row wrap"><a class="foot-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="OfficeForge"><img src="/assets/logo.png" alt="OfficeForge"></a><span>Kaspa Safe · non-custodial beta · <a href="https://officeforge.co">OfficeForge</a> · feedback: kaspa@officeforge.co · <a href="/privacy.html">Privacy</a></span></div></footer>
+</div>
+
+<script src="/assets/kaspa-widget.js?v=3" defer></script>
+<script>if("serviceWorker" in navigator&&/(^|\.)kaspaforge\.org$|(^|\.)officeforge\.co$/.test(location.hostname))navigator.serviceWorker.register("/sw.js");</script>
+</body>
+</html>

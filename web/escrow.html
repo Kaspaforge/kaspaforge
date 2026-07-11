@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Create an escrow deal — Kaspa Escrow</title>
+<meta name="description" content="Non-custodial escrow for Kaspa. The arbiter settles disputes but can only ever pay the buyer or the seller — never themselves, never a third party.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#0E1116">
+<link rel="manifest" href="/manifest-escrow.json">
+<link rel="apple-touch-icon" href="/assets/icons-escrow/apple-touch-icon.png">
+<script src="/assets/nav.js?v=5" defer></script>
+<link rel="stylesheet" href="/assets/safe.css?v=14">
+<link rel="stylesheet" href="/assets/escrow.css?v=7">
+<script src="/assets/qrcode.min.js"></script>
+<style>
+/* Shipping-geography picker (physical goods + seller): 4 presets in a row, 2×2 on phones.
+   Page-scoped — escrow.css is shared by other pages, do not touch it. */
+.pick4{display:grid;gap:10px;margin-top:6px;grid-template-columns:repeat(4,1fr)}
+@media(max-width:520px){.pick4{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <a class="brand" href="/">
+    <img class="brand-k" src="/assets/brand/emblem-flat-header.png" alt="">
+    <span class="brand-name" id="brand">Kaspa <b>Escrow</b></span>
+  </a>
+  <a class="by-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="Built by OfficeForge"><img src="/assets/of-wordmark.png" alt="OfficeForge"></a>
+  <nav><a href="/deal.html">My deals</a></nav>
+</header>
+
+<div style="max-width:760px;margin:40px auto 0">
+  <div class="eyebrow">New escrow deal</div>
+  <h1 style="font-size:clamp(28px,4vw,40px);margin:10px 0 8px">Escrow a deal</h1>
+  <p class="lead">A guarantor that <b>physically can't run off with the money</b>. The arbiter can settle a dispute — buyer, seller, or a split — but the covenant makes sure the coins can only ever reach the buyer or the seller.</p>
+  <div class="note alarm" style="margin-top:16px"><b>Open beta.</b> Unaudited contract, external audit ahead. Keep deals small (cap 10,000 KAS). Non-custodial: we never hold your funds.</div>
+  <div id="err" class="note alarm" style="display:none" role="alert"></div>
+
+  <div style="margin-top:30px">
+    <!-- STEP 1: parameters -->
+    <div class="step active" id="st1" data-n="1">
+      <h3>Deal terms</h3>
+      <div class="body">
+        <label>Your role</label>
+        <div class="pick2">
+          <button type="button" class="pick active" data-role="buyer" id="r-buyer">🛒 <span></span></button>
+          <button type="button" class="pick" data-role="seller" id="r-seller">📦 <span></span></button>
+        </div>
+        <label style="margin-top:16px">Deal type</label>
+        <div class="pick3">
+          <button type="button" class="pick active" data-tpl="goods" id="t-goods">📱 <span></span></button>
+          <button type="button" class="pick" data-tpl="otc" id="t-otc">💱 <span></span></button>
+          <button type="button" class="pick" data-tpl="service" id="t-service">🛠️ <span></span></button>
+        </div>
+        <!-- Shipping geography — physical goods + seller only (decision 2026-07-10). Goes as the first line
+             of the deal terms (descr): the buyer sees it BEFORE joining, both parties' panels show it,
+             and the arbiter sees it in a dispute — no separate server-side field needed. -->
+        <div id="ship-block" style="display:none">
+          <label style="margin-top:16px">Shipping — where you can send</label>
+          <div class="pick4">
+            <button type="button" class="pick active" data-ship="world">🌍 <span>Worldwide</span></button>
+            <button type="button" class="pick" data-ship="eu">🇪🇺 <span>EU only</span></button>
+            <button type="button" class="pick" data-ship="eu_us">🇪🇺🇺🇸 <span>EU + USA</span></button>
+            <button type="button" class="pick" data-ship="custom">✍️ <span>Specific countries</span></button>
+          </div>
+          <input type="text" id="ship-countries" maxlength="200" style="display:none;margin-top:8px" placeholder="e.g. Germany, Austria, Switzerland">
+        </div>
+        <label style="margin-top:16px">Dispute window</label>
+        <div class="pick6">
+          <button type="button" class="pick" data-win="24">24 h<span>1 day</span></button>
+          <button type="button" class="pick" data-win="48">48 h<span>2 days</span></button>
+          <button type="button" class="pick active" data-win="72">72 h<span>3 days</span></button>
+          <button type="button" class="pick" data-win="96">96 h<span>4 days</span></button>
+          <button type="button" class="pick" data-win="120">120 h<span>5 days</span></button>
+          <button type="button" class="pick" data-win="168">168 h<span>7 days</span></button>
+        </div>
+        <div class="hint" id="win-hint" style="margin-top:4px"></div>
+        <label for="amount" style="margin-top:16px">Amount the seller receives (KAS)</label>
+        <input type="number" id="amount" min="50" max="10000" step="0.01" placeholder="100" inputmode="decimal">
+        <div class="hint" id="cap-hint" style="margin-top:4px"></div>
+        <div id="fund-summary" style="display:none;margin-top:6px;font-family:var(--mono);font-size:12.5px;color:var(--ash)"></div>
+        <table class="fee-tbl" aria-live="polite">
+          <thead><tr><th id="fee-head" colspan="3"></th></tr></thead>
+          <tbody>
+            <tr><td id="fee-r1"></td><td class="f-rate" id="fee-rate1"></td><td class="f-val" id="fee-val1">—</td></tr>
+            <tr><td id="fee-r2"></td><td class="f-rate" id="fee-rate2"></td><td class="f-val" id="fee-val2">—</td></tr>
+          </tbody>
+        </table>
+        <div class="hint" id="fee-note" style="margin-top:4px"></div>
+        <label for="descr" style="margin-top:16px">Conditions / what's being traded</label>
+        <textarea id="descr" rows="3" placeholder="e.g. iPhone 15 Pro, sealed. Ships within 3 days of funding. Seller pays shipping."></textarea>
+        <div style="margin-top:20px"><button class="btn btn-kaspa" id="b1">Generate invite link</button></div>
+      </div>
+    </div>
+
+    <!-- STEP 2: key + invite -->
+    <div class="step" id="st2" data-n="2">
+      <h3>Your key & invite</h3>
+      <div class="body">
+        <p class="note"><b>🔑 No recovery sheet to save.</b> Your key and this deal are saved automatically to your encrypted <b>master key file</b> — your profile in the <a href="/desk.html">Desk</a>. Back it up once from the Desk ("Export key file"); one file covers every deal, vault and listing.</p>
+        <div class="keycard">
+          <div class="kc-role"><span class="dot"></span><span id="key-label"></span></div>
+          <code id="k-key"></code>
+          <div class="kc-note" id="key-hint"></div>
+        </div>
+        <div class="keycard" id="chat-keycard" style="display:none">
+          <div class="kc-role"><span class="dot"></span><span id="chat-key-label"></span></div>
+          <code id="k-chat"></code>
+          <div class="kc-note" id="chat-key-hint"></div>
+        </div>
+
+        <div id="invite-block" style="display:none;margin-top:18px">
+          <label id="invite-lead"></label>
+          <div class="addr"><code id="invite-link"></code><button id="invite-copy" aria-label="Copy invite link">copy</button></div>
+          <div class="qr" id="invite-qr"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: to the panel -->
+    <div class="step" id="st3" data-n="3">
+      <h3>Deal panel</h3>
+      <div class="body">
+        <p class="hint" id="st3-hint"></p>
+        <div style="margin-top:12px"><a class="btn btn-kaspa" id="to-panel"></a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer><div class="row wrap"><a class="foot-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="OfficeForge"><img src="/assets/logo.png" alt="OfficeForge"></a><span>Kaspa Escrow · non-custodial beta · built by the <a href="https://officeforge.co">OfficeForge</a> AI office · feedback: kaspa@officeforge.co</span></div></footer>
+</div>
+
+<script type="module">
+import { boot, core, net, api, usdStr, genToken, L, $, copyText, qrInto, showErr, hideErr,
+         saveDeal, chatSupported } from '/assets/escrow.js?v=30';
+import { requireUnlock } from '/assets/lock-ui.js';
+import * as session from '/assets/session.js';
+
+const err = $('err');
+let role = 'buyer', tpl = 'goods', keys = null, token = genToken(), deal = null;
+let win = 72, winManual = false;                      // dispute window: preset (default follows deal type)
+const WIN_DEFAULT = { goods: 72, otc: 24, service: 120 };
+
+// labels from i18n
+$('r-buyer').querySelector('span').textContent = L('role_buyer');
+$('r-seller').querySelector('span').textContent = L('role_seller');
+$('t-goods').querySelector('span').textContent = L('tpl_goods');
+$('t-otc').querySelector('span').textContent = L('tpl_otc');
+$('t-service').querySelector('span').textContent = L('tpl_service');
+$('cap-hint').textContent = L('beta_cap');
+$('win-hint').textContent = L('win_pick_hint');
+$('key-label').textContent = L('key_label');
+$('key-hint').textContent = L('hot_role_hint');
+$('chat-key-label').textContent = L('chat_key_label');
+$('chat-key-hint').textContent = L('chat_hint');
+$('fee-head').textContent = L('fee_head');
+$('fee-r1').textContent = L('fee_amicable');
+$('fee-r2').textContent = L('fee_arb');
+$('fee-rate1').textContent = L('fee_rate_resolve');
+$('fee-rate2').textContent = L('fee_rate_dispute');
+$('fee-note').textContent = L('fee_enter_amount');
+$('b1').textContent = L('gen_invite');
+$('st3-hint').textContent = L('step3_hint');
+
+try { await boot(); await requireUnlock(net()); } catch (e) { showErr(err, e); }
+
+// pickers
+for (const b of document.querySelectorAll('[data-role]')) b.onclick = () => {
+  role = b.dataset.role; document.querySelectorAll('[data-role]').forEach((x) => x.classList.toggle('active', x === b));
+  updateShipVis();
+};
+for (const b of document.querySelectorAll('[data-tpl]')) b.onclick = () => {
+  tpl = b.dataset.tpl; document.querySelectorAll('[data-tpl]').forEach((x) => x.classList.toggle('active', x === b));
+  if (!winManual) setWin(WIN_DEFAULT[tpl]);   // window default follows the deal type until picked manually
+  updateShipVis();
+};
+// shipping geography: block visible only to a physical-goods seller; "Specific countries" opens a text input
+let ship = 'world';
+const SHIP_LABEL = { world: 'Worldwide', eu: 'European Union only', eu_us: 'EU + USA' };
+function updateShipVis() { $('ship-block').style.display = (tpl === 'goods' && role === 'seller') ? 'block' : 'none'; }
+for (const b of document.querySelectorAll('[data-ship]')) b.onclick = () => {
+  ship = b.dataset.ship;
+  document.querySelectorAll('[data-ship]').forEach((x) => x.classList.toggle('active', x === b));
+  $('ship-countries').style.display = ship === 'custom' ? 'block' : 'none';
+  if (ship === 'custom') $('ship-countries').focus();
+};
+function setWin(h) {
+  win = h;
+  document.querySelectorAll('[data-win]').forEach((x) => x.classList.toggle('active', Number(x.dataset.win) === h));
+}
+for (const b of document.querySelectorAll('[data-win]')) b.onclick = () => { winManual = true; setWin(Number(b.dataset.win)); };
+// live fee calculator: release 0.5% (min 0.2 KAS) / dispute 2% (min 5 KAS)
+function updateFee() {
+  const amt = Number($('amount').value);
+  if (!(amt > 0)) { $('fee-val1').textContent = '—'; $('fee-val2').textContent = '—'; $('fee-note').style.display = 'block'; $('fund-summary').style.display = 'none'; return; }
+  const fr = Math.max(1.2, amt * 0.005), fd = Math.max(5, amt * 0.02);
+  $('fee-val1').textContent = fr.toFixed(2) + ' KAS';
+  $('fee-val2').textContent = fd.toFixed(2) + ' KAS';
+  // buyer pays amount + base fee (on top); seller receives the full amount
+  const usd = (k) => usdStr(Math.round(k * 1e8));
+  $('fund-summary').style.display = 'block';
+  $('fund-summary').innerHTML = `${L('fund_you_pay')}: <b>${(amt + fr).toFixed(2)} KAS${usd(amt + fr)}</b> · ${L('fund_seller_gets')}: <b>${amt.toFixed(2)} KAS${usd(amt)}</b>`;
+  // warning: if a dispute reaches the arbiter, the arbiter fee is a noticeable share of the amount
+  const share = Math.round(fd / amt * 100);
+  if (share >= 10) { $('fee-note').style.display = 'block'; $('fee-note').style.color = '#E0A93E'; $('fee-note').textContent = L('fee_arb_share')(share); }
+  else { $('fee-note').style.display = 'none'; $('fee-note').style.color = ''; }
+}
+$('amount').addEventListener('input', updateFee);
+
+$('b1').onclick = async () => {
+  try {
+    hideErr(err);
+    const amt = Number($('amount').value);
+    if (!(amt >= 50 && amt <= 10000)) { showErr(err, new Error(L('amount_err'))); return; }
+    let descr = $('descr').value.trim();
+    if (tpl === 'goods' && role === 'seller') {
+      const shipTxt = ship === 'custom' ? $('ship-countries').value.trim() : SHIP_LABEL[ship];
+      if (!shipTxt) { showErr(err, new Error('List the countries you can ship to')); return; }
+      descr = `📦 Ships to: ${shipTxt}` + (descr ? '\n' + descr : '');
+    }
+    // Profile v3: deal keys and owner-token are derived from the master seed —
+    // the deal is recoverable from any backup export, even one made before the deal was created.
+    const dd = session.takeDeriv('deal');
+    if (dd) {
+      const k = JSON.parse(core.derive_keys(dd.seed, 'deal/key', dd.index));
+      const f = JSON.parse(core.derive_keys(dd.seed, 'deal/funding', dd.index));
+      keys = { sk: k.sk, pk: k.pk, funding_sk: f.sk, funding_pk: f.pk };
+      token = core.derive_token(dd.seed, 'deal', dd.index);
+    } else {
+      keys = JSON.parse(core.escrow_gen_keys());   // pre-v3 profile without a seed — behaves as before
+    }
+    $('k-key').textContent = keys.sk;
+    $('b1').disabled = true; $('b1').textContent = L('creating');
+    // chat key (SEPARATE pair, cannot move funds) — only if the core supports chat
+    const chat = !chatSupported() ? null
+      : (dd && core.derive_chat_keys) ? JSON.parse(core.derive_chat_keys(dd.seed, 'deal/chat', dd.index))
+      : JSON.parse(core.chat_gen_keys());
+    if (chat) { $('chat-keycard').style.display = 'block'; $('k-chat').textContent = chat.sk; }
+    const r = await api('/api/safe/escrow', { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ role, template: tpl, amount: Math.round(amt * 1e8), descr, pk: keys.pk, token, chat_pk: chat ? chat.pk : '', dispute_hours: win }) });
+    deal = { id: r.id, role, token, network: net(), amount: Math.round(amt * 1e8), template: tpl, descr, deriv_i: dd ? dd.index : null,
+             sk: keys.sk, pk: keys.pk, funding_sk: role === 'buyer' ? keys.funding_sk : null,
+             funding_pk: role === 'buyer' ? keys.funding_pk : null, join_code: r.join_code,
+             chat_sk: chat ? chat.sk : null, chat_pk: chat ? chat.pk : null };
+    saveDeal(deal);
+    $('st1').classList.remove('active'); $('st1').classList.add('done');
+    $('st2').classList.add('active');
+    const link = `${location.origin}/${lang2()}deal.html?join=${r.join_code}`;
+    $('invite-lead').textContent = L('invite_ready');
+    $('invite-link').textContent = link;
+    copyText($('invite-copy'), () => link);
+    qrInto($('invite-qr'), link);
+    $('to-panel').textContent = L('open_panel');
+    $('to-panel').href = `/${lang2()}deal.html?id=${r.id}`;
+    // recovery-sheet removed: keys already in the master key file (saveDeal above) — show the invite straight away
+    $('invite-block').style.display = 'block'; $('st3').classList.add('active'); $('st2').classList.add('done');
+    $('st2').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (e) { showErr(err, e); $('b1').disabled = false; $('b1').textContent = L('gen_invite'); }
+};
+function lang2() { return document.documentElement.lang === 'ru' ? 'ru/' : ''; }
+
+updateFee();
+</script>
+<script src="/assets/kaspa-widget.js?v=3" defer></script>
+<script>if("serviceWorker" in navigator&&/(^|\.)kaspaforge\.org$|(^|\.)officeforge\.co$/.test(location.hostname))navigator.serviceWorker.register("/sw-escrow.js");</script>
+</body>
+</html>

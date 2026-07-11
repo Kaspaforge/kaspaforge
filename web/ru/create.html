@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Создать сейф — Kaspa Safe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0E1116">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="stylesheet" href="/assets/safe.css?v=14">
+<script src="/assets/nav.js?v=5" defer></script>
+<script src="/assets/qrcode.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <a class="brand" href="/ru/">
+    <img class="brand-k" src="/assets/brand/emblem-flat-header.png" alt="">
+    <span class="brand-name">Kaspa <b>Safe</b></span>
+  </a>
+  <a class="by-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="Сделано в OfficeForge"><img src="/assets/of-wordmark.png" alt="OfficeForge"></a>
+  <nav><a href="/ru/manage.html">Мой сейф</a><a href="/ru/recover.html">Восстановление</a></nav>
+</header>
+
+<div style="max-width:760px;margin:40px auto 0">
+  <div class="eyebrow">Новый сейф</div>
+  <h1 style="font-size:clamp(28px,4vw,40px);margin:10px 0 8px">Куём сейф</h1>
+  <p class="lead">Четыре шага. Всё криптографическое — в этом окне браузера; мы не видим и не храним твои ключи.</p>
+  <div class="note alarm" style="margin-top:16px"><b>Открытая бета.</b> Не кладите больше, чем готовы доверить бете (≤ 5 000 KAS). Контракт открыт, но внешний аудит ещё впереди.</div>
+  <div id="err" class="note alarm" style="display:none"></div>
+
+  <div style="margin-top:34px">
+
+    <!-- STEP 1 -->
+    <div class="step active" data-n="1" id="st1">
+      <h3>Задержка и наследование</h3>
+      <div class="body">
+        <p class="hint">Задержка — окно, в котором можно отменить кражу. Дольше — безопаснее, но и свой вывод ждёшь дольше.</p>
+        <label for="delay">Окно отмены</label>
+        <select id="delay"></select>
+        <div id="delay-custom" style="display:none;gap:10px;margin-top:10px">
+          <input type="number" id="delay-num" min="1" step="1" placeholder="12" style="flex:1">
+          <select id="delay-unit" style="width:130px"><option value="h">hours</option><option value="d">days</option></select>
+        </div>
+        <div id="delay-info" class="note" style="margin-top:12px"></div>
+        <label class="check" style="margin-top:14px"><input type="checkbox" id="autocomplete" checked> <span id="ac-label"></span></label>
+
+        <label for="inherit" style="margin-top:18px">Наследование (опционально)</label>
+        <select id="inherit"></select>
+        <div id="inherit-custom" style="display:none;gap:10px;margin-top:10px">
+          <input type="number" id="inherit-num" min="1" step="1" placeholder="6" style="flex:1">
+          <select id="inherit-unit" style="width:130px"><option value="m">months</option><option value="d">days</option></select>
+        </div>
+        <div id="inherit-info" class="hint" style="margin-top:8px"></div>
+        <div id="inherit-mode-block" style="display:none">
+          <label for="inherit-mode" style="margin-top:14px">Доставка наследства</label>
+          <select id="inherit-mode">
+            <option value="auto">Автоматически — средства уходят наследнику</option>
+            <option value="signed">Вручную — наследник забирает своим ключом</option>
+          </select>
+          <div id="inherit-mode-info" class="hint" style="margin-top:6px"></div>
+        </div>
+        <div style="margin-top:20px"><button class="btn btn-kaspa" id="b1">Дальше: выковать ключи</button></div>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="step" data-n="2" id="st2">
+      <h3>Три ключа — два в key-file, один на карточке</h3>
+      <div class="body">
+        <p class="note"><b>🔑 Recovery-лист сохранять не нужно.</b> Горячий ключ, ключ закладки и сам сейф автоматически сохраняются в зашифрованный <b>мастер key-file</b> — твой профиль в <a href="/ru/desk.html">Деске</a>. Сделай бэкап один раз в Деске («Экспорт файла ключей»). <b>Тревожный ключ — сознательное исключение:</b> он живёт на отдельной <b>тревожной карточке</b> ниже, отдельно от файла — чтобы кражи key-file с паролем никогда не хватало, чтобы опустошить сейф.</p>
+        <div class="keycard">
+          <div class="kc-role"><span class="dot"></span>Горячий ключ — вывод и чекины</div>
+          <code id="k-hot"></code>
+          <div class="kc-note">Можно держать на компьютере/в менеджере паролей.</div>
+        </div>
+        <div class="keycard kc-alarm">
+          <div class="kc-role"><span class="dot"></span>Тревожный ключ — отменяет кражу · <b>твоя тревожная карточка</b></div>
+          <code id="k-alarm"></code>
+          <div class="kc-note" id="card-note"><b>Показывается один раз — в key-file НЕ сохраняется, так задумано.</b> Горячий + тревожный вместе двигают сейф мгновенно, поэтому владелец key-file не должен автоматически владеть обоими. Сохрани карточку на бумаге или отдельном носителе — отдельно от key-file и его пароля.</div>
+          <div class="kc-note" id="optout-note" style="display:none">Храни ОТДЕЛЬНО от горячего: бумага, сейф, другое устройство. Если вор получит оба — защита не сработает.</div>
+          <div id="card-tools">
+            <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">
+              <button class="btn btn-ghost" id="card-dl">Скачать карточку</button>
+              <button class="btn btn-ghost" id="card-print">Печать</button>
+            </div>
+            <label style="margin-top:10px;display:block">Подтверди, что сохранил: введи <b>последние 4 символа</b> тревожного ключа</label>
+            <input id="card-ack" autocomplete="off" maxlength="4" placeholder="····" style="width:110px;font-family:var(--mono)">
+          </div>
+          <label style="margin-top:12px;display:flex;gap:8px;align-items:center">
+            <input type="checkbox" id="card-optout" style="width:auto;margin:0"> <span class="hint" style="margin:0">хранить тревожный ключ в key-file (удобнее — но файл становится единственной точкой отказа)</span>
+          </label>
+        </div>
+        <div class="keycard">
+          <div class="kc-role"><span class="dot"></span>Ключ закладки — временный, для помещения монет в сейф</div>
+          <code id="k-fund"></code>
+          <div class="kc-note">Нужен один раз на шаге 3. Дальше не важен.</div>
+        </div>
+        <div id="heir-block" style="display:none">
+          <label>Адрес наследника (kaspa:q…) — кто наследует, если перестанешь отмечаться</label>
+          <input type="text" id="heir-addr" autocomplete="off">
+          <label>Email наследника (опц.) — уведомим его, когда откроется окно наследования</label>
+          <input type="email" id="heir-mail" autocomplete="off" placeholder="naslednik@example.com">
+        </div>
+        <div class="kv" style="margin-top:14px"><span class="k">Адрес сейфа</span><span class="v ok" id="v-addr"></span></div>
+        <div style="margin-top:16px;display:flex;gap:12px;flex-wrap:wrap">
+          <button class="btn btn-ghost" id="regen">Перековать ключи</button>
+        </div>
+        <div style="margin-top:16px"><button class="btn btn-kaspa" id="b2">Дальше: заложить монеты</button></div>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="step" data-n="3" id="st3">
+      <h3>Закладка монет</h3>
+      <div class="body">
+        <p class="hint">Отправь KAS с любого кошелька на адрес закладки. Когда придёт — жми «Заложить в сейф», браузер соберёт и подпишет ончейн-контракт.</p>
+        <div class="note"><b>Чей это адрес? Твой.</b> Ключ адреса закладки только что создан в этом браузере и сохранён в твоём мастер key-file — у нас доступа к этим монетам нет. Они просто ждут здесь, пока ты не нажмёшь «Заложить в сейф»: в этот момент твой браузер сам соберёт и подпишет контракт сейфа. Ковенант нельзя создать обычным переводом — поэтому и нужен этот шаг (и поэтому же никогда не отправляй KAS напрямую на адрес сейфа).</div>
+        <label>Адрес закладки (отправляй сюда)</label>
+        <div class="addr"><code id="f-addr"></code><button id="f-copy">копировать</button></div>
+        <div class="row wrap" style="display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap">
+          <input id="fw-amt" placeholder="KAS" inputmode="decimal" aria-label="Сумма в KAS" style="width:150px">
+          <button class="btn btn-ghost" id="fw-btn">Пополнить из desk-кошелька</button>
+          <span id="fw-note" class="hint" style="margin:0;display:none"></span>
+        </div>
+        <div class="qr" id="f-qr"></div>
+        <p class="hint" style="margin-top:8px">🔑 Приватный ключ этого адреса — у тебя: он в твоём мастер key-file (профиль в Деске).</p>
+        <div class="kv" style="margin-top:14px"><span class="k">Получено</span><span class="v" id="f-recv">ожидаем перевод…</span></div>
+        <div id="swap-widget" style="margin-top:16px"></div>
+        <div class="note" id="beta-warn" style="display:none"></div>
+        <div style="margin-top:14px"><button class="btn btn-kaspa" id="b3" disabled>Заложить в сейф</button></div>
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="step" data-n="4" id="st4">
+      <h3>Сейф закрыт. Подключи алерты</h3>
+      <div class="body">
+        <div style="display:flex;gap:26px;align-items:center;flex-wrap:wrap;padding-bottom:26px">
+          <div class="coin" id="done-coin" style="--coin-size:150px"></div>
+          <div style="flex:1;min-width:260px">
+            <div class="kv"><span class="k">В сейфе</span><span class="v ok" id="d-amount"></span></div>
+            <div class="kv"><span class="k">Транзакция</span><span class="v" id="d-txid"></span></div>
+            <div class="kv"><span class="k">Адрес сейфа</span><span class="v" id="d-addr"></span></div>
+          </div>
+        </div>
+        <p class="hint">Telegram пришлёт «🚨 начат вывод» в ту же секунду, как тронут сейф — с кнопкой отмены. Алерты — 100 KAS/год, первые 30 дней бесплатно.</p>
+        <div id="tg-block" style="margin-top:12px">
+          <button class="btn btn-kaspa" id="tg-btn">Получить код для Telegram</button>
+          <div id="tg-out" style="display:none;margin-top:12px">
+            <div class="kv"><span class="k">Code</span><span class="v mono" id="tg-code" style="font-size:20px;letter-spacing:.2em"></span></div>
+            <p class="hint" style="margin-top:8px">Открой <a id="tg-link" target="_blank" rel="noopener">бота</a> и отправь <span class="mono">/start CODE</span>.</p>
+          </div>
+        </div>
+        <!-- Оплата подписки — В КЛИК с desk-кошелька (замечание Майка 09.07): адрес/QR/copy
+             убраны, платить копипастой больше не нужно. Нет KAS — свап-виджет кошелька ниже. -->
+        <div id="sub-offer" style="display:none;margin-top:16px">
+          <div class="kv"><span class="k">Мониторинг</span><span class="v ok">первые 30 дней бесплатно — уже включён</span></div>
+          <p class="hint">Оставить после пробного — по желанию: оплати <b><span class="sub-price">100</span> KAS</b> с desk-кошелька, и год добавится автоматически. Сейф работает и без этого — просто не будет алертов.</p>
+          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:10px">
+            <button class="btn btn-kaspa" id="sub-pay-btn">Оплатить <span class="sub-price">100</span> KAS с desk-кошелька</button>
+            <span id="sub-paid" class="hint" style="margin:0;display:none"></span>
+          </div>
+          <div id="sub-swap" style="margin-top:12px"></div>
+        </div>
+        <div style="margin-top:22px"><a class="btn btn-ghost" href="/ru/manage.html">Открыть панель сейфа →</a></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer><div class="row wrap"><a class="foot-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="OfficeForge"><img src="/assets/logo.png" alt="OfficeForge"></a><span>Kaspa Safe · non-custodial beta · построен ИИ-офисом <a href="https://officeforge.co">OfficeForge</a> · фидбэк: kaspa@officeforge.co · <a href="/ru/privacy.html">Приватность</a></span></div></footer>
+</div>
+
+<script type="module">
+import { boot, core, net, delayOptions, inheritOptions, daaToHuman, unitToDaa, DELAY_MIN, WILL_DELAY, DELAY_MAX, MO, INHERIT_MIN, INHERIT_MAX, api, utxosRaw, utxosSum, submitTx,
+         saveVault, loadVaults, genToken, L, $, kas, copyBtn, showErr, qrInto, renderCoin } from '/assets/app.js?v=15';
+import { mountSwapWidget } from '/assets/swap-widget.js?v=3';
+import { requireUnlock, confirmPassword } from '/assets/lock-ui.js';
+import * as session from '/assets/session.js';
+import { fundTargetFromWallet, walletBalance } from '/assets/wallet.js';
+import { alertBox } from '/assets/dialog.js';
+
+let keys = null, delay = 0, inheritDelay = 0, autoInherit = true, heirPk = '', vaultAddr = '', fundAddr = '', token = genToken(), pollTimer = null, fundRaw = '[]', derivIndex = null;
+let swapMounted = false; // SimpleSwap fund-in виджет монтируется один раз за визард (см. deal.html)
+const err = $('err');
+const step = (n, on) => { $('st'+n).classList.toggle('active', on === 'a'); $('st'+n).classList.toggle('done', on === 'd'); };
+// единый конфиг сейфа для wasm-ядра
+// fee_budget фиксируется ЯВНО на момент создания (дефолт 1M); при будущем бампе дефолта
+// этот сейф пересчитает адрес по своему сохранённому значению.
+const FEE_BUDGET = 1000000;
+const cfg = () => JSON.stringify({ hot_pk: keys.hot_pk, alarm_pk: keys.alarm_pk, delay, heir_pk: heirPk, inherit_delay: inheritDelay, auto_inherit: autoInherit, fee_budget: FEE_BUDGET });
+// «режим завещания»: выбран пресет ниже UI-минимума. ДО init-блока — updateDelayInfo() зовётся оттуда (TDZ).
+const willMode = () => net() === 'mainnet' && $('delay').value === String(WILL_DELAY);
+// Режим завещания БЕЗ наследника = горячий кошелёк с лишними шагами (ни анти-кражи, ни наследования) —
+// наследование в этом режиме обязательно: «выкл» дизейблится, при входе в режим ставим 12 месяцев.
+function applyWillInherit() {
+  const isel = $('inherit'), off = isel.querySelector('option[value="0"]');
+  if (willMode()) {
+    if (currentInherit() === 0) { isel.value = String(12 * MO); $('inherit-custom').style.display = 'none'; }
+    off.disabled = true;
+  } else off.disabled = false;
+  updateInheritInfo(); updateInheritMode();
+}
+
+try {
+  const info = await boot();
+  await requireUnlock(info.network);
+  const sel = $('delay');
+  for (const o of delayOptions()) sel.insertAdjacentHTML('beforeend', `<option value="${o.daa}">${o.label}</option>`);
+  sel.insertAdjacentHTML('beforeend', `<option value="custom">${L('delay_custom')}</option>`);
+  if (info.network === 'mainnet') sel.value = String(24 * 36000);
+  $('delay-unit').options[0].text = L('u_hours');
+  $('delay-unit').options[1].text = L('u_days');
+  const isel = $('inherit');
+  for (const o of inheritOptions()) isel.insertAdjacentHTML('beforeend', `<option value="${o.daa}">${o.label}</option>`);
+  isel.insertAdjacentHTML('beforeend', `<option value="custom">${L('delay_custom')}</option>`);
+  $('inherit-unit').options[0].text = L('u_months');
+  $('inherit-unit').options[1].text = L('u_days');
+  $('ac-label').textContent = L('autocomplete_label');
+  updateDelayInfo();
+  updateInheritInfo();
+  offerDraftResume();
+} catch (e) { showErr(err, e); }
+
+// ── незавершённые сейфы: ключи выкованы (шаг 2 пройден), но средства не заложены —
+// профиль хранит черновик (draft:true, пишется на b2), отсюда можно продолжить шаг 3 ──
+function offerDraftResume() {
+  const drafts = loadVaults().filter((v) => v.draft && v.network === net() && v.funding_pk);
+  if (!drafts.length) return;
+  const box = document.createElement('div');
+  box.className = 'note'; box.id = 'resume-note'; box.style.marginTop = '16px';
+  box.innerHTML = '<b>Незавершённый сейф.</b> Ключи выкованы, но средства ещё не заложены.';
+  for (const d of drafts) {
+    const row = document.createElement('div');
+    row.className = 'row wrap'; row.style.cssText = 'display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap';
+    const lbl = document.createElement('span');
+    lbl.className = 'mono'; lbl.textContent = d.vault_addr.slice(0, 18) + '…' + d.vault_addr.slice(-6);
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-kaspa'; btn.textContent = 'Продолжить финансирование';
+    btn.onclick = () => resumeDraft(d);
+    row.appendChild(lbl); row.appendChild(btn); box.appendChild(row);
+  }
+  err.parentNode.insertBefore(box, err.nextSibling);
+}
+function resumeDraft(d) {
+  keys = { hot_sk: d.hot_sk, hot_pk: d.hot_pk, alarm_sk: d.alarm_sk, alarm_pk: d.alarm_pk,
+           funding_sk: d.funding_sk, funding_pk: d.funding_pk };
+  // модель хранения тревожного — из черновика: карточный сейф не должен обрести alarm_sk на b3
+  $('card-optout').checked = !!d.alarm_sk;
+  delay = d.delay; inheritDelay = d.inherit_delay || 0; autoInherit = !!d.auto_inherit;
+  heirPk = d.heir_pk || ''; token = d.token; derivIndex = d.deriv_i ?? null;
+  $('autocomplete').checked = d.auto_complete !== false;
+  vaultAddr = core.vault_address(cfg(), net());
+  fundAddr = core.pubkey_to_address(keys.funding_pk, net());
+  if (vaultAddr !== d.vault_addr) { showErr(err, new Error('Черновик повреждён: адрес сейфа не сходится с его конфигом')); return; }
+  const rn = $('resume-note'); if (rn) rn.remove();
+  step(1, 'd'); step(2, 'd');
+  enterStep3();
+}
+
+// текущий срок наследования в DAA (0 = выключено)
+function currentInherit() {
+  const v = $('inherit').value;
+  if (v === '0') return 0;
+  if (v !== 'custom') return Number(v);
+  return unitToDaa(Number($('inherit-num').value), $('inherit-unit').value);
+}
+function updateInheritInfo() {
+  const info = $('inherit-info');
+  const isMain = net() === 'mainnet';
+  const v = currentInherit();
+  if (v === 0 && willMode()) { info.className = 'note alarm'; info.innerHTML = L('will_inherit_req'); $('b1').disabled = true; return; }
+  if (v === 0) { info.className = 'hint'; info.innerHTML = L('inh_default_hint'); $('b1').disabled = false; return; }
+  const min = isMain ? INHERIT_MIN : 1, max = isMain ? INHERIT_MAX : 1e12;
+  if (Number.isNaN(v) || v < min) { info.className = 'note alarm'; info.innerHTML = L('inh_min_err'); $('b1').disabled = true; return; }
+  if (v > max) { info.className = 'note alarm'; info.innerHTML = L('inh_max_err'); $('b1').disabled = true; return; }
+  info.className = 'hint'; info.innerHTML = L('inh_info')(daaToHuman(v));
+  updateDelayInfo(); // не перетереть блокировку от delay
+}
+function updateInheritMode() {
+  const on = currentInherit() > 0;
+  $('inherit-mode-block').style.display = on ? 'block' : 'none';
+  autoInherit = currentInherit() > 0 && $('inherit-mode').value === 'auto'; // выключено => false (канон: реестр/vaultctl/wasm-дефолт)
+  $('inherit-mode-info').innerHTML = autoInherit ? L('inh_mode_auto_info') : L('inh_mode_signed_info');
+}
+$('inherit').addEventListener('change', () => {
+  $('inherit-custom').style.display = $('inherit').value === 'custom' ? 'flex' : 'none';
+  updateInheritInfo(); updateInheritMode();
+});
+$('inherit-num').addEventListener('input', () => { updateInheritInfo(); updateInheritMode(); });
+$('inherit-unit').addEventListener('change', () => { updateInheritInfo(); updateInheritMode(); });
+$('inherit-mode').addEventListener('change', updateInheritMode);
+updateInheritMode();
+
+// текущее окно отмены в DAA — из пресета либо из «Своё значение»
+function currentDelay() {
+  const v = $('delay').value;
+  if (v !== 'custom') return Number(v);
+  return unitToDaa(Number($('delay-num').value), $('delay-unit').value);
+}
+// живой инфо-блок под пикером: заморозка на N + рекомендация + предупреждения
+function updateDelayInfo() {
+  const info = $('delay-info');
+  const isMain = net() === 'mainnet';
+  const min = isMain ? DELAY_MIN : 1, max = isMain ? DELAY_MAX : 1e12;
+  const d = currentDelay();
+  // Пресет «режим завещания» — единственный путь ниже UI-минимума (кастомный ввод <1ч остаётся запрещён):
+  // выбор осознанный, поэтому вместо ошибки — жирный дисклеймер, кнопка не блокируется.
+  if (willMode()) { info.className = 'note alarm'; info.innerHTML = L('will_warn'); $('b1').disabled = false; return; }
+  if (Number.isNaN(d) || d < min) { info.className = 'note alarm'; info.innerHTML = L('delay_min_err'); $('b1').disabled = true; return; }
+  if (d > max) { info.className = 'note alarm'; info.innerHTML = L('delay_max_err'); $('b1').disabled = true; return; }
+  $('b1').disabled = false;
+  let html = L('frozen_for')(daaToHuman(d));
+  if (isMain) {
+    html += '<br>' + L('rec_general');
+    const h = d / 36000;
+    if (h < 6) html += '<br>⚠ ' + L('warn_short');
+    if (h > 14 * 24) html += '<br>⚠ ' + L('warn_long');
+  }
+  info.className = 'note';
+  info.innerHTML = html;
+}
+$('delay').addEventListener('change', () => {
+  $('delay-custom').style.display = $('delay').value === 'custom' ? 'flex' : 'none';
+  applyWillInherit();
+  updateDelayInfo();
+});
+$('delay-num').addEventListener('input', updateDelayInfo);
+$('delay-unit').addEventListener('change', updateDelayInfo);
+
+const cardMode = () => !$('card-optout').checked;
+function genKeys() {
+  // Профиль v3: ключи и owner-token деривируются из мастер-seed — сейф с индексом N
+  // восстановим из ЛЮБОГО экспорта бэкапа, даже сделанного до его создания.
+  // Regen сжигает индекс (новый N → новые ключи), дырки в индексах закрывает gap-scan restore.
+  // ТРЕВОЖНЫЙ — исключение (карточная модель): генерируется СЛУЧАЙНО, не из seed — иначе
+  // файл+пароль восстанавливали бы его деривацией и «не хранить в профиле» было бы иллюзией.
+  // Opt-out (галка ниже) возвращает старую модель: alarm деривирован и лежит в профиле.
+  const dv = session.takeDeriv('vault');
+  if (dv) {
+    const dk = (dom) => JSON.parse(core.derive_keys(dv.seed, dom, dv.index));
+    const hot = dk('vault/hot'), fund = dk('vault/funding');
+    const alarm = cardMode() ? (() => { const r = JSON.parse(core.gen_keys()); return { sk: r.alarm_sk, pk: r.alarm_pk }; })() : dk('vault/alarm');
+    keys = { hot_sk: hot.sk, hot_pk: hot.pk, alarm_sk: alarm.sk, alarm_pk: alarm.pk,
+             funding_sk: fund.sk, funding_pk: fund.pk };
+    token = core.derive_token(dv.seed, 'vault', dv.index);
+    derivIndex = dv.index;
+  } else {
+    keys = JSON.parse(core.gen_keys()); // профиль до-v3 без seed — случайные, как раньше
+    derivIndex = null;
+  }
+  $('k-hot').textContent = keys.hot_sk;
+  $('k-alarm').textContent = keys.alarm_sk;
+  $('k-fund').textContent = keys.funding_sk;
+  $('card-ack').value = '';                       // новые ключи = новая карточка, ack заново
+  $('card-tools').style.display = cardMode() ? '' : 'none';
+  $('card-note').style.display = cardMode() ? '' : 'none';
+  $('optout-note').style.display = cardMode() ? 'none' : '';
+  recomputeAddr();
+}
+
+// текст тревожной карточки — физический артефакт, единственная копия ключа в карточном режиме
+function alarmCardText() {
+  return ['KASPA SAFE — ТРЕВОЖНАЯ КАРТОЧКА (ALARM CARD)', '',
+    `Сеть:            ${net()}`,
+    `Адрес сейфа:     ${vaultAddr}`,
+    `Тревожный ключ:  ${keys.alarm_sk}`,
+    `Тревожный pubkey: ${keys.alarm_pk}`,
+    `Создана:         ${new Date().toISOString().slice(0, 10)}`, '',
+    'Этот ключ отменяет любой вывод из сейфа (kaspaforge.org/ru/recover.html).',
+    'Вместе с горячим ключом он двигает сейф МГНОВЕННО (migrate).',
+    'Храни карточку отдельно от key-file и его пароля.',
+    'В key-file этот ключ НЕ сохранён — карточка и есть единственная копия.'].join('\n');
+}
+$('card-dl').onclick = () => {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([alarmCardText()], { type: 'text/plain' }));
+  a.download = `kaspa-safe-alarm-card-${vaultAddr.slice(-8)}.txt`;
+  a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+};
+$('card-print').onclick = () => {
+  const w = window.open('', '_blank');
+  if (!w) { showErr(err, new Error('Браузер заблокировал окно печати — используй «Скачать карточку».')); return; }
+  w.document.write('<pre style="font:14px/1.6 monospace;white-space:pre-wrap">' + alarmCardText().replace(/</g, '&lt;') + '</pre>');
+  w.document.close(); w.print();
+};
+$('card-optout').onchange = () => { syncHeir(); genKeys(); }; // смена модели = новые ключи (см. genKeys)
+function recomputeAddr() {
+  vaultAddr = core.vault_address(cfg(), net());
+  fundAddr = core.pubkey_to_address(keys.funding_pk, net());
+  $('v-addr').textContent = vaultAddr;
+}
+
+$('b1').onclick = () => {
+  delay = currentDelay();
+  if (Number.isNaN(delay) || (delay < (net() === 'mainnet' ? DELAY_MIN : 1) && !willMode())) { updateDelayInfo(); return; }
+  inheritDelay = currentInherit();
+  if (willMode() && inheritDelay === 0) { updateInheritInfo(); return; }
+  if (inheritDelay > 0) {
+    const min = net() === 'mainnet' ? INHERIT_MIN : 1, max = net() === 'mainnet' ? INHERIT_MAX : 1e12;
+    if (Number.isNaN(inheritDelay) || inheritDelay < min || inheritDelay > max) { updateInheritInfo(); return; }
+  }
+  autoInherit = inheritDelay > 0 && $('inherit-mode').value === 'auto'; // выключено => false (канон адреса: реестр/vaultctl/wasm/manage-дефолт)
+  $('heir-block').style.display = inheritDelay > 0 ? 'block' : 'none';
+  heirPk = '';
+  genKeys();
+  step(1,'d'); step(2,'a');
+};
+$('regen').onclick = () => { syncHeir(); genKeys(); };
+
+function syncHeir() {
+  if (inheritDelay > 0) {
+    const a = $('heir-addr').value.trim();
+    if (a) { try { heirPk = core.address_to_pubkey(a); } catch (e) { showErr(err, e); heirPk = ''; } }
+    else heirPk = '';
+  } else heirPk = '';
+}
+$('heir-addr') && ($('heir-addr').onchange = () => { syncHeir(); recomputeAddr(); });
+
+// Запись сейфа для профиля. Карточный режим (дефолт): alarm_sk в профиль НЕ пишется —
+// его единственная копия у владельца на карточке; в записи только alarm_pk + флаг alarm_card.
+function vaultRecord(extra) {
+  const rec = { network: net(), vault_addr: vaultAddr, hot_pk: keys.hot_pk, alarm_pk: keys.alarm_pk,
+    hot_sk: keys.hot_sk, funding_sk: keys.funding_sk, funding_pk: keys.funding_pk,
+    delay, heir_pk: heirPk, inherit_delay: inheritDelay, auto_inherit: autoInherit,
+    fee_budget: FEE_BUDGET, token, deriv_i: derivIndex, ...extra };
+  if (cardMode()) rec.alarm_card = true; else rec.alarm_sk = keys.alarm_sk;
+  return rec;
+}
+
+$('b2').onclick = async () => {
+  syncHeir();
+  if (inheritDelay > 0 && !heirPk) { showErr(err, new Error(L('heir_err'))); return; }
+  // ack-гейт карточки: галочки мало — ввод последних 4 символов доказывает, что ключ
+  // реально сохранён (дальше его никто никогда не покажет)
+  if (cardMode() && $('card-ack').value.trim().toLowerCase() !== keys.alarm_sk.slice(-4).toLowerCase()) {
+    showErr(err, new Error('Сначала сохрани тревожную карточку: введи последние 4 символа тревожного ключа.'));
+    return;
+  }
+  recomputeAddr();
+  // Черновик в профиль УЖЕ ЗДЕСЬ (не только на «Заложить в сейф»): ключи выкованы и признаны
+  // (ack), уйдёт пользователь без финансирования — сейф не пропадёт из деска, шаг 3 возобновим
+  // (offerDraftResume выше). Финальный save в b3 перепишет ту же запись (merge по vault_addr).
+  saveVault(vaultRecord({ auto_complete: $('autocomplete').checked, draft: true }));
+  const rn = $('resume-note'); if (rn) rn.remove();     // черновик теперь этот — старый оффер неактуален
+  step(2,'d');
+  await enterStep3();
+};
+
+async function enterStep3() {
+  step(3,'a');
+  $('f-addr').textContent = fundAddr;
+  copyBtn($('f-copy'), () => fundAddr);
+  qrInto($('f-qr'), fundAddr);
+  $('fw-btn').onclick = async () => {
+    try {
+      const amt = Math.round(parseFloat($('fw-amt').value) * 1e8);
+      if (!(amt > 0)) { await alertBox('Укажи сумму'); return; }
+      const w = session.getProfile().wallet;
+      if (!w) { await alertBox('В профиле нет кошелька', { alarm: true }); return; }
+      // баланс — до пароля: человеческое сообщение вместо ошибки ядра после ввода
+      const bal = await walletBalance(w.addr);
+      if (amt > bal) { await alertBox(`Это больше баланса кошелька (${kas(bal)}).`, { alarm: true }); return; }
+      // конфирм не слепой: сумма в модалке (тот же паттерн, что Send деска)
+      if (!await confirmPassword('Пополнение этого сейфа из desk-кошелька.', {
+        context: `<b style="font-family:var(--mono);color:var(--kaspa)">${kas(amt)}</b> → адрес закладки этого сейфа` })) return;
+      $('fw-btn').disabled = true;
+      await fundTargetFromWallet(w, fundAddr, amt, net());
+      const n = $('fw-note'); n.style.display = ''; n.innerHTML = '<span style="color:var(--kaspa)">✓ Отправлено</span> — скоро появится в «Получено» ниже.';
+      $('fw-amt').value = '';
+    } catch (e) { await alertBox((e && e.message) || 'Ошибка', { alarm: true }); }
+    $('fw-btn').disabled = false;
+  };
+  // Регистрируем сейф на сервере УЖЕ ЗДЕСЬ (не только при "Lock into vault" на шаге 3) — иначе
+  // owner_ok() в swap_api.rs::create() не находит vault_addr+token и своп-виджет всегда 400-ится
+  // "не найдено или неверный токен" (кросс-таск баг: виджет монтируется на шаге 3-funding, а
+  // регистрация раньше была только в $('b3').onclick на лок). register_vault на сервере — UPDATE
+  // при повторе того же vault_addr+token (идемпотентно), так что $('b3').onclick ниже регистрирует
+  // повторно с финальным auto_complete перед локом — это ожидаемо, конфликта нет.
+  try {
+    await api('/api/safe/vaults', { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ vault_addr: vaultAddr, hot_pk: keys.hot_pk, alarm_pk: keys.alarm_pk, delay, token, heir_set: inheritDelay > 0, inherit_delay: inheritDelay, heir_pk: heirPk, auto_complete: $('autocomplete').checked, auto_inherit: autoInherit, fee_budget: FEE_BUDGET }) });
+  } catch (e) { showErr(err, e); }
+  if (!swapMounted) {
+    swapMounted = true;
+    mountSwapWidget({ container: $('swap-widget'), api, kas, kind: 'safe', target: vaultAddr,
+      token, fundAddr, lang: document.documentElement.lang });
+  }
+  pollTimer = setInterval(async () => {
+    try {
+      fundRaw = await utxosRaw(fundAddr);
+      const sum = utxosSum(fundRaw);
+      if (sum > 0) {
+        $('f-recv').textContent = kas(sum);
+        $('f-recv').className = 'v ok';
+        $('b3').disabled = false;
+        const w = $('beta-warn');
+        const msgs = [];
+        if (sum > 5000e8) msgs.push(L('over_cap'));
+        // крупная сумма при коротком окне отмены
+        if (net() === 'mainnet' && sum > 10000e8 && delay < 24 * 36000) msgs.push('⚠ ' + L('fund_high_delay'));
+        if (msgs.length) { w.style.display = 'block'; w.innerHTML = msgs.join('<br>'); }
+        else w.style.display = 'none';
+      }
+    } catch {}
+  }, 4000);
+};
+
+$('b3').onclick = async () => {
+  try {
+    $('b3').disabled = true; $('b3').textContent = L('forging');
+    const built = core.build_fund(cfg(), keys.funding_sk, fundRaw, net());
+    const parsed = JSON.parse(built);
+    const { txid } = await submitTx(built);
+    clearInterval(pollTimer);
+    const autoComplete = $('autocomplete').checked;
+    await api('/api/safe/vaults', { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ vault_addr: vaultAddr, hot_pk: keys.hot_pk, alarm_pk: keys.alarm_pk, delay, token, heir_set: inheritDelay > 0, inherit_delay: inheritDelay, heir_pk: heirPk, auto_complete: autoComplete, auto_inherit: autoInherit, fee_budget: FEE_BUDGET }) });
+    // контакт наследника (email-уведомление при открытии окна) — необязательный, сбой не блокирует
+    const heirMail = inheritDelay > 0 && $('heir-mail') ? $('heir-mail').value.trim() : '';
+    if (heirMail) await api('/api/safe/heir-contact', { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ vault_addr: vaultAddr, token, contact: heirMail }) }).catch(() => {});
+    saveVault(vaultRecord({ covenant_id: parsed.covenant_id, auto_complete: autoComplete, draft: false }));
+    step(3,'d'); step(4,'a');
+    try {
+      const s = await api(`/api/safe/sub-status?vault_addr=${encodeURIComponent(vaultAddr)}&token=${token}`);
+      if (s.sub_addr) {
+        $('sub-offer').style.display = 'block';
+        document.querySelectorAll('.sub-price').forEach(el => { el.textContent = s.price_kas; });
+        wireSubPay(s);
+      }
+    } catch {}
+    renderCoin($('done-coin'), 'vault', 0, L('in_vault'));
+    $('d-amount').textContent = kas(parsed.amount);
+    $('d-txid').textContent = txid;
+    $('d-addr').textContent = vaultAddr;
+  } catch (e) { showErr(err, e); $('b3').disabled = false; $('b3').textContent = L('lock_btn'); }
+};
+
+// Оплата подписки В КЛИК с desk-кошелька + свап-виджет пополнения самого кошелька
+// (замечание Майка 09.07: адрес подписки с copy/QR убран — копипаста не нужна)
+function wireSubPay(s) {
+  $('sub-pay-btn').onclick = async () => {
+    const btn = $('sub-pay-btn');
+    try {
+      const w = session.getProfile().wallet;
+      if (!w) { await alertBox('В профиле нет кошелька', { alarm: true }); return; }
+      const price = Math.round(Number(s.price_kas) * 1e8);
+      const bal = await walletBalance(w.addr);
+      if (price > bal) { await alertBox(`На кошельке не хватает (${kas(bal)}). Пополни ниже через SimpleSwap — или с любого кошелька в Деске.`, { alarm: true }); return; }
+      if (!await confirmPassword('Оплата подписки на алерты с desk-кошелька.', {
+        context: `<b style="font-family:var(--mono);color:var(--kaspa)">${kas(price)}</b> → подписка на алерты, +1 год` })) return;
+      btn.disabled = true; btn.textContent = 'Оплачиваем…';
+      await fundTargetFromWallet(w, s.sub_addr, price, net());
+      btn.style.display = 'none';
+      const ok = $('sub-paid'); ok.style.display = '';
+      ok.innerHTML = '<span style="color:var(--kaspa)">✓ Оплата отправлена</span> — год добавится автоматически после подтверждения.';
+    } catch (e) {
+      await alertBox((e && e.message) || 'Ошибка', { alarm: true });
+      btn.disabled = false; btn.textContent = `Оплатить ${s.price_kas} KAS с desk-кошелька`;
+    }
+  };
+  // «Нет KAS?» — тот же wallet-свап, что на деске: свопы пишутся в профиль, статус виден в деске
+  try {
+    const w = session.getProfile().wallet;
+    if (w) {
+      const swapToken = genToken();
+      mountSwapWidget({ container: $('sub-swap'), api, kas, kind: 'wallet', target: w.addr,
+        token: swapToken, fundAddr: w.addr, lang: document.documentElement.lang,
+        onCreated: (sw) => { try { const p = session.getProfile(); (p.swaps = p.swaps || []).push({ ...sw, token: swapToken }); session.commit(p); } catch {} } });
+    }
+  } catch {}
+}
+
+$('tg-btn').onclick = async () => {
+  try {
+    const r = await api(`/api/safe/tg-code?vault_addr=${encodeURIComponent(vaultAddr)}&token=${token}`);
+    $('tg-code').textContent = r.code;
+    $('tg-out').style.display = 'block';
+    if (r.bot) { $('tg-link').href = `https://t.me/${r.bot}?start=${r.code}`; $('tg-link').textContent = '@' + r.bot; }
+    else $('tg-link').textContent = L('bot_soon');
+  } catch (e) { showErr(err, e); }
+};
+</script>
+<script src="/assets/kaspa-widget.js?v=3" defer></script>
+<script>if("serviceWorker" in navigator&&/(^|\.)kaspaforge\.org$|(^|\.)officeforge\.co$/.test(location.hostname))navigator.serviceWorker.register("/sw.js");</script>
+</body>
+</html>
