@@ -279,7 +279,7 @@
   <p>Our payment gateway also relies on the DAG's fast UTXO confirmations. The gateway watcher polls <code>getUtxosByAddresses</code> and confirms payments based on blue-score depth — a configurable threshold, fast to settle because blocks arrive at roughly 10 per second.</p>
   <div class="callout">
     <div class="box">
-      <p>Fast confirmations and deterministic DAA-score time-locks are what make non-custodial vaults and P2P escrow contracts practical on Kaspa. If you want to see these mechanisms in action, <a class="ln" href="/create.html">create a vault</a> or explore a deal on <a class="ln" href="/escrow-index.html">Kaspa Escrow</a> — on-chain operations are free, and the <a class="ln" href="https://github.com/pcdoctormsk-ctrl/kaspa-safe">open-source tools</a> let you recover everything from a printed recovery sheet.</p>
+      <p>Fast confirmations and deterministic DAA-score time-locks are what make non-custodial vaults and P2P escrow contracts practical on Kaspa. If you want to see these mechanisms in action, <a class="ln" href="/create.html">create a vault</a> or explore a deal on <a class="ln" href="/escrow-index.html">Kaspa Escrow</a> — on-chain operations are free, and the <a class="ln" href="https://github.com/Kaspaforge/kaspaforge">open-source tools</a> let you recover everything from a printed recovery sheet.</p>
     </div>
     <a href="/create.html" class="btn-cta">Create a vault</a>
   </div>
@@ -289,7 +289,7 @@
   <p><b>Red blocks are second-class.</b> A transaction included in a red block is accepted, but red blocks don't contribute to blue-work security and receive reduced (or no) rewards. Miners in poorly connected geographies risk higher red rates — a mild centralization pressure, though far less severe than Bitcoin's orphan problem.</p>
   <p><b>DAA-score time-locks assume stable BPS.</b> Our covenant delays are specified in DAA units and resolved against a roughly constant block rate. A significant, sustained change in Kaspa's BPS would shift the wall-clock interpretation of these delays. At the current ~10 BPS, the mapping is straightforward — but it's an assumption, not a guarantee.</p>
   <p><b>Smart contract compute budgets are tight.</b> Kaspa's Toccata covenants operate under a compute budget (20 for standard vault transitions, 30 for migration paths, 40 for escrow contracts). This limits the complexity of on-chain logic — a deliberate design choice that keeps validation fast but restricts what covenants can express. The <a class="ln" href="https://wiki.kaspa.org/en/developers-knowledge-base">developers knowledge base</a> has further context on current opcode capabilities and the Toccata roadmap.</p>
-  <p><b>Kaspa Safe is in beta; the vault contract (v3) has not undergone an external security audit.</b> The v4 contract and audit are on the roadmap. The code is open-source and has self-tests against the node's VM, but open-source is not the same as audited. Use it with that understanding.</p>
+  <p><b>Kaspa Safe is in beta.</b> The vault contract (v3) is open-source and has self-tests against the node's VM. Treat it as beta software.</p>
   <p>The DAG gives Kaspa its speed. GHOSTDAG gives that speed a deterministic order. And that order — measured in DAA ticks, resolvable in seconds, enforceable on-chain — is what makes the Kaspa Forge stack work.</p>
 
     <div class="faqwrap">
@@ -316,7 +316,18 @@
   </article>
 </div>
 
-<footer><div class="row wrap"><a class="foot-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="OfficeForge"><img src="/assets/logo.png" alt="OfficeForge"></a><span>Kaspa Forge · non-custodial beta · <a href="https://officeforge.co">OfficeForge</a> · feedback: kaspa@officeforge.co · <a href="/privacy.html">Privacy</a></span></div></footer>
+<footer>
+  <div class="foot">
+    <span class="fb">
+      <img class="k" src="/assets/brand/emblem-flat-header.png" alt="" aria-hidden="true">
+      <span>© 2026 Kaspa Forge — built by the</span>
+      <a class="foot-ofs-logo" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="Visit OfficeForge"><img src="/assets/of-wordmark.png" alt="OfficeForge"></a>
+    </span>
+    <nav aria-label="Footer">
+      <a href="/safe.html">Safe</a><a href="/escrow-index.html">Escrow</a><a href="/market.html">Market</a><a href="/blog/">Blog</a><a href="/docs/">Docs</a><a href="/recover.html">Recovery</a><a href="https://github.com/Kaspaforge/kaspaforge" target="_blank" rel="noopener">GitHub</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><a href="/security.html">Security</a><a href="mailto:kaspa@officeforge.co">kaspa@officeforge.co</a>
+    </nav>
+  </div>
+</footer>
 </div>
 
 <script src="/assets/kaspa-widget.js?v=3" defer></script>

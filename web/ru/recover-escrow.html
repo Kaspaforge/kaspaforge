@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" href="/assets/icons-escrow/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/safe.css?v=14">
 <link rel="stylesheet" href="/assets/escrow.css?v=7">
-<script src="/assets/nav.js?v=5" defer></script>
+<script src="/assets/nav.js?v=7" defer></script>
 </head>
 <body>
 <div class="wrap">
@@ -46,14 +46,14 @@
     <div class="hint" style="flex:1;min-width:220px">Никогда не вводите ключи на похожих копиях. Чтобы просто <i>посмотреть</i> эскроу, ключи не нужны: вставьте адрес эскроу из recovery-листа в <span class="mono">kaspa.stream</span> — баланс и все транзакции публичны, видны без нас и без ключей.</div>
   </div>
 
-  <!-- BLOCK 0: мастер key-file (основной путь) -->
+  <!-- BLOCK 0: master key-file (primary path) -->
   <div class="plate" style="margin-top:28px;border-left:3px solid var(--kaspa)">
     <h2 style="font-size:20px">Восстановить из мастер key-file (простой способ)</h2>
     <p class="hint">Каждая сделка, которую вы создаёте или к которой присоединяетесь, автоматически сохраняется в один зашифрованный <b>мастер key-file</b> — ваш профиль Деска, вместе с сейфами и объявлениями. С любого устройства откройте свой <a href="/ru/desk.html"><b>Деск</b></a>, выберите <b>«Импорт / восстановить»</b> и загрузите мастер key-file (<span class="mono">.age</span>) с его паролем — эта сделка (и всё остальное) вернётся разом. Сделайте бэкап в Деске («Экспорт файла ключей») — этот один файл и есть ваше восстановление.</p>
     <p class="hint" style="margin-top:8px">Остался старый <span class="mono">.txt</span> recovery-лист с прежних времён, или нужно открыть всего одну сделку? Ручные шаги ниже по-прежнему работают.</p>
   </div>
 
-  <!-- BLOCK 1: устаревший путь — одна сделка / старый лист -->
+  <!-- BLOCK 1: legacy path — single deal / old sheet -->
   <div class="plate" style="margin-top:28px">
     <h2 style="font-size:20px">Открыть одну сделку по старому recovery-листу</h2>
     <p class="hint">Ваша сторона сделки не хранится в одном браузере — сама сделка живёт в блокчейне, а ключи — в старом recovery-листе (или в публичных данных из мастер key-file). Оттуда и восстанавливайте.</p>
@@ -99,7 +99,7 @@
   <!-- BLOCK 4 -->
   <div class="plate">
     <h2 style="font-size:20px">Если сайт недоступен — сделка всё равно в блокчейне</h2>
-    <p class="hint">Эскроу — публичный ковенант Kaspa, и контракт открыт: <a href="https://github.com/pcdoctormsk-ctrl/kaspa-safe" target="_blank" rel="noopener"><span class="mono">github.com/pcdoctormsk-ctrl/kaspa-safe</span></a> (Code → Download ZIP, чтобы держать копию). Что можно без нашего сайта уже сегодня:</p>
+    <p class="hint">Эскроу — публичный ковенант Kaspa, и контракт открыт: <a href="https://github.com/Kaspaforge/kaspaforge" target="_blank" rel="noopener"><span class="mono">github.com/Kaspaforge/kaspaforge</span></a> (Code → Download ZIP, чтобы держать копию). Что можно без нашего сайта уже сегодня:</p>
     <ul class="need">
       <li><b>Смотреть эскроу</b> — вставьте адрес эскроу в <span class="mono">kaspa.stream</span>; баланс и все движения публичны.</li>
       <li><b>Проверить контракт</b> — ковенант <span class="mono">escrow.sil</span> открыт: его правила исполняет ончейн консенсус Kaspa, независимо от нас.</li>
@@ -145,7 +145,28 @@
   </div>
 </div>
 
-<footer><div class="row wrap"><a class="foot-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="OfficeForge"><img src="/assets/logo.png" alt="OfficeForge"></a><span>Kaspa Гарант · некостодиальная бета · <a href="https://officeforge.co">OfficeForge</a> · связь: kaspa@officeforge.co · <a href="/ru/privacy-escrow.html">Приватность</a></span></div></footer>
+<footer>
+  <div class="foot">
+    <span class="fb">
+      <img class="k" src="/assets/brand/emblem-flat-header.png" alt="" aria-hidden="true">
+      <span>© 2026 Kaspa Forge — сделан ИИ-офисом</span>
+      <a class="foot-ofs-logo" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="Перейти на сайт OfficeForge"><img src="/assets/of-wordmark.png" alt="OfficeForge"></a>
+    </span>
+    <nav aria-label="Подвал">
+      <a href="/ru/safe.html">Сейф</a>
+      <a href="/ru/escrow-index.html">Гарант</a>
+      <a href="/ru/market.html">Маркет</a>
+      <a href="/ru/blog/">Блог</a>
+      <a href="/ru/docs/">Документы</a>
+      <a href="/ru/recover.html">Восстановление</a>
+      <a href="https://github.com/Kaspaforge/kaspaforge" target="_blank" rel="noopener">GitHub</a>
+      <a href="/ru/privacy.html">Приватность</a>
+      <a href="/ru/terms.html">Условия</a>
+      <a href="/ru/security.html">Безопасность</a>
+      <a href="mailto:kaspa@officeforge.co">kaspa@officeforge.co</a>
+    </nav>
+  </div>
+</footer>
 </div>
 
 <script>
@@ -154,7 +175,7 @@ document.getElementById('dl-checklist').addEventListener('click', function () {
     'KASPA ГАРАНТ — ЧЕК-ЛИСТ ВОССТАНОВЛЕНИЯ СДЕЛКИ',
     '================================================',
     'Настоящий сайт: kaspaforge.org  (ключи вводить только там)',
-    'Открытый код / контракт + инструмент арбитра: github.com/pcdoctormsk-ctrl/kaspa-safe',
+    'Открытый код / контракт + инструмент арбитра: github.com/Kaspaforge/kaspaforge',
     'Смотреть эскроу без ключей: адрес эскроу на kaspa.stream',
     '',
     'ОТКРЫТЬ СДЕЛКУ В НОВОМ БРАУЗЕРЕ:',
@@ -189,7 +210,7 @@ document.getElementById('dl-checklist').addEventListener('click', function () {
   a.click();
 });
 </script>
-<script src="/assets/kaspa-widget.js?v=3" defer></script>
+<script src="/assets/kaspa-widget.js?v=4" defer></script>
 <script>if("serviceWorker" in navigator&&/(^|\.)kaspaforge\.org$|(^|\.)officeforge\.co$/.test(location.hostname))navigator.serviceWorker.register("/sw-escrow.js");</script>
 </body>
 </html>

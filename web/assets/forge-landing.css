@@ -41,9 +41,6 @@ p{margin:0}
 .brand:hover .brand-lockup{filter:drop-shadow(0 0 9px rgba(0,193,175,.55))}
 .brand-name{font-family:var(--disp);font-weight:500;font-size:19px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
 .brand-name b{color:var(--kaspa);font-weight:700}
-.by-ofs{border-left:1px solid var(--bd);padding-left:14px;display:flex;align-items:center}
-.by-ofs img{height:15px;width:auto;opacity:.7;transition:opacity .18s ease}
-.by-ofs:hover img{opacity:1}
 .top nav{margin-left:auto;display:flex;align-items:center;gap:clamp(10px,2.5vw,26px)}
 .top nav>a{font-family:var(--mono);font-size:12.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--ash)}
 .top nav>a:hover{color:var(--kaspa-soft)}
@@ -311,7 +308,10 @@ h2{font-size:clamp(1.7rem,3.4vw,2.5rem);font-weight:600;margin-top:20px;max-widt
 footer{border-top:1px solid var(--bd-soft);background:var(--steel);padding:30px 0 36px}
 .foot{display:flex;flex-wrap:wrap;gap:14px 30px;align-items:center;font-size:13px;color:var(--ash2)}
 .foot .fb{display:flex;align-items:center;gap:9px;color:var(--ash)}
-.foot .fb .k{width:20px;height:20px}
+.foot .fb .k{width:auto;height:24px;object-fit:contain}
+.foot-ofs-logo{display:flex;align-items:center;flex:none}
+.foot-ofs-logo img{display:block;width:auto;height:18px;opacity:.72;transition:opacity .18s ease}
+.foot-ofs-logo:hover img{opacity:1}
 .foot nav{margin-left:auto;display:flex;flex-wrap:wrap;gap:8px 22px}
 .foot nav a{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ash2);
   display:inline-block;padding:8px 0}
@@ -333,7 +333,6 @@ footer{border-top:1px solid var(--bd-soft);background:var(--steel);padding:30px 
   .claims{grid-template-columns:1fr}
 }
 @media (max-width:640px){
-  .by-ofs{display:none}
   .top nav>a:not(.btn){display:none}
   .kv{flex-direction:column;gap:3px;align-items:flex-start}
   .kv .v{text-align:left}
@@ -349,4 +348,5 @@ footer{border-top:1px solid var(--bd-soft);background:var(--steel);padding:30px 
   .fee-tbl td:last-child{white-space:normal}
   /* the floating "Ask Sara" widget was covering the footer's last line */
   footer{padding-bottom:96px}
+  .foot .fb{flex-basis:100%;flex-wrap:wrap}
 }

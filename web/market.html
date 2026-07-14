@@ -33,7 +33,7 @@
 ]}
 </script>
 <link rel="stylesheet" href="/assets/safe.css?v=14">
-<script src="/assets/nav.js?v=5" defer></script>
+<script src="/assets/nav.js?v=7" defer></script>
 <style>
 /* market.html: page-scoped, doesn't touch safe.css (shared by ~15 pages), modeled on
    desk.html — .row.wrap here is not the footer; footer .row (safe.css) is untouched. */
@@ -68,6 +68,10 @@ section .row.wrap{display:flex;flex-wrap:wrap;align-items:center}
 .mk-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .mk-cat{font-size:12px}
 .mk-id{font-family:var(--mono);font-size:11px;color:var(--ash2)}
+.mk-trust{display:flex;flex-wrap:wrap;gap:5px;margin-top:1px}
+.mk-trust span{display:inline-flex;align-items:center;min-height:23px;padding:3px 6px;border:1px solid var(--bd-soft);
+  border-radius:999px;background:var(--iron);color:var(--ash);font:500 10.5px/1.25 var(--body)}
+.mk-trust .protected{color:var(--kaspa);border-color:rgba(0,193,175,.3);background:rgba(0,193,175,.055)}
 /* price — mono + --kaspa (DESIGN.md canon "fees and amounts"; used to be --ingot against it) */
 .mk-price{margin-top:auto;font-family:var(--mono);font-size:15px;font-weight:700;color:var(--kaspa)}
 
@@ -105,6 +109,9 @@ section .row.wrap{display:flex;flex-wrap:wrap;align-items:center}
    the price/Buy zone — feedback 2026-07-09) */
 @media (max-width:520px){
   #list{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+  .mk-body{padding:11px 10px 12px}.mk-title{font-size:14px;line-height:1.4}
+  .mk-cat{font-size:12.5px}.mk-id{font-size:11.5px}.type-tag{font-size:11px;letter-spacing:.055em}
+  .mk-trust span{font-size:11px;line-height:1.3}.mk-price{font-size:15.5px}
   .wrap{padding-bottom:76px}
 }
 /* lightbox: paging and explicit close (all 3 photos are browsable, not just one zoomed) */
@@ -190,7 +197,7 @@ section .row.wrap{display:flex;flex-wrap:wrap;align-items:center}
     </div>
     <div class="path">
       <div class="glyph">3 · Deliver, release — or dispute</div>
-      <p>The seller delivers, you release — they’re paid. Something wrong — open a dispute: an AI mediator proposes an outcome in minutes, a human arbiter has the final word. Buyer silent — auto-release protects the seller. In every path the covenant pays only the buyer or the seller.</p>
+      <p>The seller delivers, you release — they’re paid. The <b>dispute window</b> is your budget for delivery and inspection: it starts when the escrow is funded, and any time before it closes you can open a dispute — normal buyer protection, not an emergency (physical goods default to a 7-day window, up to 30 days for international shipping). Received it while a dispute is open? Just release. Buyer silent — auto-release protects the seller. In every path the covenant pays only the buyer or the seller.</p>
     </div>
   </div>
 
@@ -218,15 +225,31 @@ section .row.wrap{display:flex;flex-wrap:wrap;align-items:center}
     </details>
     <details>
       <summary>What if the seller never ships?</summary>
-      <p>That’s what the escrow is for. Open a dispute within the listing’s dispute window: both sides state their claims, the deal chat becomes the case file, an AI mediator proposes an outcome and a human arbiter backs it. The seller never had your money — it was locked in the covenant all along.</p>
+      <p>That’s what the escrow is for. The dispute window is sized for delivery plus inspection — the timer starts when you fund the escrow, and the seller picks a preset that fits the shipping distance (up to 30 days for international parcels). Open a dispute any time before it closes: both sides state their claims, the deal chat becomes the case file, an AI mediator proposes an outcome and a human arbiter backs it. If the goods arrive while your dispute is open, just press Release. The seller never had your money — it was locked in the covenant all along.</p>
     </details>
   </div>
 </section>
 
 <footer>
-  <div class="row">
-    <a class="foot-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="OfficeForge"><img src="/assets/logo.png" alt="OfficeForge"></a>
-    <span>Kaspa Marketplace — part of <a href="/">Kaspa Forge</a>, built by the <a href="https://officeforge.co" target="_blank" rel="noopener">OfficeForge</a> AI office · every deal runs on <a href="/escrow-index.html">Kaspa Escrow</a> covenants · feedback: kaspa@officeforge.co · <a href="/docs/">Docs</a> · <a href="/blog/">Blog</a> · <a href="/privacy-escrow.html">Privacy</a></span>
+  <div class="foot">
+    <span class="fb">
+      <img class="k" src="/assets/brand/emblem-flat-header.png" alt="" aria-hidden="true">
+      <span>© 2026 Kaspa Forge — built by the</span>
+      <a class="foot-ofs-logo" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="Visit OfficeForge"><img src="/assets/of-wordmark.png" alt="OfficeForge"></a>
+    </span>
+    <nav aria-label="Footer">
+      <a href="/safe.html">Safe</a>
+      <a href="/escrow-index.html">Escrow</a>
+      <a href="/market.html">Market</a>
+      <a href="/blog/">Blog</a>
+      <a href="/docs/">Docs</a>
+      <a href="/recover.html">Recovery</a>
+      <a href="https://github.com/Kaspaforge/kaspaforge" target="_blank" rel="noopener">GitHub</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+      <a href="/security.html">Security</a>
+      <a href="mailto:kaspa@officeforge.co">kaspa@officeforge.co</a>
+    </nav>
   </div>
 </footer>
 
@@ -237,7 +260,7 @@ section .row.wrap{display:flex;flex-wrap:wrap;align-items:center}
 // only reads of the public /api/safe/listings* endpoints (Task 4), so boot()/init()
 // (the WASM core needed for vaults/deals) is NOT imported — same pattern as desk.html's
 // "plain list" tabs (renderVaultsTab/renderDealsTab don't call boot() either).
-import { $, kas } from '/assets/app.js?v=15';
+import { $, kas } from '/assets/app.js?v=18';
 
 // Local copy of app.js's private (unexported) esc() — same one-liner,
 // same purpose: title/description/category come from an anonymous seller (AI moderation
@@ -248,6 +271,14 @@ const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&
 // Display names for the category slugs the API stores — same wording as the filter <select>.
 const CATS = { goods: 'Physical goods', otc: 'OTC / crypto trade', services: 'Service / freelance' };
 const photoUrl = (id) => `/api/safe/listings/photos/${encodeURIComponent(id)}`;
+const shippingText = (region) => {
+  if (!region) return '';
+  if (region === 'Worldwide' || region === 'Весь мир') return 'Worldwide';
+  if (region === 'European Union only' || region === 'Только Евросоюз') return 'European Union only';
+  if (region === 'EU + USA' || region === 'ЕС + США') return 'EU + USA';
+  return region;
+};
+const disputeText = (hours) => (hours % 24 === 0 && hours >= 48 ? `${hours / 24} days` : `${hours} h`);
 
 const PAGE = 24;          // storefront page size (the server caps limit at 100)
 let browseOffset = 0;     // how many cards are already shown — offset for "Show more"
@@ -335,7 +366,7 @@ async function renderList(append = false) {
     const card = document.createElement('a');
     card.href = `?id=${l.id}`;
     card.className = 'mk-card';
-    card.innerHTML = '<span class="mk-ph"></span><span class="mk-body"><span class="mk-title"></span><span class="mk-meta"><span class="mk-id"></span><span class="type-tag"></span><span class="mk-cat"></span></span><span class="mk-price"></span></span>';
+    card.innerHTML = '<span class="mk-ph"></span><span class="mk-body"><span class="mk-title"></span><span class="mk-meta"><span class="mk-id"></span><span class="type-tag"></span><span class="mk-cat"></span></span><span class="mk-trust"></span><span class="mk-price"></span></span>';
     card.querySelector('.mk-id').textContent = `#${l.id}`;
     const ph = card.querySelector('.mk-ph');
     if (l.photo_ids && l.photo_ids.length) {
@@ -351,6 +382,12 @@ async function renderList(append = false) {
     card.querySelector('.mk-title').textContent = l.title;
     card.querySelector('.type-tag').textContent = l.listing_type === 'item' ? 'Item' : 'Service';
     card.querySelector('.mk-cat').textContent = CATS[l.category] || l.category;
+    const ship = shippingText(l.shipping_region);
+    const trust = card.querySelector('.mk-trust');
+    const badge = (text, cls = '') => { const el = document.createElement('span'); el.className = cls; el.textContent = text; trust.appendChild(el); };
+    badge('✓ Escrow protected', 'protected');
+    badge(`Dispute ${disputeText(l.dispute_hours)}`);
+    badge(l.listing_type === 'item' ? (ship ? `Ships to: ${ship}` : 'Physical delivery') : 'Digital / service');
     card.querySelector('.mk-price').textContent = kas(l.price_sompi);
     card.onclick = (e) => { e.preventDefault(); cameFromList = true; showDetail(l.id); history.pushState({}, '', `?id=${l.id}`); syncLangLink(); };
     box.appendChild(card);
@@ -415,7 +452,7 @@ async function showDetail(id) {
     ${l.description ? `<p style="white-space:pre-wrap">${esc(l.description)}</p>` : '<p class="hint">No description provided.</p>'}
     <div style="margin:14px 0">
       <div class="kv"><span class="k">Price</span><span class="v" style="color:var(--kaspa);font-weight:700">${kas(l.price_sompi)}</span></div>
-      <div class="kv"><span class="k">Dispute window</span><span class="v">${l.dispute_hours} h</span></div>
+      <div class="kv"><span class="k">Dispute window</span><span class="v">${l.dispute_hours % 24 === 0 && l.dispute_hours >= 48 ? (l.dispute_hours / 24) + ' days' : l.dispute_hours + ' h'}</span></div>
       <div class="kv"><span class="k">Escrow</span><span class="v ok">required</span></div>
       ${inv && inv.fee_resolve ? `<div class="kv"><span class="k">Fee</span><span class="v">${kas(inv.fee_resolve)} on release · ${kas(inv.fee_dispute)} if arbitrated</span></div>` : ''}
     </div>
@@ -511,6 +548,6 @@ syncLangLink();
 if (params.get('id')) showDetail(Number(params.get('id')));
 else renderList();
 </script>
-<script src="/assets/kaspa-widget.js?v=3" defer></script>
+<script src="/assets/kaspa-widget.js?v=4" defer></script>
 </body>
 </html>

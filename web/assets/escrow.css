@@ -13,12 +13,12 @@
 .pick span { font-size: 12.5px; letter-spacing: .04em; color: inherit; text-align: center; }
 .pick:hover { border-color: var(--kaspa); background: var(--plate); }
 .pick.active { border-color: var(--kaspa); background: var(--plate); color: var(--kaspa); box-shadow: 0 0 0 3px rgba(0,193,175,.16); }
-/* six dispute-window presets: hours + label in days */
-.pick6 { display: grid; gap: 8px; margin-top: 6px; grid-template-columns: repeat(6, 1fr); }
+/* dispute-window presets: hours/days + label. 8 presets (incl. 14d/30d physical-shipping) → 4×2 grid. */
+.pick6 { display: grid; gap: 8px; margin-top: 6px; grid-template-columns: repeat(4, 1fr); }
 .pick6 .pick { padding: 12px 6px; font-size: 17px; gap: 3px; }
 .pick6 .pick span { font-size: 11px; color: var(--ash2); }
 .pick6 .pick.active span { color: inherit; }
-@media (max-width: 520px) { .pick3 { grid-template-columns: 1fr; } .pick6 { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 520px) { .pick3 { grid-template-columns: 1fr; } .pick6 { grid-template-columns: repeat(2, 1fr); } }
 
 /* deal stage timeline */
 .timeline { display: flex; align-items: center; gap: 0; }
@@ -29,6 +29,17 @@
 .tl-lbl { font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ash2); }
 .tl.on .tl-lbl { color: var(--ingot); }
 .tl-bar { flex: 1; height: 2px; background: var(--bd-soft); margin: 0 4px; margin-bottom: 18px; }
+
+/* OTC counter-leg verification badge (Task 8) — a neutral mono pill; the shared .ok/.warn/.bad
+   color utilities (safe.css) tint it: verified = ok (teal), mismatch/failed = bad (red), everything
+   else (awaiting/declared/pending_conf/unsupported/…) stays neutral ash. */
+.badge {
+  display: inline-flex; align-items: center; font-family: var(--mono); font-size: 11px;
+  letter-spacing: .04em; color: var(--ash); border: 1px solid var(--bd); border-radius: 4px;
+  padding: 4px 9px; white-space: normal;
+}
+.badge.ok { border-color: var(--kaspa); }
+.badge.bad { border-color: var(--alarm); }
 
 textarea {
   width: 100%; background: var(--steel); border: 1px solid var(--bd-soft); border-radius: 6px;

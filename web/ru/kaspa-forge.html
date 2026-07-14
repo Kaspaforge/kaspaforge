@@ -29,7 +29,7 @@
 <link rel="manifest" href="/manifest-forge.json">
 <meta name="theme-color" content="#0E1116">
 <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
-<link rel="stylesheet" href="/assets/forge-landing.css?v=3">
+<link rel="stylesheet" href="/assets/forge-landing.css?v=6">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebApplication","name":"Kaspa Forge","url":"https://kaspaforge.org/ru/","applicationCategory":"FinanceApplication","operatingSystem":"Web","inLanguage":"ru","description":"Некостодиальный деск на ковенантах Kaspa Toccata: сейф с окном отмены, ковенант-эскроу для P2P-сделок и маркетплейс — один шифрованный профиль в твоём браузере.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD","description":"Ончейн-операции бесплатны; платится только сетевая комиссия Kaspa."}}
 </script>
@@ -41,7 +41,6 @@
     <a class="brand" href="/ru/">
       <img class="brand-lockup" src="/assets/brand/lockup-h-flat-header.png" alt="KaspaForge">
     </a>
-    <a class="by-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="Сделано в OfficeForge"><img src="/assets/of-wordmark.png" alt="OfficeForge"></a>
     <nav aria-label="Kaspa Forge">
       <a href="/ru/safe.html">Сейф</a>
       <a href="/ru/escrow-index.html">Эскроу</a>
@@ -78,6 +77,17 @@
   </div>
 </div>
 <script src="/assets/netstat.js?v=1" defer></script>
+
+<div class="strip" id="secstat" style="display:none">
+  <div class="wrap strip-in">
+    <span>контракты <b id="sec-contracts">…</b></span>
+    <span>тесты <b class="ok" id="sec-tests">…</b></span>
+    <span>релиз <b id="sec-release">…</b></span>
+    <span><a href="/ru/security.html" id="sec-link">Безопасность ▸</a></span>
+    <span><a href="https://github.com/Kaspaforge/kaspaforge" id="sec-github" target="_blank" rel="noopener">GitHub</a></span>
+  </div>
+</div>
+<script src="/assets/sec-status.js?v=3" defer></script>
 
 <section class="hero">
   <div class="hero-glow" aria-hidden="true"></div>
@@ -156,7 +166,7 @@
       <h2>Сейф, в котором кражу можно отменить</h2>
       <p class="d">
         Любой вывод из сейфа выдерживает окно, которое задал ты. Адрес назначения
-        <b>намертво фиксируется ончейн в момент старта вывода</b> — подменить его не может никто.
+        <b>намертво фиксируется ончейн в момент старта вывода</b> — ковенант не принимает другой адрес.
         Если вывод запускал не ты, один ход отдельным <b>тревожным ключом</b> (лежит на бумаге,
         дома — где угодно отдельно от горячего) возвращает всё в сейф.
       </p>
@@ -175,6 +185,9 @@
         <div class="kv"><span class="k">Android</span><span class="v">APK с криптографией внутри + наш F-Droid-репозиторий</span></div>
       </div>
       <a class="tool-more" href="/ru/safe.html">Как работает сейф&nbsp;▸</a>
+      <div style="margin-top:12px;font-size:12px;color:var(--ash2)">
+        <span>Открытая бета — <a href="/ru/security.html">безопасность &middot; проверка</a></span>
+      </div>
     </div>
 
     <div>
@@ -205,7 +218,7 @@
         </div>
       </div>
       <div class="note teal">
-        <b>Потерял оба ключа?</b> Мы не поможем — и в этом суть: не может никто, включая нас.
+        <b>Потерял оба ключа?</b> Мы не поможем — у сейфа просто нет ключа-лазейки, который мог бы это сделать.
         Включай наследование, пусть даже наследник — твой же второй адрес.
       </div>
     </div>
@@ -227,10 +240,11 @@
         Kaspa просто не примет.</b> Это математика, а не обещание.
       </p>
       <p class="d">
-        Честно про границу: контракт гарантирует, что средства <b>нельзя украсть</b>;
-        справедливость вердикта — работа человека-арбитра по твоим доказательствам. И доказательства
-        железные: чат сделки работает на протоколе Kasia, где <b>каждое сообщение — сквозно
-        зашифрованная транзакция Kaspa</b>: подделать или дописать задним числом нельзя.
+        Честно про границу: каждый путь траты в ковенанте платит стороне сделки —
+        <b>оператор не может перенаправить средства</b>; справедливость вердикта — работа
+        человека-арбитра по твоим доказательствам. И доказательства железные: чат сделки работает
+        на протоколе Kasia, где <b>каждое сообщение — сквозно зашифрованная транзакция Kaspa</b>,
+        заякоренная ончейн — незаметно подделать или переписать задним числом нельзя.
       </p>
       <div class="kvs">
         <div class="kv"><span class="k">Типы сделок</span><span class="v">товар · OTC-обмен · услуга</span></div>
@@ -240,6 +254,9 @@
         <div class="kv"><span class="k">Сумма сделки</span><span class="v m">50 – 10 000 KAS (бета)</span></div>
       </div>
       <a class="tool-more" href="/ru/escrow-index.html">Как работает Гарант&nbsp;▸</a>
+      <div style="margin-top:12px;font-size:12px;color:var(--ash2)">
+        <span>Открытая бета — <a href="/ru/security.html">безопасность &middot; проверка</a></span>
+      </div>
     </div>
 
     <div>
@@ -369,7 +386,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="#00C1AF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m8 6-5 6 5 6"/><path d="m16 6 5 6-5 6"/><path d="M13.5 4.5 10.5 19.5"/></svg>
         <div>
           <div class="cn">Открытый код, проверяемые слова</div>
-          <div class="cd">Контракты и инструменты опубликованы: <a href="https://github.com/pcdoctormsk-ctrl/kaspa-safe" target="_blank" rel="noopener">github.com/pcdoctormsk-ctrl/kaspa-safe</a>. Не верь тексту на этой странице — проверь.</div>
+          <div class="cd">Контракты и инструменты опубликованы: <a href="https://github.com/Kaspaforge/kaspaforge" target="_blank" rel="noopener">github.com/Kaspaforge/kaspaforge</a>. Не верь тексту на этой странице — проверь.</div>
         </div>
       </li>
     </ul>
@@ -442,8 +459,8 @@
     <div class="beta-plate">
       <h3>Открытая бета — честная часть</h3>
       <p>
-        Контракты прошли наш полный цикл ончейн-тестов и адверсариальные атаки, код открыт —
-        но <b>внешний аудит ещё впереди</b>. До него относись к Forge как к бете: не храни и
+        Контракты прошли наш полный цикл ончейн-тестов и адверсариальные атаки, код открыт.
+        Относись к Forge как к бете: не храни и
         не проводи больше, чем доверил бы бете.
       </p>
       <p>
@@ -453,7 +470,6 @@
       <div class="lim">
         <span>сейфы ≤ 5 000 KAS</span>
         <span>сделки 50 – 10 000 KAS</span>
-        <span>аудит: впереди</span>
       </div>
     </div>
     <div class="price-plate">
@@ -467,6 +483,14 @@
         <tr><td>Эскроу: арбитраж (только при споре)</td><td class="m">2 % · мин 5 KAS</td></tr>
       </table>
     </div>
+  </div>
+</section>
+
+<section class="band" id="learn">
+  <div class="wrap">
+    <div class="eyebrow">Разберитесь до блокировки средств</div>
+    <h2>Проверьте модель безопасности — затем выбирайте продукт</h2>
+    <p class="d">Начните с <a href="/ru/docs/">документации Kaspa Forge</a>, прочитайте, как <a href="/ru/blog/kaspa-covenants-how-they-work.html">ковенанты Kaspa ограничивают расходование</a>, затем изучите фиксированные пути выплат в <a href="/ru/escrow-index.html">Kaspa Гаранте</a>.</p>
   </div>
 </section>
 
@@ -489,8 +513,9 @@
 <footer>
   <div class="wrap foot">
     <span class="fb">
-      <svg class="k" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="46" fill="none" stroke="#00C1AF" stroke-width="8"/><path d="M58 30 v40 M36 32 L54 50 L36 68" fill="none" stroke="#00C1AF" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <span>Kaspa Forge — сделан ИИ-офисом <a href="https://officeforge.co" target="_blank" rel="noopener">OfficeForge</a></span>
+      <img class="k" src="/assets/brand/emblem-flat-header.png" alt="" aria-hidden="true">
+      <span>© 2026 Kaspa Forge — сделан ИИ-офисом</span>
+      <a class="foot-ofs-logo" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="Перейти на сайт OfficeForge"><img src="/assets/of-wordmark.png" alt="OfficeForge"></a>
     </span>
     <nav aria-label="Подвал">
       <a href="/ru/safe.html">Сейф</a>
@@ -498,8 +523,11 @@
       <a href="/ru/market.html">Маркет</a>
       <a href="/ru/blog/">Блог</a>
       <a href="/ru/docs/">Документация</a>
-      <a href="https://github.com/pcdoctormsk-ctrl/kaspa-safe" target="_blank" rel="noopener">GitHub</a>
+      <a href="/ru/recover.html">Восстановление</a>
+      <a href="https://github.com/Kaspaforge/kaspaforge" target="_blank" rel="noopener">GitHub</a>
       <a href="/ru/privacy.html">Приватность</a>
+      <a href="/ru/terms.html">Условия</a>
+      <a href="/ru/security.html">Безопасность</a>
       <a href="mailto:kaspa@officeforge.co">kaspa@officeforge.co</a>
     </nav>
   </div>
@@ -519,6 +547,6 @@
 })();
 if ("serviceWorker" in navigator && /^(kaspaforge\.org|kaspa\.officeforge\.co)$/.test(location.hostname)) navigator.serviceWorker.register("/sw-forge.js");
 </script>
-<script src="/assets/kaspa-widget.js?v=3" defer></script>
+<script src="/assets/kaspa-widget.js?v=4" defer></script>
 </body>
 </html>

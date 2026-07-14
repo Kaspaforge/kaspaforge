@@ -25,7 +25,7 @@
 <meta name="theme-color" content="#0E1116">
 <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/safe.css?v=14">
-<script src="/assets/nav.js?v=5" defer></script>
+<script src="/assets/nav.js?v=7" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"Как работает Kaspa Гарант — некастодиальный эскроу для P2P-сделок","description":"Десять путей траты эскроу-ковенанта, жизненный цикл сделки, комиссии, сквозно зашифрованный ончейн-чат, ИИ-медиатор, человек-арбитр и гарантии таймаутов.","inLanguage":"ru","url":"https://kaspaforge.org/ru/docs/escrow.html","image":"https://kaspaforge.org/assets/og-escrow.png","dateModified":"2026-07-10","isPartOf":{"@type":"WebSite","name":"Kaspa Forge","url":"https://kaspaforge.org/"},"publisher":{"@type":"Organization","name":"OfficeForge","url":"https://officeforge.co"}}
 </script>
@@ -52,6 +52,7 @@
   <nav aria-label="Разделы документации" style="display:flex;gap:16px;flex-wrap:wrap;margin:20px 0 8px;padding:10px 0;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);font-family:var(--mono);font-size:11.5px;letter-spacing:.09em;text-transform:uppercase">
     <a href="/ru/docs/" style="color:var(--ash);text-decoration:none">Обзор</a>
     <a href="/ru/docs/desk.html" style="color:var(--ash);text-decoration:none">Деск и ключи</a>
+    <a href="/ru/docs/security.html" style="color:var(--ash);text-decoration:none">Безопасность</a>
     <a href="/ru/docs/safe.html" style="color:var(--ash);text-decoration:none">Сейф</a>
     <a href="/ru/docs/escrow.html" style="color:var(--kaspa);text-decoration:none">Гарант</a>
     <a href="/ru/docs/market.html" style="color:var(--ash);text-decoration:none">Маркет</a>
@@ -68,7 +69,7 @@
     <div class="kv"><span class="k" style="min-width:230px">Арбитраж — подпись арбитра</span><span class="v" style="text-align:left">Три варианта: всё покупателю, всё продавцу или раздел между ними. <b>Пути «арбитру» или «третьему лицу» не существует</b> — такую транзакцию сеть отвергнет сразу.</span></div>
     <div class="kv"><span class="k" style="min-width:230px">Таймаут — без подписи</span><span class="v" style="text-align:left">Арбитр пропустил дедлайн → средства уходят стороне по умолчанию (обычно покупателю), <b>без комиссии сервиса</b>. Сделка не может зависнуть, даже если мы исчезнем.</span></div>
   </div>
-  <p class="hint" style="margin-top:10px">В этом вся история с доверием: мы не просим верить в честность гаранта — гарант ничего не держит, и двери, через которую он мог бы вынести деньги, в контракте нет. Точная граница: ковенант гарантирует, что средства <b>нельзя украсть</b>; а <b>справедливость</b> вердикта в споре — работа человека по вашим доказательствам.</p>
+  <p class="hint" style="margin-top:10px">В этом вся история с доверием: мы не просим верить в честность гаранта — гарант ничего не держит, и двери, через которую он мог бы вынести деньги, в контракте нет. Точная граница: каждый путь траты в ковенанте платит стороне сделки — <b>оператор не может перенаправить средства</b>; а <b>справедливость</b> вердикта в споре — работа человека по вашим доказательствам.</p>
 
   <h2 style="margin-top:32px">Сделка от начала до конца</h2>
   <ol class="steps" style="margin-top:10px">
@@ -79,9 +80,19 @@
   </ol>
   <div style="margin-top:14px">
     <div class="kv"><span class="k" style="min-width:210px">Размер сделки</span><span class="v" style="text-align:left">50 – 10&nbsp;000 KAS (открытая бета; ниже 50 KAS минимум арбитража съедал бы слишком большую долю).</span></div>
-    <div class="kv"><span class="k" style="min-width:210px">Окно споров</span><span class="v" style="text-align:left">Выбирает создатель сделки из шести пресетов: 24&nbsp;ч / 48&nbsp;ч / 72&nbsp;ч / 96&nbsp;ч / 120&nbsp;ч / 7 дней — вторая сторона видит его <i>до</i> вступления. Дефолты по типу: товар 72&nbsp;ч, OTC 24&nbsp;ч, услуга 120&nbsp;ч. Произвольные значения невозможны сознательно — никаких «микро-окон», лишающих покупателя реального шанса на спор.</span></div>
+    <div class="kv"><span class="k" style="min-width:210px">Окно споров</span><span class="v" style="text-align:left">Ваш <b>бюджет на доставку + проверку</b>: таймер идёт с момента фандинга эскроу, и пока окно не закрылось, покупатель может открыть спор — это штатная защита покупателя, а не аварийная кнопка. Выбирает создатель сделки из восьми пресетов: 24&nbsp;ч / 48&nbsp;ч / 72&nbsp;ч / 96&nbsp;ч / 120&nbsp;ч / 7 дней / <b>14 дней (доставка по стране)</b> / <b>30 дней (международная)</b> — вторая сторона видит его <i>до</i> вступления. Дефолты по типу: товар <b>7 дней</b> (физическая посылка должна успеть дойти), OTC 24&nbsp;ч, услуга 120&nbsp;ч. Получили товар, а спор уже открыт? Не проблема — обычный <b>Release</b> его закрывает. Произвольные значения невозможны сознательно — никаких «микро-окон», лишающих покупателя реального шанса на спор.</span></div>
     <div class="kv"><span class="k" style="min-width:210px">Комиссии</span><span class="v" style="text-align:left">Создание сделки — бесплатно. Release / refund / mutual — <b>0.5%</b> (мин 1.2 KAS — сюда входит и оплата ончейн-чата). Арбитраж, только если дошло до спора, — <b>2%</b> (мин 5 KAS). Таймаут — без комиссии сервиса. Комиссию форсит сам контракт, и она видна до подтверждения. Телеграм-гаранты берут 3–10% <i>и</i> держат ваши деньги; мы берём 0.5% — и не можем.</span></div>
   </div>
+
+  <h2 style="margin-top:32px">OTC-сделки: обмен KAS на другой актив</h2>
+  <p class="hint">В <b>OTC / крипто-обмене</b> две ноги живут в разных сетях: покупатель лочит <b>KAS</b> в ковенанте, а продавец платит <b>встречную ногу</b> — USDT/USDC в другой сети, нативную монету или фиат. Эскроу защищает KAS; встречный платёж проходит в своей сети. Из слепого обмена безопасный делают две вещи:</p>
+  <div style="margin-top:12px">
+    <div class="kv"><span class="k" style="min-width:210px">Фиксируется при создании</span><span class="v" style="text-align:left">Покупатель выбирает <b>валюту / сеть</b> и <b>сумму</b> встречного платежа и вводит <b>адрес получения</b>, на который его ждёт — адрес проверяется на соответствие выбранной сети прямо при вводе. Эти условия вшиты в сделку и видны обеим сторонам и арбитру; их нельзя тихо подменить в чате задним числом.</span></div>
+    <div class="kv"><span class="k" style="min-width:210px">Порядок, защищающий продавца</span><span class="v" style="text-align:left"><b>Сначала покупатель лочит KAS в эскроу.</b> И только затем продавец платит встречную ногу. Пока эскроу не профинансирован, панель оплаты у продавца скрыта за предупреждением — не отправляйте платёж, пока KAS не заблокирован, иначе заплатите в пустой эскроу.</span></div>
+    <div class="kv"><span class="k" style="min-width:210px">Он-чейн автопроверка</span><span class="v" style="text-align:left">Для поддерживаемых сетей продавец жмёт <b>«Я оплатил»</b> — сервис находит недавний платёж на адрес покупателя (или вы вставляете txid) и <b>проверяет его вживую в публичном блокчейне</b>. Зелёный бейдж <b>«платёж подтверждён он-чейн»</b> появляется у обеих сторон, только когда сходится всё: транзакция успешна, набрала подтверждения, использует канонический контракт токена (не фейк-USDT), получатель — ровно зафиксированный адрес покупателя, сумма не меньше оговорённой, а платёж новее самой сделки (анти-replay). Один txid засчитывается лишь в одной сделке.</span></div>
+    <div class="kv"><span class="k" style="min-width:210px">Сигнал, а не действие</span><span class="v" style="text-align:left">Бейдж <b>сам по себе ничего не двигает</b>. Release остаётся подписью покупателя — даже при зелёном бейдже убедитесь, что средства реально пришли (зачисление на биржу может отставать от подтверждения в сети), и только затем отпускайте. В споре подтверждённая нога — <b>сильнейшее возможное доказательство</b>, что продавец исполнил свою часть, и арбитр его видит.</span></div>
+  </div>
+  <p class="hint" style="margin-top:10px">Сети с автопроверкой: <b>USDT</b> на Tron, TON, Ethereum, BSC, Polygon и Arbitrum; <b>USDC</b> на Ethereum, BSC, Polygon, Arbitrum и Base; нативные <b>TRX, TON, ETH, BNB</b>; и <b>BTC, LTC</b>. Любая другая крипта или фиат тоже работают как OTC-сделка — условия ноги фиксируются и видны обеим сторонам, — но живого бейджа нет, поэтому зачисление вы подтверждаете сами перед release.</p>
 
   <h2 style="margin-top:32px">Чат сделки: доказательства, которые нельзя подделать</h2>
   <p class="hint">Чат внутри сделки — не чат поддержки, а <b>сквозно зашифрованная ончейн-переписка</b> (протокол Kasia в BlockDAG Kaspa). Каждое сообщение шифруется в вашем браузере и якорится транзакцией Kaspa; фото, видео и документы шифруются пофайлово с хешем целостности, закреплённым ончейн. Сервер ретранслирует и хранит только шифртекст, который не может прочитать. В споре это решает: переписку <b>нельзя подделать, отредактировать или дописать задним числом</b> — она и есть материалы дела. Мелкую сетевую комиссию за ваши сообщения покрывает сервис.</p>
@@ -100,21 +111,43 @@
   <ol class="steps" style="margin-top:10px">
     <li><b>Арбитр не может украсть</b> — ни один путь ковенанта не ведёт за пределы треугольника «покупатель / продавец / комиссия».</li>
     <li><b>Сервер не может украсть</b> — ключей сделки у него нет; пути без подписи (авто-релиз, таймаут) намертво фиксируют получателя.</li>
+    <li><b>Сервисный токен не может тратить</b> — это capability стороны на чтение состояния, чат (только шифртекст) и заявления в споре; любое движение средств всё равно требует подписи ключа сделки, который никогда не покидает браузер. Подробнее: <a href="/ru/privacy-escrow.html#token">приватность Гаранта</a>.</li>
     <li><b>Чат приватен, пока <i>вы сами</i> его не откроете</b> — плейнтекст появляется у медиатора только после добровольного раскрытия чат-ключа стороной, и этот ключ не двигает средства.</li>
     <li><b>ИИ ничего не исполняет сам</b> — его предложение становится реальностью только через подпись стороны или человека-арбитра; ковенант ограничивает исход в любом случае.</li>
     <li><b>Смерть сервиса ≠ потеря сделки</b> — таймауты ончейн и без подписи. Как сделка переживает сайт — на странице <a href="/ru/recover-escrow.html">восстановления сделки</a>.</li>
   </ol>
 
   <div class="note" style="margin-top:20px">
-    <b>Лимиты беты.</b> Контракт прошёл нативные тесты эквивалентности в VM и адверсариальный ончейн-цикл (52/52 self-тестов); внешний аудит впереди. Сделки ограничены 50–10&nbsp;000 KAS. Единственное, чего эскроу не видит, — офчейн-мир: дошла ли посылка на самом деле. Именно для этого существуют рельсы спора — и именно поэтому переписку сделки стоит вести внутри, в защищённом от подделки чате.
+    <b>Лимиты беты.</b> Контракт прошёл нативные тесты эквивалентности в VM и адверсариальный ончейн-цикл (52/52 self-тестов). Сделки ограничены 50–10&nbsp;000 KAS. Единственное, чего эскроу не видит, — офчейн-мир: дошла ли посылка на самом деле. Именно для этого существуют рельсы спора — и именно поэтому переписку сделки стоит вести внутри, в защищённом от подделки чате.
   </div>
 
   <p class="hint" style="margin-top:24px">См. также: <a href="/ru/escrow-index.html">обзор Kaspa Гаранта</a> · <a href="/ru/recover-escrow.html">восстановление сделки</a> · <a href="/ru/docs/market.html">маркетплейс</a> — объявления с этим эскроу внутри</p>
 </div>
 
-<footer><div class="row wrap"><a class="foot-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="OfficeForge"><img src="/assets/logo.png" alt="OfficeForge"></a><span>Kaspa Forge · некастодиальная бета · <a href="https://officeforge.co">OfficeForge</a> · обратная связь: kaspa@officeforge.co · <a href="/ru/privacy-escrow.html">Приватность</a></span></div></footer>
+<footer>
+  <div class="foot">
+    <span class="fb">
+      <img class="k" src="/assets/brand/emblem-flat-header.png" alt="" aria-hidden="true">
+      <span>© 2026 Kaspa Forge — сделан ИИ-офисом</span>
+      <a class="foot-ofs-logo" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="Перейти на сайт OfficeForge"><img src="/assets/of-wordmark.png" alt="OfficeForge"></a>
+    </span>
+    <nav aria-label="Подвал">
+      <a href="/ru/safe.html">Сейф</a>
+      <a href="/ru/escrow-index.html">Гарант</a>
+      <a href="/ru/market.html">Маркет</a>
+      <a href="/ru/blog/">Блог</a>
+      <a href="/ru/docs/">Документы</a>
+      <a href="/ru/recover.html">Восстановление</a>
+      <a href="https://github.com/Kaspaforge/kaspaforge" target="_blank" rel="noopener">GitHub</a>
+      <a href="/ru/privacy.html">Приватность</a>
+      <a href="/ru/terms.html">Условия</a>
+      <a href="/ru/security.html">Безопасность</a>
+      <a href="mailto:kaspa@officeforge.co">kaspa@officeforge.co</a>
+    </nav>
+  </div>
+</footer>
 </div>
 
-<script src="/assets/kaspa-widget.js?v=3" defer></script>
+<script src="/assets/kaspa-widget.js?v=4" defer></script>
 </body>
 </html>

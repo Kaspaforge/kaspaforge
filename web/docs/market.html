@@ -24,7 +24,7 @@
 <meta name="theme-color" content="#0E1116">
 <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/safe.css?v=14">
-<script src="/assets/nav.js?v=5" defer></script>
+<script src="/assets/nav.js?v=7" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"How the Kaspa Marketplace works — listings with escrow built in","description":"Every purchase opens a covenant escrow deal, so the seller can't be paid until the buyer confirms. Listing types, moderation, shipping geography, fees and security.","inLanguage":"en","url":"https://kaspaforge.org/docs/market.html","image":"https://kaspaforge.org/assets/og-market.png","dateModified":"2026-07-10","isPartOf":{"@type":"WebSite","name":"Kaspa Forge","url":"https://kaspaforge.org/"},"publisher":{"@type":"Organization","name":"OfficeForge","url":"https://officeforge.co"}}
 </script>
@@ -51,6 +51,7 @@
   <nav aria-label="Documentation sections" style="display:flex;gap:16px;flex-wrap:wrap;margin:20px 0 8px;padding:10px 0;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);font-family:var(--mono);font-size:11.5px;letter-spacing:.09em;text-transform:uppercase">
     <a href="/docs/" style="color:var(--ash);text-decoration:none">Overview</a>
     <a href="/docs/desk.html" style="color:var(--ash);text-decoration:none">Desk &amp; keys</a>
+    <a href="/docs/security.html" style="color:var(--ash);text-decoration:none">Security</a>
     <a href="/docs/safe.html" style="color:var(--ash);text-decoration:none">Safe</a>
     <a href="/docs/escrow.html" style="color:var(--ash);text-decoration:none">Escrow</a>
     <a href="/docs/market.html" style="color:var(--kaspa);text-decoration:none">Marketplace</a>
@@ -81,15 +82,36 @@
     <li><b>No reputation games.</b> The same on-chain script guards a first-time seller and a veteran equally; you don't need to evaluate anyone's karma — the money can't go anywhere the covenant doesn't allow.</li>
     <li><b>Disputes are real.</b> The encrypted deal chat can't be forged or backdated; an AI mediator proposes, a human arbiter decides, the covenant caps every outcome to buyer / seller / split. See <a href="/docs/escrow.html">the dispute rail</a>.</li>
     <li><b>What the server holds:</b> the public listing (that's the point of a storefront), encrypted deal traffic, and moderation records. Your keys stay in your browser. Details: <a href="/privacy-escrow.html">Escrow &amp; Marketplace privacy</a>.</li>
-    <li><b>Beta honesty.</b> Same status as the escrow: our full test cycle passed, external audit ahead, deals capped at 50–10&nbsp;000 KAS.</li>
+    <li><b>Beta honesty.</b> Same status as the escrow: our full test cycle passed, deals capped at 50–10&nbsp;000 KAS.</li>
   </ol>
 
   <p class="hint" style="margin-top:24px">See also: <a href="/market.html">browse the market</a> · <a href="/docs/escrow.html">how Kaspa Escrow works</a> · <a href="/docs/desk.html">the Desk &amp; your keys</a></p>
 </div>
 
-<footer><div class="row wrap"><a class="foot-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="OfficeForge"><img src="/assets/logo.png" alt="OfficeForge"></a><span>Kaspa Forge · non-custodial beta · <a href="https://officeforge.co">OfficeForge</a> · feedback: kaspa@officeforge.co · <a href="/privacy-escrow.html">Privacy</a></span></div></footer>
+<footer>
+  <div class="foot">
+    <span class="fb">
+      <img class="k" src="/assets/brand/emblem-flat-header.png" alt="" aria-hidden="true">
+      <span>© 2026 Kaspa Forge — built by the</span>
+      <a class="foot-ofs-logo" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="Visit OfficeForge"><img src="/assets/of-wordmark.png" alt="OfficeForge"></a>
+    </span>
+    <nav aria-label="Footer">
+      <a href="/safe.html">Safe</a>
+      <a href="/escrow-index.html">Escrow</a>
+      <a href="/market.html">Market</a>
+      <a href="/blog/">Blog</a>
+      <a href="/docs/">Docs</a>
+      <a href="/recover.html">Recovery</a>
+      <a href="https://github.com/Kaspaforge/kaspaforge" target="_blank" rel="noopener">GitHub</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+      <a href="/security.html">Security</a>
+      <a href="mailto:kaspa@officeforge.co">kaspa@officeforge.co</a>
+    </nav>
+  </div>
+</footer>
 </div>
 
-<script src="/assets/kaspa-widget.js?v=3" defer></script>
+<script src="/assets/kaspa-widget.js?v=4" defer></script>
 </body>
 </html>

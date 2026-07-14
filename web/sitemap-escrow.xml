@@ -30,4 +30,28 @@
     <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/privacy-escrow.html"/>
     <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/privacy-escrow.html"/>
   </url>
+  <url>
+    <loc>https://kaspaforge.org/terms.html</loc>
+    <lastmod>2026-07-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/terms.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/terms.html"/>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/ru/terms.html</loc>
+    <lastmod>2026-07-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/terms.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/terms.html"/>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/security.html</loc>
+    <lastmod>2026-07-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/security.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/security.html"/>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/ru/security.html</loc>
+    <lastmod>2026-07-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/security.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/security.html"/>
+  </url>
 </urlset>

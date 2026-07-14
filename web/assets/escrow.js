@@ -9,7 +9,8 @@
 // v5 = v4 (chat_* Kasia + media_* file encryption) + escrow_mutual_* (split co-signing, Phase 2).
 import init, * as core from '/assets/vault-core-v5/kaspa_safe_core.js';
 export { core };
-import { getDeals, setDeals } from './identity.js';
+import { getDeals, setDeals, loadProfile, saveProfile, isProfileRecordTombstoned,
+  tombstoneProfileRecord, reviveProfileRecord } from './identity.js';
 
 let network = null;
 let kasUsdRate = 0;   // KAS→USD rate (from /api/safe/info), 0 = unavailable → don't show USD
@@ -37,6 +38,55 @@ export async function api(path, opts) {
   try { j = JSON.parse(text); } catch { throw new Error(`server: ${r.status}`); }
   if (!r.ok) throw new Error(j.error || `server: ${r.status}`);
   return j;
+}
+
+// OTC counter-leg methods matrix (server-verified networks, Task 7) — fetched once per page load.
+let _otcMethods = null;
+export async function otcMethods() {
+  if (_otcMethods) return _otcMethods;
+  try { _otcMethods = await api('/api/safe/escrow/otc/methods'); }
+  catch { _otcMethods = { enabled: false, methods: [] }; }
+  return _otcMethods;
+}
+
+/** Seller: declare the counter-leg paid (Task 8) — server records the txid and probes the
+ *  explorer in the background; poll /escrow/state (state.otc.verify_status) for the result. */
+export function otcPay(deal, ref) {
+  return api('/api/safe/escrow/otc/pay', { method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ id: deal.id, token: deal.token, ref }) });
+}
+
+// "I have paid" auto-detect: the server scans the buyer's address for a fresh incoming payment
+// and returns a candidate txid — the seller confirms it via otcPay (full verification applies).
+export function otcDetect(deal) {
+  return api('/api/safe/escrow/otc/detect', { method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ id: deal.id, token: deal.token }) });
+}
+
+// Light client-side address-format check per network family (mirrors the server addr_format_ok:
+// prefix/alphabet/length; full checksum stays server-side). Lets the create/join UI reject a
+// wrong-network receiving address at entry (owner request 2026-07-13).
+const B58 = (s) => /^[1-9A-HJ-NP-Za-km-z]+$/.test(s);   // base58: no 0 O I l
+const BECH = (s) => /^[a-z0-9]+$/.test(s);
+export function otcAddrOk(kind, addr) {
+  const a = (addr || '').trim();
+  if (!a) return false;
+  switch (kind) {
+    case 'tron': return a.length === 34 && a[0] === 'T' && B58(a);
+    case 'evm':  return a.length === 42 && a.startsWith('0x') && /^[0-9a-fA-F]{40}$/.test(a.slice(2));
+    case 'ton':  return /^(0|-1):[0-9a-fA-F]{64}$/.test(a) || (a.length === 48 && /^[A-Za-z0-9_+/-]+$/.test(a));
+    case 'btc':  return (a.startsWith('bc1') && a.length >= 42 && a.length <= 62 && BECH(a.slice(3)))
+                     || ((a[0] === '1' || a[0] === '3') && a.length >= 26 && a.length <= 35 && B58(a));
+    case 'ltc':  return (a.startsWith('ltc1') && a.length >= 43 && a.length <= 62 && BECH(a.slice(4)))
+                     || ((a[0] === 'L' || a[0] === 'M') && a.length >= 26 && a.length <= 35 && B58(a));
+    default:     return true;   // other-crypto / unknown family → no format constraint (server won't verify it)
+  }
+}
+// method id → address-format family, from the cached methods list (addr_kind field)
+export async function otcAddrKind(methodId) {
+  if (!methodId || methodId === 'other-crypto') return null;
+  const { methods } = await otcMethods();
+  return (methods.find((m) => m.id === methodId) || {}).addr_kind || null;
 }
 
 export const kas = (sompi) => (sompi / 1e8).toLocaleString('en-US', { maximumFractionDigits: 4 }) + ' KAS';
@@ -67,6 +117,7 @@ const DICT = {
     role_buyer: "I'm the buyer", role_seller: "I'm the seller",
     noun_buyer: 'buyer', noun_seller: 'seller',
     tpl_goods: 'Physical goods', tpl_otc: 'OTC / crypto trade', tpl_service: 'Service / freelance',
+    tpl_pick_label: 'Deal template (optional)', tpl_custom_opt: '— Custom (no template) —',
     beta_cap: 'Beta limits: 50 to 10,000 KAS per deal.',
     amount_err: 'Enter an amount between 50 and 10,000 KAS.',
     fee_arb_share: (p) => `Heads up: if this goes to arbitration, the fee is about ${p}% of the amount — arbitration is costly on small deals. It only applies if a dispute reaches a verdict.`,
@@ -98,7 +149,7 @@ const DICT = {
     fund_nokey: 'The funding key is not on this device — fund the deal from the device where it was created or joined.',
     fund_recv: 'Received', fund_send_lbl: 'Amount to send (incl. fee)', fund_wait: 'waiting for transfer…', lock_btn: 'Lock into escrow', locking: 'locking…',
     lock_auto: 'Locks in automatically once the transfer arrives',
-    seller_wait: 'Waiting for the buyer to fund the escrow. You will be notified when it is funded.',
+    seller_wait: '⏳ The buyer has NOT funded the escrow yet. Do NOT ship the goods or start the work until this deal shows “funded” — if you deliver now and the buyer never funds, nothing protects you. You will be notified the moment it is funded.',
     win_left: (t) => `Auto-release to seller in ${t} unless a dispute is opened.`,
     win_over: 'The dispute window is over — auto-release to the seller is imminent.',
     act_buyer: 'You received what you paid for? Release the funds. Something wrong? Open a dispute within the window.',
@@ -131,7 +182,7 @@ const DICT = {
     payout_done_tx: 'View the withdrawal transaction →',
     confirm_release: 'Release all funds to the seller? This is final.',
     confirm_dispute: 'Open a dispute? Funds freeze until the arbiter rules or the deadline passes.',
-    dispute_confirm_note: 'Opening a dispute moves the deal to DISPUTED, brings in the AI mediator, and opens your chat to the arbiter for review. Sign to proceed.',
+    dispute_confirm_note: 'Opening a dispute moves the deal to DISPUTED, brings in the AI mediator, and opens your chat to the arbiter for review. Sign to proceed. By signing you accept the <a href="/terms.html#arbitration" target="_blank" rel="noopener">Arbitration Policy</a>.',
     dispute_sign_open: 'Sign & open the chat for the arbiter',
     disp_cancel: 'Cancel',
     disp_opened_warn: '⚠️ The buyer opened a dispute. The deal is now in dispute and the AI mediator is involved — state your position below.',
@@ -142,8 +193,8 @@ const DICT = {
     deals_bar_title: 'My deals', deal_new: '+ New deal',
     deals_done_toggle: (n) => `Completed (${n})`,
     db_rename: 'Name this deal (shown only in this browser):',
-    forget_deal: 'Forget this deal in this browser',
-    forget_deal_confirm: 'Remove this deal from this browser? Your key goes with it — the recovery sheet (.txt) stays your only way back in.',
+    forget_deal: 'Remove this deal from my Desk',
+    forget_deal_confirm: 'Remove this deal from your Desk? With Forge Sync enabled, the removal also reaches your other devices. An explicit recovery-sheet or key-file import can restore it.',
     forget_locked: 'Active deal — your key is needed to release/refund or dispute. Removal unlocks once the deal closes.',
     key_label: 'Your key (private)', hot_role_hint: 'Kept in this browser and on your recovery sheet.',
     // fresh device
@@ -170,7 +221,7 @@ const DICT = {
     chat_peer_missing: 'The other party has not joined the chat yet.',
     chat_after_fund: 'The deal chat opens right after the escrow is funded — messages live on-chain, so the chat keys get their dust once funding arrives.',
     chat_unavailable: 'Chat is not available for this deal (created before deal chat existed).',
-    chat_hint: 'On-chain messaging on the Kaspa BlockDAG (Kasia protocol): end-to-end encrypted, every message is a transaction — impossible to forge or backdate. The server relays only ciphertext.',
+    chat_hint: 'On-chain messaging on the Kaspa BlockDAG (Kasia protocol): end-to-end encrypted, every message is a transaction anchored on-chain — can\'t be silently altered or backdated. The server relays only ciphertext.',
     chat_attach: 'Attach a photo, video or PDF',
     chat_sending: 'sending…',
     chat_readonly: 'Deal closed — the chat is read-only.',
@@ -208,6 +259,53 @@ const DICT = {
     track_sent_meta: 'anchored on-chain — timestamp cannot be forged',
     track_unboxing_hint: '🎥 Tip: when the parcel arrives, record ONE continuous unboxing video — sealed box with the shipping label in frame, then the contents. If the wrong item is inside, that video is your strongest evidence in a dispute (a valid tracking number only proves shipment, not what was in the box). Send it to this chat.',
     track_win_guard: (t) => `⚠️ The dispute window closes in ${t} and the goods are not confirmed as received. If you have NOT received your order, open a dispute BEFORE the window closes — after that the funds auto-release to the seller.`,
+    // OTC leg (Task 7): counter-payment fields in the create wizard + join screen.
+    // Labels follow the role tile: the buyer RECEIVES the counter-payment for their KAS,
+    // the seller SENDS it and gets the KAS on release.
+    otc_leg_head_buyer: 'Counter-payment — what you receive for your KAS',
+    otc_leg_head_seller: 'Counter-payment — what you send the buyer for their KAS',
+    otc_leg_method_buyer: 'Currency / network you get paid in',
+    otc_leg_method_seller: 'Currency / network you pay in',
+    otc_leg_amount_buyer: 'Amount you expect to receive',
+    otc_leg_amount_seller: 'Amount you will send',
+    otc_leg_currency_ph: 'e.g. XMR',
+    otc_leg_addr_buyer: 'Your receiving address',
+    otc_leg_addr_ph: 'your address in the selected network',
+    otc_leg_addr_bad: '⚠ This does not look like a valid {net} address. Check that it matches the selected network.',
+    otc_leg_addr_hint_buyer: 'The seller sends the counter-payment to this address. For auto-verified methods the service checks the payment on-chain against exactly this address — double-check it.',
+    otc_leg_addr_note_seller: 'The buyer will enter their receiving address when they join the deal.',
+    otc_leg_addr_join: 'Your receiving address (counter-payment)',
+    otc_join_hint: 'The seller must send you {sum} — enter YOUR address in this network and double-check it: a payment to a wrong address cannot be undone.',
+    otc_leg_auto: 'auto-verified on-chain',
+    otc_leg_manual: 'no auto-verification — manual check',
+    otc_leg_fiat: 'Fiat / other (flow unchanged)',
+    otc_leg_other: 'Other cryptocurrency…',
+    // OTC counter-leg verification panel (Task 8): badge + "I have paid" + verified hint
+    otc_panel_head: 'Counter-payment',
+    otc_badge_awaiting: 'awaiting payment',
+    otc_badge_declared: 'checking on-chain…',
+    otc_badge_pending_conf: 'confirming on-chain…',
+    otc_badge_verified: '✓ payment confirmed on-chain',
+    otc_badge_mismatch: '⚠ declared payment does NOT match the terms',
+    otc_badge_failed: '⚠ transaction failed on-chain',
+    otc_badge_not_found: 'transaction not found',
+    otc_badge_error: 'explorer unavailable, retrying…',
+    otc_badge_unsupported: 'no auto-verification for this network — verify manually',
+    otc_paid_btn: 'I have paid',
+    otc_paid_ref_ph: 'transaction id (txid)',
+    otc_paid_send: 'Confirm payment',
+    otc_not_funded_warn: '⏳ The buyer has NOT locked the {amt} into escrow yet. Do NOT send your payment until the escrow is funded — if you pay now and the buyer never funds, there is nothing in escrow to protect you. The “I have paid” button appears once the escrow is funded.',
+    otc_send_exactly: 'Send exactly',
+    otc_expect_amount: 'You receive',
+    otc_pay_to_addr: 'To this address (the buyer’s receiving address)',
+    otc_your_addr: 'Your receiving address',
+    otc_detect_btn: '💸 I have paid — find my transfer',
+    otc_detect_searching: 'Looking for your transfer on-chain…',
+    otc_detect_found: 'Found your transfer: {sum} at {time}. Check the txid below and press “Confirm payment”.',
+    otc_detect_none: 'No matching transfer to this address in the last {min} min. If you paid earlier or in several parts — paste the txid manually below.',
+    otc_paid_chat_fail: 'Payment declared — on-chain check started, but posting the chat receipt failed. You can send the "paid" message in chat manually.',
+    otc_verified_hint: 'On-chain confirmation means the funds reached the address. If it is an exchange deposit address, exchange crediting may lag. Release is always YOUR signature.',
+    otc_open_explorer: 'Open in explorer',
     // OTC: payment details + payment claim
     payto_btn_title: 'Share payment details',
     payto_head: 'Payment details',
@@ -247,7 +345,7 @@ const DICT = {
     disp_reveal_head: 'Reveal the chat to the mediator',
     disp_reveal_warn: 'The AI mediator judges by the deal chat. The button below sends your CHAT KEY to the server. It only decrypts messages — it can never move funds. Your escrow key stays on this device. One party\'s key opens the whole thread.',
     disp_reveal_btn: 'Reveal chat to the arbiter', disp_revealing: 'revealing…',
-    disp_reveal_nokey: 'The chat key is not on this device, so revealing from here is impossible. The other party can reveal from their side — one key is enough.',
+    disp_reveal_nokey: 'The chat key is not on this device — reveal only works from wherever the key is. The other party can reveal from their side — one key is enough.',
     disp_reveal_status: (you, peer) => `Revealed: you ${you} · other party ${peer}`,
     disp_verdict_wait: 'Chat revealed. The mediator is reading the thread — the verdict will appear here.',
     disp_verdict_head: 'AI mediator\'s verdict',
@@ -288,6 +386,7 @@ const DICT = {
     role_buyer: 'Я покупатель', role_seller: 'Я продавец',
     noun_buyer: 'покупатель', noun_seller: 'продавец',
     tpl_goods: 'Товар', tpl_otc: 'OTC / обмен крипты', tpl_service: 'Услуга / фриланс',
+    tpl_pick_label: 'Шаблон сделки (необязательно)', tpl_custom_opt: '— Своя (без шаблона) —',
     beta_cap: 'Бета-лимиты: от 50 до 10 000 KAS на сделку.',
     amount_err: 'Введите сумму от 50 до 10 000 KAS.',
     fee_arb_share: (p) => `Обратите внимание: если дойдёт до арбитра, его комиссия — около ${p}% суммы: на мелких сделках арбитраж дорог. Списывается только если спор дошёл до вердикта.`,
@@ -317,7 +416,7 @@ const DICT = {
     fund_nokey: 'На этом устройстве нет ключа закладки — финансируйте сделку с устройства, где она создавалась или принималась.',
     fund_recv: 'Получено', fund_send_lbl: 'Сумма к отправке (с комиссией)', fund_wait: 'ждём перевод…', lock_btn: 'Заложить в эскроу', locking: 'закладываем…',
     lock_auto: 'Заложится автоматически, когда придёт перевод',
-    seller_wait: 'Ждём, пока покупатель профинансирует эскроу. Вы получите уведомление.',
+    seller_wait: '⏳ Покупатель ещё НЕ профинансировал эскроу. НЕ отправляйте товар и не начинайте работу, пока сделка не перейдёт в статус «профинансирован» — если исполните сейчас, а покупатель не внесёт средства, вас ничто не защитит. Вы получите уведомление, как только эскроу профинансируют.',
     win_left: (t) => `Авто-релиз продавцу через ${t}, если не открыть спор.`,
     win_over: 'Окно спора закрылось — вот-вот пройдёт авто-релиз продавцу.',
     act_buyer: 'Получили оплаченное? Отпустите средства. Что-то не так? Откройте спор в течение окна.',
@@ -350,7 +449,7 @@ const DICT = {
     payout_done_tx: 'Транзакция вывода на эксплорере →',
     confirm_release: 'Отпустить все средства продавцу? Это окончательно.',
     confirm_dispute: 'Открыть спор? Средства замрут до вердикта арбитра или дедлайна.',
-    dispute_confirm_note: 'Открытие спора переводит сделку в статус СПОРНАЯ, подключает ИИ-медиатора и открывает вашу переписку арбитру для рассмотрения. Подпишите, чтобы продолжить.',
+    dispute_confirm_note: 'Открытие спора переводит сделку в статус СПОРНАЯ, подключает ИИ-медиатора и открывает вашу переписку арбитру для рассмотрения. Подпишите, чтобы продолжить. Подписывая, вы принимаете <a href="/ru/terms.html#arbitration" target="_blank" rel="noopener">Политику арбитража</a>.',
     dispute_sign_open: 'Подписать и открыть чат для арбитра',
     disp_cancel: 'Отмена',
     disp_opened_warn: '⚠️ Покупатель открыл спор. Сделка теперь спорная, подключён ИИ-медиатор — изложите свою позицию ниже.',
@@ -361,8 +460,8 @@ const DICT = {
     deals_bar_title: 'Мои сделки', deal_new: '+ Новая сделка',
     deals_done_toggle: (n) => `Завершённые (${n})`,
     db_rename: 'Название сделки (видно только в этом браузере):',
-    forget_deal: 'Удалить эту сделку из браузера',
-    forget_deal_confirm: 'Удалить эту сделку из этого браузера? Ключ уйдёт вместе с ней — вернуться можно будет только по recovery-листу (.txt).',
+    forget_deal: 'Удалить эту сделку из Desk',
+    forget_deal_confirm: 'Удалить сделку из Desk? При включённом Forge Sync удаление придёт и на другие устройства. Явный импорт recovery-листа или файла ключей сможет восстановить её.',
     forget_locked: 'Сделка активна — ключ нужен для release/refund или спора. Удаление станет доступно после закрытия.',
     key_label: 'Ваш ключ (приватный)', hot_role_hint: 'Хранится в этом браузере и в recovery-листе.',
     fd_head: 'Открыть сделку на этом устройстве',
@@ -387,7 +486,7 @@ const DICT = {
     chat_peer_missing: 'Вторая сторона ещё не подключила чат.',
     chat_after_fund: 'Чат сделки откроется сразу после финансирования эскроу — сообщения живут ончейн, пыль на чат-ключи приходит вместе с фандингом.',
     chat_unavailable: 'Чат недоступен для этой сделки (создана до появления чата).',
-    chat_hint: 'Ончейн-общение в BlockDAG Kaspa (протокол Kasia): сквозное шифрование, каждое сообщение — транзакция, подделать или дописать нельзя. Сервер видит только шифртекст.',
+    chat_hint: 'Ончейн-общение в BlockDAG Kaspa (протокол Kasia): сквозное шифрование, каждое сообщение — транзакция, заякоренная в цепочке — незаметно подделать или переписать задним числом нельзя. Сервер видит только шифртекст.',
     chat_attach: 'Прикрепить фото, видео или PDF',
     chat_sending: 'отправка…',
     chat_readonly: 'Сделка закрыта — чат только для чтения.',
@@ -424,6 +523,53 @@ const DICT = {
     track_sent_meta: 'заякорено ончейн — время добавления не подделать',
     track_unboxing_hint: '🎥 Совет: при получении снимите ОДНО непрерывное видео вскрытия — запечатанная коробка с этикеткой в кадре, затем содержимое. Если внутри не то — это ваше главное доказательство в споре (валидный трек доказывает только отправку, не содержимое посылки). Пришлите его в этот чат.',
     track_win_guard: (t) => `⚠️ Окно споров закроется через ${t}, а получение товара не подтверждено. Если заказ НЕ пришёл — откройте спор ДО закрытия окна: после него средства автоматически уйдут продавцу.`,
+    // OTC leg (Task 7): counter-payment fields in the create wizard + join screen.
+    // Labels follow the role tile: the buyer RECEIVES the counter-payment for their KAS,
+    // the seller SENDS it and gets the KAS on release.
+    otc_leg_head_buyer: 'Встречный платёж — что вы получите за свои KAS',
+    otc_leg_head_seller: 'Встречный платёж — что вы отправите покупателю за его KAS',
+    otc_leg_method_buyer: 'Валюта / сеть, в которой вы ждёте платёж',
+    otc_leg_method_seller: 'Валюта / сеть, в которой вы платите',
+    otc_leg_amount_buyer: 'Сумма, которую вы ждёте',
+    otc_leg_amount_seller: 'Сумма, которую вы отправите',
+    otc_leg_currency_ph: 'напр. XMR',
+    otc_leg_addr_buyer: 'Ваш адрес получения',
+    otc_leg_addr_ph: 'ваш адрес в выбранной сети',
+    otc_leg_addr_bad: '⚠ Это не похоже на корректный адрес сети {net}. Проверьте, что он соответствует выбранной сети.',
+    otc_leg_addr_hint_buyer: 'Сюда продавец отправит встречный платёж. Для методов с автопроверкой сервис сверит платёж он-чейн именно с этим адресом — проверьте его дважды.',
+    otc_leg_addr_note_seller: 'Адрес получения укажет покупатель, когда присоединится к сделке.',
+    otc_leg_addr_join: 'Ваш адрес получения (встречный платёж)',
+    otc_join_hint: 'Продавец должен отправить вам {sum} — укажите СВОЙ адрес в этой сети и проверьте его дважды: платёж на ошибочный адрес не отменить.',
+    otc_leg_auto: 'проверяется он-чейн автоматически',
+    otc_leg_manual: 'без автопроверки — проверяйте вручную',
+    otc_leg_fiat: 'Фиат / другое (флоу без изменений)',
+    otc_leg_other: 'Другая криптовалюта…',
+    // Counter-leg verification panel (Task 8): badge + “I have paid” + post-verified hint
+    otc_panel_head: 'Встречный платёж',
+    otc_badge_awaiting: 'ожидается платёж',
+    otc_badge_declared: 'проверяем он-чейн…',
+    otc_badge_pending_conf: 'копятся подтверждения…',
+    otc_badge_verified: '✓ платёж подтверждён он-чейн',
+    otc_badge_mismatch: '⚠ заявленный платёж НЕ соответствует условиям',
+    otc_badge_failed: '⚠ транзакция не прошла',
+    otc_badge_not_found: 'транзакция не найдена',
+    otc_badge_error: 'эксплорер недоступен, повторяем…',
+    otc_badge_unsupported: 'автопроверка для этой сети недоступна — проверяйте вручную',
+    otc_paid_btn: 'Я оплатил',
+    otc_paid_ref_ph: 'ид транзакции (txid)',
+    otc_paid_send: 'Подтвердить платёж',
+    otc_not_funded_warn: '⏳ Покупатель ещё НЕ заблокировал {amt} в эскроу. НЕ отправляйте свой платёж, пока эскроу не профинансирован — если заплатите сейчас, а покупатель не внесёт средства, в эскроу нечему вас защитить. Кнопка «Я оплатил» появится, когда эскроу профинансируют.',
+    otc_send_exactly: 'Отправьте ровно',
+    otc_expect_amount: 'Вы получаете',
+    otc_pay_to_addr: 'На этот адрес (адрес получения покупателя)',
+    otc_your_addr: 'Ваш адрес получения',
+    otc_detect_btn: '💸 Я заплатил — найти мой перевод',
+    otc_detect_searching: 'Ищем ваш перевод он-чейн…',
+    otc_detect_found: 'Нашли ваш перевод: {sum} в {time}. Проверьте txid ниже и нажмите «Подтвердить платёж».',
+    otc_detect_none: 'Перевод на этот адрес за последние {min} мин не найден. Если платили раньше или частями — вставьте txid вручную ниже.',
+    otc_paid_chat_fail: 'Платёж заявлен — он-чейн проверка запущена, но отправить квитанцию в чат не удалось. Продублируйте сообщение «оплатил» в чате вручную.',
+    otc_verified_hint: 'Он-чейн подтверждение = средства дошли до адреса. Если это депозит биржи, зачисление на аккаунт может отставать. Release — всегда ВАША подпись.',
+    otc_open_explorer: 'Открыть в эксплорере',
     // OTC: payment details + payment claim
     payto_btn_title: 'Дать реквизиты для оплаты',
     payto_head: 'Реквизиты для оплаты',
@@ -463,7 +609,7 @@ const DICT = {
     disp_reveal_head: 'Раскрыть переписку медиатору',
     disp_reveal_warn: 'ИИ-медиатор судит по чату сделки. Кнопка ниже отправит на сервер ваш КЛЮЧ ЧАТА. Он расшифровывает только сообщения — двигать средства им НЕЛЬЗЯ. Эскроу-ключ остаётся на этом устройстве. Ключа одной стороны хватает на весь тред.',
     disp_reveal_btn: 'Раскрыть переписку арбитру', disp_revealing: 'раскрываем…',
-    disp_reveal_nokey: 'Ключа чата нет на этом устройстве — раскрыть отсюда не выйдет. Вторая сторона может раскрыть со своей: одного ключа достаточно.',
+    disp_reveal_nokey: 'Ключа чата нет на этом устройстве — раскрыть можно только там, где лежит ключ. Вторая сторона может раскрыть со своей: одного ключа достаточно.',
     disp_reveal_status: (you, peer) => `Раскрыто: вы ${you} · вторая сторона ${peer}`,
     disp_verdict_wait: 'Переписка раскрыта. Медиатор читает тред — вердикт появится здесь.',
     disp_verdict_head: 'Вердикт ИИ-медиатора',
@@ -556,26 +702,30 @@ const LSA = 'kaspa-escrow-active';    // id of the active deal (which one to ope
 export function loadDeals() { return getDeals(); }        // session is unlocked by the page's boot guard
 export function saveDeals(arr) { setDeals(arr); }         // no plaintext mirror (it used to hold the private sk!)
 export function saveDeal(d) {
-  const arr = loadDeals();
+  const profile = loadProfile(), arr = profile.deals;
   const i = arr.findIndex((x) => x.id === d.id);
   // Do NOT resurrect a forgotten deal: "Forget" races the deal page's background writers
   // (6-sec refresh() polling, debounced chatRead) — their saveDeal upsert, landing after
   // removeDeal(), silently put the deal back into the profile (owner-reported bug, 2026-07-11).
   // Updating an existing record leaves the tombstone alone; explicit return flows clear the mark via unforgetDeal().
-  if (i < 0 && forgottenDealIds().includes(Number(d.id))) return;
+  if (i < 0 && (forgottenDealIds().includes(Number(d.id)) || isProfileRecordTombstoned(profile, 'deals', d.id))) return false;
   if (i >= 0) arr[i] = { ...arr[i], ...d }; else arr.push(d);
-  saveDeals(arr);
+  saveProfile(profile);
   localStorage.setItem(LSA, String(d.id)); // an opened/saved deal becomes the active one
+  return true;
 }
 export function loadDeal(id) { return loadDeals().find((d) => d.id === Number(id)) || null; }
 export function activeDealId() { const v = Number(localStorage.getItem(LSA)); return Number.isFinite(v) && v > 0 ? v : null; }
 export function setActiveDeal(id) { localStorage.setItem(LSA, String(id)); }
-// Forget a deal in this browser (the key goes with it — only the recovery sheet grants access after).
+// Remove a deal from the encrypted profile. Its synced tombstone prevents stale devices and
+// background writers from recreating it; explicit recovery/import may revive it with a newer clock.
 // Returns the remaining list; if the active one was removed, the first remaining becomes active.
 export function removeDeal(id) {
   id = Number(id);
-  const arr = loadDeals().filter((d) => d.id !== id);
-  saveDeals(arr);
+  const profile = loadProfile();
+  tombstoneProfileRecord(profile, 'deals', id);
+  saveProfile(profile);
+  const arr = profile.deals;
   const t = forgottenDealIds();
   if (!t.includes(id)) { t.push(id); localStorage.setItem(LSF, JSON.stringify(t.slice(-200))); }
   if (activeDealId() === id) {
@@ -584,16 +734,20 @@ export function removeDeal(id) {
   }
   return arr;
 }
-// Tombstone of forgotten deals (device-local, like LSA): removeDeal marks the id, saveDeal refuses
-// to re-insert a marked one. Cleared by explicit user actions: join/restore from a
-// recovery sheet (deal.html) and importing a key file that contains the deal (desk.html).
+// Compatibility guard for profiles deleted before synced tombstones existed. New deletions also
+// keep this local marker so already-open old tabs cannot race an upsert back into the profile.
 const LSF = 'kaspa-escrow-forgotten';
 export function forgottenDealIds() {
   try { const a = JSON.parse(localStorage.getItem(LSF)); return Array.isArray(a) ? a.map(Number) : []; } catch { return []; }
 }
-export function unforgetDeal(id) {
+export function unforgetDeal(id, record = null) {
   const rest = forgottenDealIds().filter((x) => x !== Number(id));
   if (rest.length) localStorage.setItem(LSF, JSON.stringify(rest)); else localStorage.removeItem(LSF);
+  if (record) {
+    const profile = loadProfile();
+    reviveProfileRecord(profile, 'deals', record);
+    saveProfile(profile);
+  }
 }
 
 // cfg string for the wasm core, built from a stored deal
@@ -631,7 +785,7 @@ export function dealSheet(d) {
     d.chat_sk ? `Ключ чата:       ${d.chat_sk}   (НЕ двигает средства — только переписка)` : null,
     `Сервисный токен: ${d.token}`, '',
     'Панель сделки: https://kaspaforge.org/ru/deal.html?id=' + d.id,
-    'Открытый код и офлайн-инструмент: https://github.com/pcdoctormsk-ctrl/kaspa-safe',
+    'Открытый код и офлайн-инструмент: https://github.com/Kaspaforge/kaspaforge',
     '', 'ХРАНИ ЭТОТ ЛИСТ. Потеря ключа = потеря доступа к своей стороне сделки.',
   ] : [
     'KASPA ESCROW — DEAL RECOVERY SHEET (THE ONLY COPY OF YOUR KEYS)',
@@ -643,7 +797,7 @@ export function dealSheet(d) {
     d.chat_sk ? `Chat key:       ${d.chat_sk}   (does NOT move funds — messaging only)` : null,
     `Service token:  ${d.token}`, '',
     'Deal panel: https://kaspaforge.org/deal.html?id=' + d.id,
-    'Open source & offline tool: https://github.com/pcdoctormsk-ctrl/kaspa-safe',
+    'Open source & offline tool: https://github.com/Kaspaforge/kaspaforge',
     '', 'KEEP THIS SHEET. Losing the key means losing access to your side of the deal.',
   ];
   return lines.filter((x) => x != null).join('\n');
@@ -980,7 +1134,13 @@ export function parsePayToMsg(text) {
   return { method, details, label: payMethodLabel(method) };
 }
 
-/** Detect a pay message. */
+/** Detect a pay message. `method` keeps the RAW id (sanitized) rather than collapsing anything
+ *  outside the client's PAY_METHODS picker to 'other' — a server-verified OTC leg (Task 8, "I have
+ *  paid" in the counter-leg panel) posts the leg's real method id (e.g. 'btc', 'usdt-polygon'),
+ *  which is outside PAY_METHODS (that list only mirrors the 3 original free-form crypto options) but
+ *  is exactly what deal.html's buildExplorerUrl() needs to link the right explorer. payMethodLabel()
+ *  still falls back to "Other" for ids outside PAY_METHODS — cosmetic only, the explorer link is
+ *  computed by the caller (not here) so it now covers the full server method matrix. */
 export function parsePayMsg(text) {
   if (typeof text !== 'string' || text[0] !== '{' || !text.includes('"pay"')) return null;
   let j;
@@ -988,10 +1148,8 @@ export function parsePayMsg(text) {
   if (!j || j.t !== 'pay') return null;
   const ref = cleanStr(j.ref, 100);
   if (ref.length < 5) return null;
-  const method = PAY_METHODS.some((m) => m.id === j.method) ? j.method : 'other';
-  const m = payMethodOf(method);
-  return { method, ref, amount: cleanStr(j.amount, 20), currency: cleanStr(j.currency, 10),
-           label: payMethodLabel(method), txUrl: m.tx ? m.tx(encodeURIComponent(ref)) : null };
+  const method = /^[a-z0-9-]{1,24}$/.test(j.method || '') ? j.method : 'other';
+  return { method, ref, amount: cleanStr(j.amount, 20), currency: cleanStr(j.currency, 10), label: payMethodLabel(method) };
 }
 
 // ── dispute flow (Phase 2): claims → chat-key reveal → AI verdict → party's signature ──

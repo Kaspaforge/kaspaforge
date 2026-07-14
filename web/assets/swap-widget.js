@@ -12,14 +12,25 @@ function injectStyles() {
   const style = document.createElement('style');
   style.id = 'sw-widget-styles';
   style.textContent = `
-    .sw-timeline { display: flex; align-items: center; gap: 0; }
+    .sw-widget { min-width: 0; max-width: 100%; }
+    .sw-widget #sw-body, .sw-widget #sw-step3 { min-width: 0; max-width: 100%; }
+    .sw-timeline { display: flex; align-items: center; gap: 0; min-width: 0; max-width: 100%; }
     .sw-tl { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: none; }
     .sw-tl-dot { width: 13px; height: 13px; border-radius: 50%; background: var(--bd-soft); border: 2px solid var(--bd-soft); }
     .sw-tl.sw-on .sw-tl-dot { background: var(--kaspa); border-color: var(--kaspa); }
     .sw-tl.sw-on.sw-warn .sw-tl-dot { background: #E0A93E; border-color: #E0A93E; }
-    .sw-tl-lbl { font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ash2); }
+    .sw-tl-lbl { font-family: var(--mono); font-size: 10.5px; line-height: 1.25; letter-spacing: .1em; text-align: center; text-transform: uppercase; color: var(--ash2); }
     .sw-tl.sw-on .sw-tl-lbl { color: var(--ingot); }
     .sw-tl-bar { flex: 1; height: 2px; background: var(--bd-soft); margin: 0 4px; margin-bottom: 18px; }
+    @media (max-width: 640px) {
+      .sw-timeline { flex-direction: column; align-items: stretch; }
+      .sw-tl { display: grid; grid-template-columns: 18px minmax(0, 1fr); align-items: center; gap: 10px; width: 100%; }
+      .sw-tl-dot { grid-column: 1; justify-self: start; }
+      .sw-tl-lbl { grid-column: 2; min-width: 0; text-align: left; overflow-wrap: anywhere; }
+      .sw-tl-bar { flex: none; width: 2px; height: 16px; margin: 3px 0 3px 6px; }
+      .sw-widget .qr { max-width: 100%; }
+      .sw-widget .qr img { max-width: 100%; height: auto; }
+    }
   `;
   document.head.appendChild(style);
 }
@@ -70,6 +81,7 @@ export async function mountSwapWidget({ container, api, kas, kind, target, token
   // and Safe (create.html loads only safe.css), so it must draw the stepper itself,
   // without relying on any external stylesheet.
   injectStyles();
+  container.classList.add('sw-widget');
   container.innerHTML = `
     <button class="btn btn-ghost" id="sw-toggle" type="button">⇄ ${t.toggle}</button>
     <div id="sw-body" style="display:none;margin-top:14px">

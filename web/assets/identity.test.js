@@ -1,7 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import * as session from './session.js';
-import { getVaults, setVaults, getDeals, setDeals, mergeProfile, parseProfileFile, passphraseStrength } from './identity.js';
+import { getVaults, setVaults, getDeals, setDeals, mergeProfile, parseProfileFile, passphraseStrength,
+  tombstoneProfileRecord, reviveProfileRecords } from './identity.js';
+import { mirrorProjection } from './profile-mirror.js';
 
 const fakeCrypto = { encrypt: (j) => 'AGE:' + Buffer.from(j).toString('base64'),
   decrypt: (a) => Buffer.from(a.slice(4), 'base64').toString(),
@@ -70,6 +72,18 @@ test('mergeProfile: vaults — the record with alarm_sk beats the one without (a
   // an unmatched card record stays a card record
   m = mergeProfile({ ...base }, { ...base, vaults: [{ vault_addr: 'B', alarm_card: true }] });
   assert.equal(m.vaults.find((x) => x.vault_addr === 'B').alarm_card, true);
+});
+
+test('mergeProfile: a mirrored projection cannot erase two local alarm keys', () => {
+  const base = { wallet: null, vaults: [], deals: [], listings: [], swaps: [], chats: [], txs: [] };
+  const local = { ...base, vaults: [
+    { vault_addr: 'A', hot_sk: 'hot-a', alarm_sk: 'ALARM-A' },
+    { vault_addr: 'B', hot_sk: 'hot-b', alarm_sk: 'ALARM-B' },
+  ] };
+  const remote = mirrorProjection(local);
+  assert.deepEqual(remote.vaults.map((v) => v.alarm_sk), [undefined, undefined]);
+  const merged = mergeProfile(local, remote);
+  assert.deepEqual(merged.vaults.map((v) => v.alarm_sk), ['ALARM-A', 'ALARM-B']);
 });
 
 // walletOld: previous wallet addresses must survive a key-file import (owner-reported bug,
@@ -147,6 +161,55 @@ test('mergeProfile: prefs travel in the file, local ones take precedence', () =>
     { ...base, prefs: { activeVault: 'kaspa:qImported', txsHide: true } });
   assert.equal(m.prefs.activeVault, 'kaspa:qLocal');   // local preference is not overridden
   assert.equal(m.prefs.txsHide, true);                 // new value from the file arrived
+});
+
+test('mergeProfile carries one mirror identity but never combines two', () => {
+  const base = { version: 3, seed: 's', deriv: {}, wallet: null, vaults: [], deals: [], listings: [], swaps: [], chats: [], txs: [] };
+  assert.equal(mergeProfile(base, { ...base, mirror: { profile_id: 'remote' } }).mirror.profile_id, 'remote');
+  assert.equal(mergeProfile({ ...base, mirror: { profile_id: 'local' } },
+    { ...base, mirror: { profile_id: 'remote' } }).mirror.profile_id, 'local');
+});
+
+test('mergeProfile: synced tombstones prevent stale vault and deal resurrection in both merge orders', () => {
+  const stale = parseProfileFile(JSON.stringify({
+    vaults: [{ vault_addr: 'kaspa:vault-a', hot_sk: 'hot' }],
+    deals: [{ id: 17, sk: 'deal' }],
+  }));
+  const deleted = structuredClone(stale);
+  tombstoneProfileRecord(deleted, 'vaults', 'kaspa:vault-a');
+  tombstoneProfileRecord(deleted, 'deals', 17);
+  const mirroredDeletion = mirrorProjection(deleted);
+  assert.equal(mirroredDeletion.tombstones.vaults['kaspa:vault-a'], deleted.tombstones.vaults['kaspa:vault-a']);
+  assert.equal(mirroredDeletion.tombstones.deals['17'], deleted.tombstones.deals['17']); // encrypted sync payload
+
+  for (const merged of [mergeProfile(mirroredDeletion, stale), mergeProfile(stale, mirroredDeletion)]) {
+    assert.deepEqual(merged.vaults, []);
+    assert.deepEqual(merged.deals, []);
+    assert.ok(merged.tombstones.vaults['kaspa:vault-a'] > 0);
+    assert.ok(merged.tombstones.deals['17'] > 0);
+  }
+});
+
+test('reviveProfileRecords: explicit key-file import outranks an older tombstone', () => {
+  const original = parseProfileFile(JSON.stringify({
+    vaults: [{ vault_addr: 'kaspa:vault-a', hot_sk: 'hot' }],
+    deals: [{ id: 17, sk: 'deal' }],
+  }));
+  const deleted = structuredClone(original);
+  tombstoneProfileRecord(deleted, 'vaults', 'kaspa:vault-a');
+  tombstoneProfileRecord(deleted, 'deals', 17);
+
+  const restored = reviveProfileRecords(mergeProfile(deleted, original), original);
+  assert.equal(restored.vaults[0].vault_addr, 'kaspa:vault-a');
+  assert.equal(restored.deals[0].id, 17);
+  assert.equal(restored.tombstones.vaults['kaspa:vault-a'], undefined);
+  assert.equal(restored.tombstones.deals['17'], undefined);
+
+  // A device that still holds the old deletion cannot delete the explicit restore again.
+  for (const merged of [mergeProfile(restored, deleted), mergeProfile(deleted, restored)]) {
+    assert.equal(merged.vaults.length, 1);
+    assert.equal(merged.deals.length, 1);
+  }
 });
 
 test('passphraseStrength: strong ok, weak not ok', () => {

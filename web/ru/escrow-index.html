@@ -29,7 +29,7 @@
 <meta name="theme-color" content="#0E1116">
 <link rel="manifest" href="/manifest-escrow.json">
 <link rel="apple-touch-icon" href="/assets/icons-escrow/apple-touch-icon.png">
-<script src="/assets/nav.js?v=5" defer></script>
+<script src="/assets/nav.js?v=7" defer></script>
 <link rel="stylesheet" href="/assets/safe.css?v=14">
 <style>
 /* ── эскроу-лендинг: схема ковенанта (подпись-визуал) + степпер спора + сравнение ── */
@@ -106,8 +106,8 @@
 {"@type":"Question","name":"А если покупатель получил товар и замолчал?","acceptedAnswer":{"@type":"Answer","text":"Окно споров защищает и продавца: если покупатель не отпустил средства и не открыл спор, по закрытии окна эскроу авто-релизится продавцу."}},
 {"@type":"Question","name":"А если ваш сайт исчезнет посреди сделки?","acceptedAnswer":{"@type":"Answer","text":"Сделка — ончейн-контракт с аварийным таймаутом: если арбитр не вынес вердикт к контрактному дедлайну, средства сами уходят стороне по умолчанию. Контракт и офлайн-инструменты открыты — сделка переживёт сайт."}},
 {"@type":"Question","name":"Сколько это стоит?","acceptedAnswer":{"@type":"Answer","text":"Создание сделки бесплатно. Нормальный исход — релиз, возврат или взаимная договорённость — 0.5% (мин 1.2 KAS). Арбитраж — 2% (мин 5 KAS). Комиссия сервиса взимается ковенантом на каждом из этих путей; единственный путь без комиссии — аварийный таймаут (арбитр не вынес вердикт). Точная сумма видна до подтверждения."}},
-{"@type":"Question","name":"Кто видит нашу переписку?","acceptedAnswer":{"@type":"Answer","text":"Только вы двое. Чат сделки — ончейн-общение в BlockDAG Kaspa (протокол Kasia): каждое сообщение — сквозно зашифрованная транзакция, поэтому тред нельзя подделать или дописать задним числом. Сервер видит только шифртекст. Арбитр читает переписку, только если сторона осознанно раскрыла её в споре — а после закрытия сделки расшифрованная копия стирается."}},
-{"@type":"Question","name":"Насколько это проверено?","acceptedAnswer":{"@type":"Answer","text":"Открытая бета. Контракт прошёл полный ончейн-цикл и адверсариальные атаки на нашем полигоне (52/52 в VM) плюс живые прогоны споров на mainnet — но внешний аудит впереди. Сделки от 50 до 10 000 KAS."}}
+{"@type":"Question","name":"Кто видит нашу переписку?","acceptedAnswer":{"@type":"Answer","text":"Только вы двое. Чат сделки — ончейн-общение в BlockDAG Kaspa (протокол Kasia): каждое сообщение — сквозно зашифрованная транзакция, заякоренная ончейн — тред нельзя незаметно подделать или дописать задним числом. Сервер видит только шифртекст. Арбитр читает переписку, только если сторона осознанно раскрыла её в споре — а после закрытия сделки расшифрованная копия стирается."}},
+{"@type":"Question","name":"Насколько это проверено?","acceptedAnswer":{"@type":"Answer","text":"Открытая бета. Контракт прошёл полный ончейн-цикл и адверсариальные атаки на нашем полигоне (52/52 в VM) плюс живые прогоны споров на mainnet. Сделки от 50 до 10 000 KAS."}}
 ]}
 </script>
 </head>
@@ -134,6 +134,15 @@
   <span class="ns-item"><span class="ns-l">Нода</span><span class="ns-v"><span class="ns-dot" id="ns-dot"></span><span id="ns-status">…</span></span></span>
 </div>
 <script src="/assets/netstat.js?v=1" defer></script>
+
+<div class="netstat" id="secstat" style="display:none">
+  <span class="ns-item"><span class="ns-l">Контракты</span><span class="ns-v" id="sec-contracts">…</span></span>
+  <span class="ns-item"><span class="ns-l">Тесты</span><span class="ns-v" id="sec-tests">…</span></span>
+  <span class="ns-item"><span class="ns-l">Релиз</span><span class="ns-v" id="sec-release">…</span></span>
+  <span class="ns-item"><a class="ns-v" href="/ru/security.html" id="sec-link" style="color:var(--kaspa)">Безопасность ▸</a></span>
+  <span class="ns-item"><a class="ns-v" href="https://github.com/Kaspaforge/kaspaforge" id="sec-github" target="_blank" rel="noopener" style="color:var(--kaspa)">GitHub</a></span>
+</div>
+<script src="/assets/sec-status.js?v=3" defer></script>
 
 <div class="hero">
   <div class="txt">
@@ -209,6 +218,7 @@
     <div class="tick" style="left:99%"></div><div class="lbl end">авто-релиз продавцу</div>
   </div>
   <p class="hint" style="margin-top:10px">Пресеты окна споров: от 24 до 120 ч с шагом в сутки, плюс 7 дней — выбирает создатель сделки (по умолчанию от типа: товар 72 ч, OTC 24 ч, услуга 120 ч), вторая сторона видит окно до входа. Пока окно открыто, покупатель может открыть спор; закрылось — средства сами уходят продавцу.</p>
+  <p class="hint" style="margin-top:10px"><b>У OTC-сделок есть дополнительный слой.</b> Когда встречный платёж — поддерживаемая крипта (USDT/USDC на Tron, TON, Ethereum, BSC, Polygon, Arbitrum и Base, нативные TRX/TON/ETH/BNB или BTC/LTC), платёж продавца на зафиксированный адрес покупателя <b>проверяется вживую в этом блокчейне</b>: обе стороны видят бейдж «платёж подтверждён он-чейн», как только сходятся сумма, получатель и подтверждения. Это сигнал, а не действие — release всё равно требует подписи покупателя. Порядок жёсткий: сначала покупатель лочит KAS, и кнопка оплаты у продавца появляется только после фандинга эскроу. <a href="/ru/docs/escrow.html">Подробнее в документации ▸</a></p>
 </section>
 
 <section id="why">
@@ -216,12 +226,12 @@
   <h2>Шесть вещей, которых живой посредник не даст</h2>
   <div class="grid cols-3" style="margin-top:22px">
     <div class="path">
-      <div class="glyph">Украсть невозможно</div>
+      <div class="glyph">Выплаты — только сторонам сделки</div>
       <p>Ковенант допускает фиксированный набор исходов, и в каждом деньги уходят покупателю, продавцу или на видимую комиссию. Пути «отправить куда-то ещё» в скрипте нет — честность посредника перестаёт быть фактором.</p>
     </div>
     <div class="path">
       <div class="glyph">Ончейн-переписка — материалы дела</div>
-      <p>Чат сделки — не чатик на сайте. Это ончейн-общение в BlockDAG Kaspa на базе <b>протокола Kasia</b>: каждое сообщение — сквозно зашифрованная транзакция в самом леджере; фото и видео летят шифром, их отпечатки заякорены ончейн. Подделать, отредактировать или дописать тред задним числом не может никто — включая нас. В споре этот чат — материалы дела.</p>
+      <p>Чат сделки — не чатик на сайте. Это ончейн-общение в BlockDAG Kaspa на базе <b>протокола Kasia</b>: каждое сообщение — сквозно зашифрованная транзакция в самом леджере; фото и видео летят шифром, их отпечатки заякорены ончейн — тред нельзя незаметно подделать, отредактировать или дописать задним числом, в том числе нам. В споре этот чат — материалы дела.</p>
     </div>
     <div class="path">
       <div class="glyph">Спор решается в три слоя</div>
@@ -237,8 +247,11 @@
     </div>
     <div class="path">
       <div class="glyph">Открытый код и офлайн-восстановление</div>
-      <p>Ковенант и инструмент арбитра открыты (<a href="https://github.com/pcdoctormsk-ctrl/kaspa-safe" target="_blank" rel="noopener">GitHub</a>). Recovery-лист открывает сделку на любом устройстве, эскроу видно на любом эксплорере, а ончейн-таймаут не даёт ей зависнуть. <a href="/ru/recover-escrow.html">Восстановление и офлайн →</a></p>
+      <p>Ковенант и инструмент арбитра открыты (<a href="https://github.com/Kaspaforge/kaspaforge" target="_blank" rel="noopener">GitHub</a>). Recovery-лист открывает сделку на любом устройстве, эскроу видно на любом эксплорере, а ончейн-таймаут не даёт ей зависнуть. <a href="/ru/recover-escrow.html">Восстановление и офлайн →</a></p>
     </div>
+  </div>
+  <div style="margin-top:14px;font-size:12px;color:var(--ash2)">
+    <span>Открытая бета — <a href="/ru/security.html">безопасность &middot; проверка</a></span>
   </div>
 </section>
 
@@ -246,6 +259,7 @@
   <div class="eyebrow">Споры</div>
   <h2>Когда что-то пошло не так — процесс это рельсы, а не одолжение</h2>
   <p class="lead" style="margin-top:10px;max-width:64ch">Покупатель открывает спор — средства замирают в ковенанте. Дальше развязка идёт по видимой колее:</p>
+  <p style="margin-top:10px;max-width:68ch">Сначала хотите увидеть протокол целиком? Прочитайте <a href="/ru/docs/escrow.html">документацию по безопасности Гаранта</a> и разбор <a href="/ru/blog/kaspa-covenants-how-they-work.html">механики ковенантов Kaspa</a>.</p>
   <div class="disp-demo" aria-hidden="true">
     <div class="tl"><span class="tl-dot"></span><span class="tl-lbl">заявления</span></div><div class="tl-bar"></div>
     <div class="tl"><span class="tl-dot"></span><span class="tl-lbl">раскрытие</span></div><div class="tl-bar"></div>
@@ -263,7 +277,7 @@
     </div>
     <div class="plate">
       <div class="kv"><span class="k">Приватность</span><span class="v">до раскрытия арбитр видит только шифртекст; после закрытия сделки раскрытая копия стирается</span></div>
-      <div class="kv"><span class="k">Честность</span><span class="v">ИИ советует, человек — финальный арбитр, ковенант ограничивает деньги — кража исключена, справедливость — решение арбитра по доказательствам</span></div>
+      <div class="kv"><span class="k">Честность</span><span class="v">ИИ советует, человек — финальный арбитр, ковенант платит только сторонам сделки — справедливость решает арбитр по доказательствам</span></div>
       <div class="kv"><span class="k">Мировая</span><span class="v">релиз / возврат доступны в любой момент спора</span></div>
       <div class="kv"><span class="k">Ключи эскроу</span><span class="v">не покидают браузер ни на одном этапе — спор не исключение</span></div>
     </div>
@@ -323,7 +337,7 @@
         <tr><td>Кто держит деньги</td><td class="us">ончейн-ковенант — никто</td><td>человек, которому надо верить</td></tr>
         <tr><td>Может ли посредник украсть</td><td class="us">нет — сеть отвергнет любой другой адрес</td><td>да — барьер только репутация</td></tr>
         <tr><td>Комиссия</td><td class="us">0.5% миром · 2% арбитраж</td><td>3–10%</td></tr>
-        <tr><td>Доказательства</td><td class="us">ончейн-чат Kasia: E2E фото/видео, не подделать и не дописать</td><td>скриншоты, которые любой подделает</td></tr>
+        <tr><td>Доказательства</td><td class="us">ончейн-чат Kasia: E2E фото/видео, заякорено ончейн — незаметно не подделать и не переписать задним числом</td><td>скриншоты, которые любой подделает</td></tr>
         <tr><td>Посредник исчез</td><td class="us">таймаут сам вернёт средства</td><td>деньги пропали</td></tr>
       </tbody>
     </table>
@@ -356,7 +370,7 @@
     </details>
     <details>
       <summary>Кто видит нашу переписку?</summary>
-      <p>Только вы двое. Чат сделки — ончейн-общение в BlockDAG Kaspa (протокол Kasia): каждое сообщение — сквозно зашифрованная транзакция, поэтому тред нельзя подделать или дописать задним числом. Сервер видит только шифртекст. Арбитр читает переписку, только если одна из сторон осознанно раскрыла её в споре — а после закрытия сделки расшифрованная копия стирается. Ключ чата не может двигать средства.</p>
+      <p>Только вы двое. Чат сделки — ончейн-общение в BlockDAG Kaspa (протокол Kasia): каждое сообщение — сквозно зашифрованная транзакция, заякоренная ончейн — тред нельзя незаметно подделать или дописать задним числом. Сервер видит только шифртекст. Арбитр читает переписку, только если одна из сторон осознанно раскрыла её в споре — а после закрытия сделки расшифрованная копия стирается. Ключ чата не может двигать средства.</p>
     </details>
     <details>
       <summary>Что мне нужно хранить?</summary>
@@ -364,21 +378,37 @@
     </details>
     <details>
       <summary>Насколько это проверено?</summary>
-      <p>Открытая бета. Контракт прошёл полный ончейн-цикл и адверсариальные атаки на нашем полигоне (52/52 в VM) плюс живые прогоны споров на mainnet — но внешний аудит впереди. Сделки от 50 до 10 000 KAS.</p>
+      <p>Открытая бета. Контракт прошёл полный ончейн-цикл и адверсариальные атаки на нашем полигоне (52/52 в VM) плюс живые прогоны споров на mainnet. Сделки от 50 до 10 000 KAS.</p>
     </details>
   </div>
 
   <div class="note alarm" style="margin-top:26px">
-    <b>Открытая бета.</b> Контракт без внешнего аудита — он впереди. Держите сделки в диапазоне 50–10 000 KAS и не
-    доверяйте бете больше, чем готовы. Контракт гарантирует, что деньги нельзя украсть; справедливость вердикта —
-    решение арбитра по представленным доказательствам. Это инструмент, а не финансовый или юридический совет.
+    <b>Открытая бета.</b> Держите сделки в диапазоне 50–10 000 KAS и не
+    доверяйте бете больше, чем готовы. Каждый путь траты в ковенанте платит стороне сделки — оператор не может
+    перенаправить средства; справедливость вердикта — решение арбитра по представленным доказательствам. Это инструмент, а не финансовый или юридический совет.
   </div>
 </section>
 
 <footer>
-  <div class="row">
-    <a class="foot-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="OfficeForge"><img src="/assets/logo.png" alt="OfficeForge"></a>
-    <span>Kaspa Гарант — сделан ИИ-офисом <a href="https://officeforge.co" target="_blank" rel="noopener">OfficeForge</a> на ковенантах Kaspa · брат <a href="https://kaspaforge.org/ru/">Kaspa Safe</a> · связь: kaspa@officeforge.co · <a href="/ru/recover-escrow.html">Восстановление</a> · <a href="/ru/docs/">Документация</a> · <a href="/ru/blog/">Блог</a> · <a href="/ru/privacy-escrow.html">Приватность</a></span>
+  <div class="foot">
+    <span class="fb">
+      <img class="k" src="/assets/brand/emblem-flat-header.png" alt="" aria-hidden="true">
+      <span>© 2026 Kaspa Forge — сделан ИИ-офисом</span>
+      <a class="foot-ofs-logo" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="Перейти на сайт OfficeForge"><img src="/assets/of-wordmark.png" alt="OfficeForge"></a>
+    </span>
+    <nav aria-label="Подвал">
+      <a href="/ru/safe.html">Сейф</a>
+      <a href="/ru/escrow-index.html">Гарант</a>
+      <a href="/ru/market.html">Маркет</a>
+      <a href="/ru/blog/">Блог</a>
+      <a href="/ru/docs/">Документы</a>
+      <a href="/ru/recover.html">Восстановление</a>
+      <a href="https://github.com/Kaspaforge/kaspaforge" target="_blank" rel="noopener">GitHub</a>
+      <a href="/ru/privacy.html">Приватность</a>
+      <a href="/ru/terms.html">Условия</a>
+      <a href="/ru/security.html">Безопасность</a>
+      <a href="mailto:kaspa@officeforge.co">kaspa@officeforge.co</a>
+    </nav>
   </div>
 </footer>
 
@@ -399,7 +429,7 @@ fetch('/api/safe/info').then(function(r){return r.json()}).then(function(i){
   });
 })();
 </script>
-<script src="/assets/kaspa-widget.js?v=3" defer></script>
+<script src="/assets/kaspa-widget.js?v=4" defer></script>
 <script>if("serviceWorker" in navigator&&/(^|\.)kaspaforge\.org$|(^|\.)officeforge\.co$/.test(location.hostname))navigator.serviceWorker.register("/sw-escrow.js");</script>
 </body>
 </html>

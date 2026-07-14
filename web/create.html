@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#0E1116">
 <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/safe.css?v=14">
-<script src="/assets/nav.js?v=5" defer></script>
+<script src="/assets/nav.js?v=7" defer></script>
 <script src="/assets/qrcode.min.js"></script>
 </head>
 <body>
@@ -24,7 +24,6 @@
     <img class="brand-k" src="/assets/brand/emblem-flat-header.png" alt="">
     <span class="brand-name">Kaspa <b>Safe</b></span>
   </a>
-  <a class="by-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="Built by OfficeForge"><img src="/assets/of-wordmark.png" alt="OfficeForge"></a>
   <nav><a href="/manage.html">My vault</a><a href="/recover.html">Recovery</a></nav>
 </header>
 
@@ -32,7 +31,7 @@
   <div class="eyebrow">New vault</div>
   <h1 style="font-size:clamp(28px,4vw,40px);margin:10px 0 8px">Forge a vault</h1>
   <p class="lead">Four steps. Everything cryptographic happens in this browser tab — we never see or store your keys.</p>
-  <div class="note alarm" style="margin-top:16px"><b>Open beta.</b> Don't store more than you'd trust to a beta (we suggest ≤ 5,000 KAS). The contract is open source, but external audit is still ahead.</div>
+  <div class="note alarm" style="margin-top:16px"><b>Open beta.</b> Don't store more than you'd trust to a beta (we suggest ≤ 5,000 KAS). The contract is open source.</div>
   <div id="err" class="note alarm" style="display:none"></div>
 
   <div style="margin-top:34px">
@@ -176,16 +175,37 @@
   </div>
 </div>
 
-<footer><div class="row wrap"><a class="foot-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="OfficeForge"><img src="/assets/logo.png" alt="OfficeForge"></a><span>Kaspa Safe · non-custodial beta · built by the <a href="https://officeforge.co">OfficeForge</a> AI office · feedback: kaspa@officeforge.co · <a href="/privacy.html">Privacy</a></span></div></footer>
+<footer>
+  <div class="foot">
+    <span class="fb">
+      <img class="k" src="/assets/brand/emblem-flat-header.png" alt="" aria-hidden="true">
+      <span>© 2026 Kaspa Forge — built by the</span>
+      <a class="foot-ofs-logo" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="Visit OfficeForge"><img src="/assets/of-wordmark.png" alt="OfficeForge"></a>
+    </span>
+    <nav aria-label="Footer">
+      <a href="/safe.html">Safe</a>
+      <a href="/escrow-index.html">Escrow</a>
+      <a href="/market.html">Market</a>
+      <a href="/blog/">Blog</a>
+      <a href="/docs/">Docs</a>
+      <a href="/recover.html">Recovery</a>
+      <a href="https://github.com/Kaspaforge/kaspaforge" target="_blank" rel="noopener">GitHub</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+      <a href="/security.html">Security</a>
+      <a href="mailto:kaspa@officeforge.co">kaspa@officeforge.co</a>
+    </nav>
+  </div>
+</footer>
 </div>
 
 <script type="module">
 import { boot, core, net, delayOptions, inheritOptions, daaToHuman, unitToDaa, DELAY_MIN, WILL_DELAY, DELAY_MAX, MO, INHERIT_MIN, INHERIT_MAX, api, utxosRaw, utxosSum, submitTx,
-         saveVault, loadVaults, genToken, L, $, kas, copyBtn, showErr, qrInto, renderCoin } from '/assets/app.js?v=15';
-import { mountSwapWidget } from '/assets/swap-widget.js?v=3';
+         saveVault, loadVaults, genToken, L, $, kas, copyBtn, showErr, qrInto, renderCoin } from '/assets/app.js?v=18';
+import { mountSwapWidget } from '/assets/swap-widget.js?v=5';
 import { requireUnlock, confirmPassword } from '/assets/lock-ui.js';
 import * as session from '/assets/session.js';
-import { fundTargetFromWallet, walletBalance } from '/assets/wallet.js';
+import { fundTargetFromWallet, walletPortfolioBalance } from '/assets/wallet.js?v=2';
 import { alertBox } from '/assets/dialog.js';
 
 let keys = null, delay = 0, inheritDelay = 0, autoInherit = true, heirPk = '', vaultAddr = '', fundAddr = '', token = genToken(), pollTimer = null, fundRaw = '[]', derivIndex = null;
@@ -467,7 +487,7 @@ async function enterStep3() {
       const w = session.getProfile().wallet;
       if (!w) { await alertBox('No wallet in this profile', { alarm: true }); return; }
       // balance check before the password: a human message instead of a core error after typing it
-      const bal = await walletBalance(w.addr);
+      const bal = await walletPortfolioBalance(undefined, net());
       if (amt > bal) { await alertBox(`That's more than the wallet balance (${kas(bal)}).`, { alarm: true }); return; }
       // no blind confirm: the amount is shown in the modal (same pattern as the desk's Send)
       if (!await confirmPassword('Funding this vault from the desk wallet.', {
@@ -554,7 +574,7 @@ function wireSubPay(s) {
       const w = session.getProfile().wallet;
       if (!w) { await alertBox('No wallet in this profile', { alarm: true }); return; }
       const price = Math.round(Number(s.price_kas) * 1e8);
-      const bal = await walletBalance(w.addr);
+      const bal = await walletPortfolioBalance(undefined, net());
       if (price > bal) { await alertBox(`Not enough in the desk wallet (${kas(bal)}). Top it up below via SimpleSwap — or from any wallet on the Desk.`, { alarm: true }); return; }
       if (!await confirmPassword('Paying the alerts subscription from the desk wallet.', {
         context: `<b style="font-family:var(--mono);color:var(--kaspa)">${kas(price)}</b> → alerts subscription, +1 year` })) return;
@@ -590,7 +610,7 @@ $('tg-btn').onclick = async () => {
   } catch (e) { showErr(err, e); }
 };
 </script>
-<script src="/assets/kaspa-widget.js?v=3" defer></script>
+<script src="/assets/kaspa-widget.js?v=4" defer></script>
 <script>if("serviceWorker" in navigator&&/(^|\.)kaspaforge\.org$|(^|\.)officeforge\.co$/.test(location.hostname))navigator.serviceWorker.register("/sw.js");</script>
 </body>
 </html>

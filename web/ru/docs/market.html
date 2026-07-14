@@ -25,7 +25,7 @@
 <meta name="theme-color" content="#0E1116">
 <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/safe.css?v=14">
-<script src="/assets/nav.js?v=5" defer></script>
+<script src="/assets/nav.js?v=7" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"Как работает маркетплейс Kaspa — объявления со встроенным эскроу","description":"Каждая покупка открывает эскроу-сделку в ковенанте — продавец не получит деньги, пока покупатель не подтвердит. Типы объявлений, модерация, география доставки, комиссии и безопасность.","inLanguage":"ru","url":"https://kaspaforge.org/ru/docs/market.html","image":"https://kaspaforge.org/assets/og-market.png","dateModified":"2026-07-10","isPartOf":{"@type":"WebSite","name":"Kaspa Forge","url":"https://kaspaforge.org/"},"publisher":{"@type":"Organization","name":"OfficeForge","url":"https://officeforge.co"}}
 </script>
@@ -52,6 +52,7 @@
   <nav aria-label="Разделы документации" style="display:flex;gap:16px;flex-wrap:wrap;margin:20px 0 8px;padding:10px 0;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);font-family:var(--mono);font-size:11.5px;letter-spacing:.09em;text-transform:uppercase">
     <a href="/ru/docs/" style="color:var(--ash);text-decoration:none">Обзор</a>
     <a href="/ru/docs/desk.html" style="color:var(--ash);text-decoration:none">Деск и ключи</a>
+    <a href="/ru/docs/security.html" style="color:var(--ash);text-decoration:none">Безопасность</a>
     <a href="/ru/docs/safe.html" style="color:var(--ash);text-decoration:none">Сейф</a>
     <a href="/ru/docs/escrow.html" style="color:var(--ash);text-decoration:none">Гарант</a>
     <a href="/ru/docs/market.html" style="color:var(--kaspa);text-decoration:none">Маркет</a>
@@ -82,15 +83,36 @@
     <li><b>Никаких игр в репутацию.</b> Один и тот же ончейн-скрипт одинаково стережёт новичка и ветерана; не нужно оценивать чью-то карму — деньги не могут уйти туда, куда ковенант не позволяет.</li>
     <li><b>Споры — настоящие.</b> Зашифрованный чат сделки нельзя подделать или дописать задним числом; ИИ-медиатор предлагает, человек-арбитр решает, ковенант ограничивает любой исход рамками «покупатель / продавец / раздел». См. <a href="/ru/docs/escrow.html">рельсы спора</a>.</li>
     <li><b>Что хранит сервер:</b> публичное объявление (в этом смысл витрины), зашифрованный трафик сделок и записи модерации. Ключи остаются в вашем браузере. Подробно: <a href="/ru/privacy-escrow.html">приватность Гаранта и маркета</a>.</li>
-    <li><b>Честность беты.</b> Статус тот же, что у эскроу: наш полный цикл тестов пройден, внешний аудит впереди, сделки ограничены 50–10&nbsp;000 KAS.</li>
+    <li><b>Честность беты.</b> Статус тот же, что у эскроу: наш полный цикл тестов пройден, сделки ограничены 50–10&nbsp;000 KAS.</li>
   </ol>
 
   <p class="hint" style="margin-top:24px">См. также: <a href="/ru/market.html">открыть маркет</a> · <a href="/ru/docs/escrow.html">как работает Гарант</a> · <a href="/ru/docs/desk.html">деск и ваши ключи</a></p>
 </div>
 
-<footer><div class="row wrap"><a class="foot-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="OfficeForge"><img src="/assets/logo.png" alt="OfficeForge"></a><span>Kaspa Forge · некастодиальная бета · <a href="https://officeforge.co">OfficeForge</a> · обратная связь: kaspa@officeforge.co · <a href="/ru/privacy-escrow.html">Приватность</a></span></div></footer>
+<footer>
+  <div class="foot">
+    <span class="fb">
+      <img class="k" src="/assets/brand/emblem-flat-header.png" alt="" aria-hidden="true">
+      <span>© 2026 Kaspa Forge — сделан ИИ-офисом</span>
+      <a class="foot-ofs-logo" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="Перейти на сайт OfficeForge"><img src="/assets/of-wordmark.png" alt="OfficeForge"></a>
+    </span>
+    <nav aria-label="Подвал">
+      <a href="/ru/safe.html">Сейф</a>
+      <a href="/ru/escrow-index.html">Гарант</a>
+      <a href="/ru/market.html">Маркет</a>
+      <a href="/ru/blog/">Блог</a>
+      <a href="/ru/docs/">Документы</a>
+      <a href="/ru/recover.html">Восстановление</a>
+      <a href="https://github.com/Kaspaforge/kaspaforge" target="_blank" rel="noopener">GitHub</a>
+      <a href="/ru/privacy.html">Приватность</a>
+      <a href="/ru/terms.html">Условия</a>
+      <a href="/ru/security.html">Безопасность</a>
+      <a href="mailto:kaspa@officeforge.co">kaspa@officeforge.co</a>
+    </nav>
+  </div>
+</footer>
 </div>
 
-<script src="/assets/kaspa-widget.js?v=3" defer></script>
+<script src="/assets/kaspa-widget.js?v=4" defer></script>
 </body>
 </html>

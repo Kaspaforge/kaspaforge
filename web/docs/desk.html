@@ -3,16 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>The Desk &amp; the master key file — keys, backup, recovery | Kaspa Forge Docs</title>
-<meta name="description" content="How the Kaspa Forge Desk stores your keys: an age-encrypted profile that never leaves your browser, one master key file as a lifetime backup, seed derivation, restore on any device, and an offline decryptor.">
+<title>The Desk, master key file &amp; Forge Sync | Kaspa Forge Docs</title>
+<meta name="description" content="How the Kaspa Forge Desk protects your keys: a local age-encrypted profile, an independent master key-file backup, optional end-to-end encrypted Forge Sync, and offline recovery.">
 <link rel="canonical" href="https://kaspaforge.org/docs/desk.html">
 <link rel="alternate" hreflang="en" href="https://kaspaforge.org/docs/desk.html">
 <link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/docs/desk.html">
 <link rel="alternate" hreflang="x-default" href="https://kaspaforge.org/docs/desk.html">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="Kaspa Forge">
-<meta property="og:title" content="The Desk &amp; the master key file — keys, backup, recovery">
-<meta property="og:description" content="An age-encrypted profile that never leaves your browser; one exported key file is a lifetime backup for every vault, deal and listing.">
+<meta property="og:title" content="The Desk, master key file &amp; Forge Sync">
+<meta property="og:description" content="A local age-encrypted profile, an independent master key-file backup, and optional end-to-end encrypted sync between your devices.">
 <meta property="og:url" content="https://kaspaforge.org/docs/desk.html">
 <meta property="og:image" content="https://kaspaforge.org/assets/og-forge.png?v=1">
 <meta name="twitter:card" content="summary_large_image">
@@ -24,9 +24,9 @@
 <meta name="theme-color" content="#0E1116">
 <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/safe.css?v=14">
-<script src="/assets/nav.js?v=5" defer></script>
+<script src="/assets/nav.js?v=7" defer></script>
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"TechArticle","headline":"The Desk & the master key file — keys, backup, recovery","description":"How the Kaspa Forge Desk stores your keys: an age-encrypted profile that never leaves your browser, one master key file as a lifetime backup, seed derivation and restore on any device.","inLanguage":"en","url":"https://kaspaforge.org/docs/desk.html","image":"https://kaspaforge.org/assets/og-forge.png","dateModified":"2026-07-10","isPartOf":{"@type":"WebSite","name":"Kaspa Forge","url":"https://kaspaforge.org/"},"publisher":{"@type":"Organization","name":"OfficeForge","url":"https://officeforge.co"}}
+{"@context":"https://schema.org","@type":"TechArticle","headline":"The Desk, master key file & Forge Sync","description":"How the Kaspa Forge Desk protects your keys with a local age-encrypted profile, an independent key-file backup, optional end-to-end encrypted Forge Sync and offline recovery.","inLanguage":"en","url":"https://kaspaforge.org/docs/desk.html","image":"https://kaspaforge.org/assets/og-forge.png","dateModified":"2026-07-13","isPartOf":{"@type":"WebSite","name":"Kaspa Forge","url":"https://kaspaforge.org/"},"publisher":{"@type":"Organization","name":"OfficeForge","url":"https://officeforge.co"}}
 </script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Kaspa Forge","item":"https://kaspaforge.org/"},{"@type":"ListItem","position":2,"name":"Docs","item":"https://kaspaforge.org/docs/"},{"@type":"ListItem","position":3,"name":"Desk & keys","item":"https://kaspaforge.org/docs/desk.html"}]}
@@ -51,6 +51,7 @@
   <nav aria-label="Documentation sections" style="display:flex;gap:16px;flex-wrap:wrap;margin:20px 0 8px;padding:10px 0;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);font-family:var(--mono);font-size:11.5px;letter-spacing:.09em;text-transform:uppercase">
     <a href="/docs/" style="color:var(--ash);text-decoration:none">Overview</a>
     <a href="/docs/desk.html" style="color:var(--kaspa);text-decoration:none">Desk &amp; keys</a>
+    <a href="/docs/security.html" style="color:var(--ash);text-decoration:none">Security</a>
     <a href="/docs/safe.html" style="color:var(--ash);text-decoration:none">Safe</a>
     <a href="/docs/escrow.html" style="color:var(--ash);text-decoration:none">Escrow</a>
     <a href="/docs/market.html" style="color:var(--ash);text-decoration:none">Marketplace</a>
@@ -59,7 +60,7 @@
   <h2 style="margin-top:28px">One encrypted profile</h2>
   <p class="hint">On your first visit the Desk asks you to invent a password. That password encrypts a single profile — the keys of your vaults, deals, listings and your personal Kaspa wallet — right in the browser, using the standard <a href="https://age-encryption.org" rel="noopener">age</a> format. The profile is <b>always stored encrypted</b>; every unlock, every money move, every export and import re-asks the password. Like a password manager — because it is one.</p>
   <div style="margin-top:12px">
-    <div class="kv"><span class="k" style="min-width:170px">Where it lives</span><span class="v" style="text-align:left">In your browser's local storage, on your device — under the site's origin. It is never uploaded anywhere.</span></div>
+    <div class="kv"><span class="k" style="min-width:170px">Where it lives</span><span class="v" style="text-align:left">The primary encrypted copy lives in your browser's local storage, under the site's origin. If you explicitly enable Forge Sync, a safe projection is additionally stored as end-to-end encrypted ciphertext; separate protection keys are excluded.</span></div>
     <div class="kv"><span class="k" style="min-width:170px">Who knows the password</span><span class="v" style="text-align:left">Only you. We never see it and cannot reset or recover it — there is no "forgot password" because there is no server-side account at all.</span></div>
     <div class="kv"><span class="k" style="min-width:170px">Why it re-asks</span><span class="v" style="text-align:left">A password prompt on a new page or after a refresh is normal, not a bug: the profile sits encrypted until you unlock it.</span></div>
   </div>
@@ -67,30 +68,40 @@
   <h2 style="margin-top:32px">The master key file: one backup, forever</h2>
   <p class="hint">"Export key file" in the Desk downloads your profile as an encrypted <span class="mono">.age</span> file. Store the file and the password <b>separately</b> — whoever has both can move your funds; whoever has one has nothing.</p>
   <ol class="steps" style="margin-top:10px">
-    <li><b>The file covers the future, not just the past.</b> The profile contains a master seed; the keys of every <i>new</i> vault, deal, listing and chat are derived from it. Even a backup exported months ago restores things you created after the export.</li>
+    <li><b>The file covers future working keys, not just the past.</b> The profile contains a master seed; ordinary keys for every <i>new</i> vault, deal, listing and chat are derived from it. Even a backup exported months ago can rediscover those records. A Safe alarm key stored in the full profile is the exception: export again after creating that Safe.</li>
     <li><b>On import, the Desk re-discovers your records.</b> It derives your keys from the seed locally, then asks the server for the <i>public</i> data it already has (which vaults and deals exist) and rebuilds the list — "Restored from server". Private keys are never sent; the derivation happens in your browser.</li>
     <li><b>Import is always a merge.</b> Old and new files can be loaded over each other; nothing gets overwritten silently (the wallet asks explicitly on conflict).</li>
-    <li><b>Legacy profiles (created before July 10, 2026)</b> predate derivation: their old entities live on random keys, so one fresh export after that date is needed — the Desk shows a yellow "backup outdated" notice until you do. After that, the file is evergreen.</li>
-    <li><b>The one deliberate exception: a vault's alarm key.</b> It lives on the <b>alarm card</b> you save at vault creation — not in the key file and not derived from the seed. Hot + alarm together move a vault instantly, so stealing the file and password must never be enough. Losing the card doesn't lose funds (normal withdrawal and inheritance still work) — details in <a href="/docs/safe.html">how Safe works</a>.</li>
+    <li><b>Alarm-key storage is your choice.</b> The safer default keeps it only on the <b>alarm card</b>, outside the key file. You can instead save it in the encrypted profile for convenience, making that file a single point of failure. In that mode, export a fresh <span class="mono">.age</span> copy after creating the vault: this full file is how you carry its alarm key to another device.</li>
+  </ol>
+
+  <h2 style="margin-top:32px">Forge Sync (Beta): an encrypted mirror between your devices</h2>
+  <p class="hint">Forge Sync is an optional, manual sync for devices that already hold a copy of the same Desk profile. Open <b>Settings → Forge Sync</b> and enable it on each copy; the first creates the mirror and the others find it automatically. After that, press <b>Sync</b> whenever you want to exchange changes. There is no background sync and the server never receives your password or a readable profile.</p>
+  <ol class="steps" style="margin-top:10px">
+    <li><b>Old copies meet automatically.</b> Copies made before Forge Sync existed derive the same Sync identity from the profile's original wallet anchor. You do not need a new post-enable export, and rotating your receive address does not change that identity.</li>
+    <li><b>A new empty browser still needs recovery material.</b> Import your <span class="mono">.age</span> key file first. A password alone cannot locate or decrypt the server mirror. Copies also need the same Desk password as the uploaded snapshot; a password mismatch is rejected without changing local data.</li>
+    <li><b>The mirror is end-to-end encrypted and signed.</b> The server stores only opaque ciphertext, a public authentication key, hashes, version numbers and timestamps. Versions form a signed chain and conflicting edits are merged explicitly instead of silently overwriting one device.</li>
+    <li><b>Separate protection keys stay separate.</b> Wallet data, Safe hot/funding keys, deals, listings and chats can sync. Vault alarm keys, heir private keys and arbiter private keys are automatically omitted and remain only on the device or card where you keep them. <b>Forge Sync does not transfer the alarm key even when you chose to store it in the shared encrypted profile.</b> The Safe itself may appear on another device after Sync, but that device cannot cancel a withdrawal until you import a full encrypted <span class="mono">.age</span> copy exported from the device where the Safe was created (or supply its separate alarm card).</li>
+    <li><b>Device-level revoke is not available in this beta.</b> Copies of one profile share the same Sync credentials. Treat a lost device that held an unlocked or recoverable profile as a key-security incident; Sync cannot remotely lock that copy.</li>
+    <li><b>Sync is not your backup.</b> Keep an independent offline <span class="mono">.age</span> export and its password separately. Forge Sync is a convenience and continuity layer, not a replacement for recovery you control.</li>
   </ol>
 
   <h2 style="margin-top:32px">The built-in wallet</h2>
   <div style="margin-top:12px">
     <div class="kv"><span class="k" style="min-width:170px">Receive / balance / send</span><span class="v" style="text-align:left">The profile has its own Kaspa address — the handiest way to fund vaults and deals directly ("To safe" does the whole two-step funding route in one click).</span></div>
     <div class="kv"><span class="k" style="min-width:170px">"New address"</span><span class="v" style="text-align:left">Generates a fresh receive address (privacy: don't show one address to every counterparty). Derived from the master seed — your existing backup already covers it.</span></div>
-    <div class="kv"><span class="k" style="min-width:170px">"Sweep to current"</span><span class="v" style="text-align:left">Old addresses keep working; the Desk shows "past addresses: N" with a button that checks their balances and sweeps everything to the active address. Useful after vault withdrawals, which pay to the address that was fixed when the withdrawal started.</span></div>
+    <div class="kv"><span class="k" style="min-width:170px">One wallet balance</span><span class="v" style="text-align:left">Old receive addresses keep working and their UTXOs are included in the same spendable balance. Send, Max and “To safe” can use funds from every address directly; no sweep is required. Funded addresses created on another device are discovered from the master seed automatically.</span></div>
     <div class="kv"><span class="k" style="min-width:170px">"Wipe from device"</span><span class="v" style="text-align:left">For shared computers: fully deletes the profile from this browser (two confirmations; an extra-hard warning if no backup was ever exported). Everything comes back by importing the <span class="mono">.age</span> file elsewhere.</span></div>
   </div>
 
   <h2 style="margin-top:32px">If this site is gone: the offline decryptor</h2>
-  <p class="hint">Your backup must not depend on our website existing. From the <a href="/recover.html">Recovery page</a> you can download <span class="mono">kaspa-keyfile-decrypt.html</span> — a single ~3&nbsp;MB HTML file. Open it from disk with the internet off, load your <span class="mono">.age</span> file and password — it shows every private key inside (wallet, seed, vaults, deals — except vault alarm keys, which live only on their alarm cards) with zero network requests. The file is standard age, so the CLI <span class="mono">age -d keyfile.age</span> works too, and the tool is mirrored in the <a href="https://github.com/pcdoctormsk-ctrl/kaspa-safe" target="_blank" rel="noopener">open-source repo</a>.</p>
+  <p class="hint">Your backup must not depend on our website existing. From the <a href="/recover.html">Recovery page</a> you can download <span class="mono">kaspa-keyfile-decrypt.html</span> — a single ~3&nbsp;MB HTML file. Open it from disk with the internet off, load your <span class="mono">.age</span> file and password — it shows every private key stored in that full file with zero network requests. An alarm key kept on a separate card is absent by design. The file is standard age, so the CLI <span class="mono">age -d keyfile.age</span> works too, and the tool is mirrored in the <a href="https://github.com/Kaspaforge/kaspaforge" target="_blank" rel="noopener">open-source repo</a>.</p>
 
   <h2 style="margin-top:32px">Security: what the server sees</h2>
   <ol class="steps" style="margin-top:10px">
-    <li><b>Never sent to us:</b> your password, your private keys, your seed, the key file. All cryptography — key generation, transaction signing, chat encryption — runs in your browser (WASM).</li>
-    <li><b>Sent to us:</b> public keys and public parameters (needed to compute covenant addresses and to watch them), signed transactions for broadcast, and — if you opt in — an heir's email or a Telegram link for alerts.</li>
+    <li><b>Never sent in readable form:</b> your password, private keys or seed. All cryptography — key generation, transaction signing, chat encryption and Forge Sync encryption — runs in your browser (WASM and WebCrypto).</li>
+    <li><b>Sent to the platform:</b> public keys and public parameters (needed to compute covenant addresses and watch them), signed transactions for broadcast, and — if you opt in — an heir's email or Telegram link for alerts. The separate Sync service receives only the opaque encrypted mirror and signed metadata described above.</li>
     <li><b>The origin matters.</b> The profile is stored under the site's address. Enter your password and keys only on <span class="mono">kaspaforge.org</span> — check the address bar; lookalike domains are phishing. Our old addresses (<span class="mono">safe.officeforge.co</span>, <span class="mono">escrow.officeforge.co</span>) simply redirect here.</li>
-    <li><b>Losing the file + password = losing access.</b> Honestly: there is no recovery through us, because we hold nothing. Export the file once, keep it apart from the password, and rehearse an import on a small amount.</li>
+    <li><b>Do not treat Sync as recovery.</b> If every profile copy and your key file are gone, the password alone cannot recover the mirror and we cannot reset access. Export the file, keep it apart from the password, and rehearse an import on a small amount.</li>
   </ol>
 
   <div class="never" style="margin-top:20px">
@@ -102,9 +113,30 @@
   <p class="hint" style="margin-top:24px">Next: <a href="/docs/safe.html">how Kaspa Safe works</a> · <a href="/docs/escrow.html">how Kaspa Escrow works</a> · <a href="/docs/market.html">how the Marketplace works</a></p>
 </div>
 
-<footer><div class="row wrap"><a class="foot-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="OfficeForge"><img src="/assets/logo.png" alt="OfficeForge"></a><span>Kaspa Forge · non-custodial beta · <a href="https://officeforge.co">OfficeForge</a> · feedback: kaspa@officeforge.co · <a href="/privacy.html">Privacy</a></span></div></footer>
+<footer>
+  <div class="foot">
+    <span class="fb">
+      <img class="k" src="/assets/brand/emblem-flat-header.png" alt="" aria-hidden="true">
+      <span>© 2026 Kaspa Forge — built by the</span>
+      <a class="foot-ofs-logo" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="Visit OfficeForge"><img src="/assets/of-wordmark.png" alt="OfficeForge"></a>
+    </span>
+    <nav aria-label="Footer">
+      <a href="/safe.html">Safe</a>
+      <a href="/escrow-index.html">Escrow</a>
+      <a href="/market.html">Market</a>
+      <a href="/blog/">Blog</a>
+      <a href="/docs/">Docs</a>
+      <a href="/recover.html">Recovery</a>
+      <a href="https://github.com/Kaspaforge/kaspaforge" target="_blank" rel="noopener">GitHub</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+      <a href="/security.html">Security</a>
+      <a href="mailto:kaspa@officeforge.co">kaspa@officeforge.co</a>
+    </nav>
+  </div>
+</footer>
 </div>
 
-<script src="/assets/kaspa-widget.js?v=3" defer></script>
+<script src="/assets/kaspa-widget.js?v=4" defer></script>
 </body>
 </html>

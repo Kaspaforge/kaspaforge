@@ -16,7 +16,7 @@
 <meta name="theme-color" content="#0E1116">
 <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/safe.css?v=14">
-<script src="/assets/nav.js?v=5" defer></script>
+<script src="/assets/nav.js?v=7" defer></script>
 </head>
 <body>
 <div class="wrap">
@@ -42,7 +42,7 @@
 
   <div class="plate">
     <h2 style="font-size:20px">Что приложение хранит на устройстве</h2>
-    <p>Параметры сейфа (публичные ключи, задержки, сервисный токен). Приватные ключи, которые ты вводишь для действия, используются в памяти для подписи и нами не сохраняются. Данные лежат в локальном хранилище браузера/приложения (в зашифрованном мастер key-file) и стираются кнопкой «Забыть этот сейф в этом браузере». Бэкап мастер key-file ты делаешь сам в Деске (Экспорт файла ключей).</p>
+    <p>Параметры и ключи сейфа живут в зашифрованном мастер-профиле браузера/приложения. «Удалить сейф из Desk» записывает зашифрованный tombstone: Forge Sync удалит сейф и на других устройствах, а устаревшая копия не вернёт его обратно. Явный импорт файла ключей может восстановить сейф с более новой версией. Сервер не получает открытый профиль или приватные ключи.</p>
   </div>
 
   <div class="plate">
@@ -76,9 +76,9 @@
   </div>
 </div>
 
-<footer><div class="row wrap"><a class="foot-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="OfficeForge"><img src="/assets/logo.png" alt="OfficeForge"></a><span>Kaspa Safe · non-custodial бета · <a href="https://officeforge.co">OfficeForge</a> · фидбэк: kaspa@officeforge.co · <a href="/ru/privacy.html">Приватность</a></span></div></footer>
+<footer><div class="row wrap"><a class="foot-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="OfficeForge"><img src="/assets/logo.png" alt="OfficeForge"></a><span>Kaspa Safe · non-custodial бета · <a href="https://officeforge.co">OfficeForge</a> · фидбэк: kaspa@officeforge.co · <a href="/ru/privacy.html">Приватность</a> · <a href="/ru/terms.html">Условия</a> &middot; <a href="/ru/security.html">Безопасность</a></span></div></footer>
 </div>
-<script src="/assets/kaspa-widget.js?v=3" defer></script>
+<script src="/assets/kaspa-widget.js?v=4" defer></script>
 <script>if("serviceWorker" in navigator&&/(^|\.)kaspaforge\.org$|(^|\.)officeforge\.co$/.test(location.hostname))navigator.serviceWorker.register("/sw.js");</script>
 </body>
 </html>

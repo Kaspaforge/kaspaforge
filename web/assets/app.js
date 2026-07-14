@@ -3,7 +3,8 @@
 // already-signed transactions go to the server.
 
 import init, * as core from './vault-core-v3/kaspa_safe_core.js';
-import { getVaults, setVaults } from './identity.js';
+import { getVaults, setVaults, loadProfile, saveProfile,
+  isProfileRecordTombstoned, tombstoneProfileRecord } from './identity.js';
 
 export { core };
 
@@ -80,7 +81,7 @@ const DICT = {
     wd_tx_link: 'View the withdrawal transaction →',
     no_token_sub: 'no service token — alerts unavailable', sub_active: (d) => `active until ${d}`, sub_inactive: 'inactive',
     no_token_tg: 'no service token (it is on your recovery sheet) — alerts unavailable', bot_soon2: '(bot soon)',
-    forget_confirm: 'Remove this vault data from the browser? The recovery sheet stays your only access.',
+    forget_confirm: 'Remove this vault from your Desk? With Forge Sync enabled, the removal also reaches your other devices. An explicit key-file import can restore it.',
     inh_left: (t) => `the heir can claim in ${t}`, inh_ripe: 'period expired — the vault is open to the heir',
     sheet_bad: "This doesn't look like a Kaspa Safe recovery sheet (no pubkeys / delay found)",
     sheet_mismatch: 'Opened, but the vault address differs from the one printed on the sheet — double-check the sheet file.',
@@ -124,7 +125,7 @@ const DICT = {
     wd_tx_link: 'Транзакция вывода на эксплорере →',
     no_token_sub: 'нет сервисного токена — алерты недоступны', sub_active: (d) => `активна до ${d}`, sub_inactive: 'неактивна',
     no_token_tg: 'нет сервисного токена (он в recovery-листе) — алерты недоступны', bot_soon2: '(бот скоро)',
-    forget_confirm: 'Удалить данные сейфа из этого браузера? Recovery-лист останется единственным доступом.',
+    forget_confirm: 'Удалить сейф из Desk? При включённом Forge Sync удаление придёт и на другие устройства. Явный импорт файла ключей сможет восстановить его.',
     inh_left: (t) => `наследник сможет забрать через ${t}`, inh_ripe: 'срок истёк — сейф открыт наследнику',
     sheet_bad: 'Не похоже на recovery-лист Kaspa Safe (не нашёл pubkey-ключи / задержку)',
     sheet_mismatch: 'Сейф открыт, но адрес не совпал с напечатанным в листе — перепроверь файл листа.',
@@ -163,9 +164,9 @@ export function recoverySheet(d) {
     'ВОССТАНОВЛЕНИЕ БЕЗ САЙТА: сейф — ончейн-контракт Kaspa, не зависит',
     'от kaspaforge.org. Инструкция: https://kaspaforge.org/ru/recover.html',
     'Открытый код и офлайн-тулза vaultctl (лист подаётся как есть):',
-    'https://github.com/pcdoctormsk-ctrl/kaspa-safe', '',
+    'https://github.com/Kaspaforge/kaspaforge', '',
     'ХРАНИ ТРЕВОЖНЫЙ КЛЮЧ ОТДЕЛЬНО ОТ ГОРЯЧЕГО.',
-    'Бета: контракт без внешнего аудита. Лимит здравого смысла — 5 000 KAS.',
+    'Бета. Лимит здравого смысла — 5 000 KAS.',
   ] : [
     'KASPA SAFE — RECOVERY SHEET (THE ONLY COPY OF YOUR KEYS)',
     '='.repeat(60),
@@ -183,9 +184,9 @@ export function recoverySheet(d) {
     'RECOVERY WITHOUT THIS SITE: your vault is an on-chain Kaspa contract,',
     'independent of kaspaforge.org. Guide: https://kaspaforge.org/recover.html',
     'Open source and the offline vaultctl tool (feed this sheet as is):',
-    'https://github.com/pcdoctormsk-ctrl/kaspa-safe', '',
+    'https://github.com/Kaspaforge/kaspaforge', '',
     'KEEP THE ALARM KEY SEPARATE FROM THE HOT KEY.',
-    'Beta: unaudited contract. Common-sense cap — 5,000 KAS.',
+    'Beta. Common-sense cap — 5,000 KAS.',
   ]).join('\n');
 }
 
@@ -285,14 +286,18 @@ export function loadVault() {
   return arr.find((v) => v.vault_addr === activeAddr()) || arr[0];
 }
 export function saveVault(v) {                                     // v MAY contain hot_sk/alarm_sk/funding_sk — stored (the profile is encrypted)
-  const arr = loadVaults();
+  const profile = loadProfile(), arr = profile.vaults;
   const i = arr.findIndex((x) => x.vault_addr === v.vault_addr);
+  // Background refreshes must not recreate a record that another device explicitly deleted.
+  if (i < 0 && isProfileRecordTombstoned(profile, 'vaults', v.vault_addr)) return false;
   if (i >= 0) arr[i] = { ...arr[i], ...v }; else arr.push(v);
-  saveVaults(arr); localStorage.setItem(LSA, v.vault_addr);
+  saveProfile(profile); localStorage.setItem(LSA, v.vault_addr); return true;
 }
 export function removeVault(addr) {
-  const arr = loadVaults().filter((x) => x.vault_addr !== addr);
-  saveVaults(arr);
+  const profile = loadProfile();
+  tombstoneProfileRecord(profile, 'vaults', addr);
+  saveProfile(profile);
+  const arr = profile.vaults;
   if (activeAddr() === addr) { if (arr.length) setActiveAddr(arr[0].vault_addr); else localStorage.removeItem(LSA); }
 }
 export function clearVault() { const v = loadVault(); if (v) removeVault(v.vault_addr); }
@@ -306,7 +311,10 @@ export function genToken() {
 
 // ── utilities ──
 export const $ = (id) => document.getElementById(id);
-export const kas = (sompi) => (sompi / 1e8).toLocaleString('ru-RU', { maximumFractionDigits: 4 }) + ' KAS';
+export const kas = (sompi) => (sompi / 1e8).toLocaleString(
+  (document.documentElement.lang || 'en').startsWith('ru') ? 'ru-RU' : 'en-US',
+  { maximumFractionDigits: 4 }
+) + ' KAS';
 export function copyBtn(btn, text) {
   btn.addEventListener('click', async () => {
     await navigator.clipboard.writeText(text());

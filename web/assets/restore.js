@@ -4,7 +4,7 @@
 // of them exist (POST /api/safe/restore/scan + token endpoints). Private keys do NOT leave the
 // browser — the server only sees pk's and owner tokens (which it already has anyway).
 // Gap-scan: a domain is finished once GAP consecutive indices are empty (holes come from regen/cancelled flows).
-import { core, ready as coreReady } from './core6.js';
+import { core, ready as coreReady } from './core7.js';
 
 const GAP = 12;      // consecutive empty indices = end of domain
 const BATCH = 16;    // candidates per request (server caps at 64)
@@ -104,7 +104,9 @@ async function scanWalletAddrs(seed, network, knownPks) {
     const hits = new Map();
     await Promise.all(idx.map(async (i) => {
       const k = dk(seed, 'wallet', i);
-      if (knownPks.has(k.pk)) return;
+      // Known derived indices are not "empty gaps": count them as occupied so scanning continues
+      // beyond this device's last address and can find a newer address selected on another device.
+      if (knownPks.has(k.pk)) { hits.set(i, { known: true, deriv_i: i }); return; }
       const addr = core.pubkey_to_address(k.pk, network);
       const r = await fetch('/api/safe/utxos?address=' + encodeURIComponent(addr));
       if (!r.ok) return;
@@ -116,18 +118,37 @@ async function scanWalletAddrs(seed, network, knownPks) {
   return found;
 }
 
+/** Discover funded wallet addresses derived from seed and merge them into the logical wallet. */
+export async function restoreWalletAddresses(seed, profile, network) {
+  await coreReady;
+  const knownPks = new Set([profile.wallet && profile.wallet.pk,
+    ...(profile.walletOld || []).map((x) => x.pk)].filter(Boolean));
+  let added = 0;
+  for (const [i, w] of await scanWalletAddrs(seed, network, knownPks)) {
+    if (w.known) continue;
+    profile.walletOld = profile.walletOld || [];
+    profile.walletOld.push({ ...w, restored: true });
+    knownPks.add(w.pk);
+    profile.deriv = profile.deriv || {};
+    profile.deriv.wallet = Math.max(profile.deriv.wallet || 0, i + 1);
+    added++;
+  }
+  return added;
+}
+
 /**
  * Restore missing profile records from the server for the given seeds (usually [seed of the
  * imported file]). MUTATES profile (adds records + bumps deriv counters upward), does NOT commit —
  * the caller does that. Returns a report {vaults, deals, listings, chats, addresses}.
- * skipDealIds — deals forgotten on THIS device ("Forget this deal", escrow.js:forgottenDealIds):
- * the scan does not resurrect them; they can be brought back via a recovery list or by importing a key file containing the deal.
+ * Synced tombstone ids and legacy device-local skipDealIds are treated as already seen, so an
+ * automatic seed scan never resurrects them. Explicit recovery/import clears the tombstone first.
  */
 export async function restoreFromSeeds(seeds, profile, network, skipDealIds = []) {
   const report = { vaults: 0, deals: 0, listings: 0, chats: 0, addresses: 0 };
   const seen = {
-    vault: new Set((profile.vaults || []).map((v) => v.vault_addr)),
-    deal: new Set([...(profile.deals || []).map((d) => d.id), ...skipDealIds.map(Number)]),
+    vault: new Set([...(profile.vaults || []).map((v) => v.vault_addr), ...Object.keys(profile.tombstones?.vaults || {})]),
+    deal: new Set([...(profile.deals || []).map((d) => Number(d.id)), ...skipDealIds.map(Number),
+      ...Object.keys(profile.tombstones?.deals || {}).map(Number)]),
     listing: new Set((profile.listings || []).map((l) => l.id)),
     chat: new Set((profile.chats || []).map((c) => c.thread_id)),
   };
@@ -209,16 +230,7 @@ export async function restoreFromSeeds(seeds, profile, network, skipDealIds = []
     }
 
     // wallet addresses holding coins created after the export → walletOld (the active one is untouched)
-    const knownPks = new Set([profile.wallet && profile.wallet.pk,
-      ...(profile.walletOld || []).map((x) => x.pk)].filter(Boolean));
-    for (const [i, w] of await scanWalletAddrs(seed, network, knownPks)) {
-      profile.walletOld = profile.walletOld || [];
-      profile.walletOld.push({ ...w, restored: true });
-      knownPks.add(w.pk);
-      profile.deriv = profile.deriv || {};
-      profile.deriv.wallet = Math.max(profile.deriv.wallet || 0, i + 1);
-      report.addresses++;
-    }
+    report.addresses += await restoreWalletAddresses(seed, profile, network);
 
     // counters move up only: the indices of found items are already taken
     profile.deriv = profile.deriv || {};

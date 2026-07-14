@@ -14,7 +14,7 @@
 <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/safe.css?v=14">
 <style>
-/* Check-in: шкала до окна наследования — заполняется зелёный→красный по мере старения сейфа; сброс при check-in */
+/* Check-in: scale toward the inheritance window — fills green→red as the vault ages; resets on check-in */
 .ci-meter{position:relative;height:9px;margin:14px 0 2px;border-radius:999px;overflow:hidden;
   background:linear-gradient(90deg,var(--kaspa) 0%,var(--kaspa-soft) 14%,#E0A93E 58%,var(--alarm) 100%);
   box-shadow:inset 0 0 0 1px var(--bd)}
@@ -22,7 +22,7 @@
   width:calc(100% - var(--p,0%));background:var(--iron);
   border-left:1px solid rgba(255,255,255,.16);transition:width .5s ease}
 </style>
-<script src="/assets/nav.js?v=5" defer></script>
+<script src="/assets/nav.js?v=7" defer></script>
 <script src="/assets/qrcode.min.js"></script>
 </head>
 <body>
@@ -41,33 +41,23 @@
   <h1 style="font-size:clamp(28px,4vw,40px);margin:10px 0 20px">Мой сейф</h1>
   <div id="err" class="note alarm" style="display:none"></div>
 
-  <!-- Портфель: все сейфы, сохранённые в этом браузере -->
+  <!-- Portfolio: all vaults saved in this browser -->
   <div class="plate" id="vaults-bar" style="display:none;padding:16px 18px">
     <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap">
       <h2 style="font-size:17px;margin:0">Мои сейфы</h2>
       <span class="hint" id="vb-total" style="margin:0"></span>
     </div>
     <div id="vb-list"></div>
-    <!-- «+ Добавить сейф» убран (Майк 10.07): новые сейфы создаются в Деске («+ Новый сейф» →
-         create.html); лоадер по публичным параметрам остаётся для браузера без сейфов. -->
+    <!-- Новые сейфы создаются из Деска; manage.html работает только с сейфами единого профиля. -->
   </div>
 
   <div class="plate" id="loader" style="display:none">
-    <h2 style="font-size:20px">Открыть сейф</h2>
-    <p class="hint">В этом браузере сейф не найден. Открой <a href="/ru/desk.html">Деск</a> и импортируй мастер key-file, либо введи параметры ниже (они публичные — из мастер key-file или старого recovery-листа; ключи пока не нужны).</p>
-    <div style="margin:12px 0 6px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-      <button class="btn btn-kaspa" id="sheet-btn" type="button">Загрузить recovery-лист (.txt)</button>
-      <span class="hint" style="margin:0">файл читается локально в браузере — никуда не отправляется. Или введи значения ниже.</span>
+    <h2 style="font-size:20px">В этом профиле нет сейфов</h2>
+    <p class="hint">Сейфы управляются через единый зашифрованный профиль Деска и master key file. Импортируй или объедини этот файл в настройках Деска либо создай новый сейф. Тревожный ключ по замыслу остаётся отдельно — на alarm card.</p>
+    <div style="margin-top:16px;display:flex;gap:12px;flex-wrap:wrap">
+      <a class="btn btn-kaspa" href="/ru/desk.html#settings">Открыть настройки Деска</a>
+      <a class="btn btn-ghost" href="/ru/create.html">Создать сейф</a>
     </div>
-    <input type="file" id="sheet-file" accept=".txt,text/plain" style="display:none">
-    <label>Горячий pubkey</label><input type="text" id="in-hot">
-    <label>Тревожный pubkey</label><input type="text" id="in-alarm">
-    <label>Задержка вывода (DAA)</label><input type="text" id="in-delay">
-    <label>Pubkey наследника (опц.)</label><input type="text" id="in-heir">
-    <label>Срок наследования (DAA, опц.)</label><input type="text" id="in-inherit">
-    <label class="check"><input type="checkbox" id="in-auto" checked> Авто-наследование (как при создании сейфа)</label>
-    <label>Сервисный токен (для алертов; опц.)</label><input type="text" id="in-token">
-    <div style="margin-top:16px"><button class="btn btn-kaspa" id="load-btn">Открыть</button></div>
   </div>
 
   <div id="panel" style="display:none">
@@ -88,13 +78,13 @@
       <h2 style="font-size:20px">Вывести из сейфа</h2>
       <p class="hint">Вывод пойдёт с задержкой <span id="i-delay"></span>. Адрес получателя фиксируется навсегда — проверь дважды.</p>
       <label>Адрес получателя (kaspa:q…)</label><input type="text" id="i-dest" autocomplete="off">
-      <!-- Горячий ключ берётся из шифрованного профиля (мастер key-file) — поле показывается ТОЛЬКО
-           когда ключа в профиле нет (вольт открыт по публичным параметрам). Замечание Майка 09.07. -->
+      <!-- Горячий ключ берётся из зашифрованного профиля. Если его нет, загружен неверный или
+           неполный master key file, поэтому fallback ведёт обратно к импорту в Деске. -->
       <div id="i-hot-block" style="display:none">
         <label>Горячий ключ</label><input type="password" id="i-hotsk" autocomplete="off">
         <p class="hint">В профиле этого браузера нет горячего ключа этого сейфа — вставь его или импортируй мастер key-file в <a href="/ru/desk.html">Деске</a>.</p>
       </div>
-      <!-- разбивка по депозитам (covenant-UTXO): появляется, когда их несколько -->
+      <!-- deposit breakdown (covenant-UTXO): shown when there's more than one -->
       <div id="wd-breakdown" style="display:none;margin-top:14px"></div>
       <div style="margin-top:16px;display:flex;gap:12px;flex-wrap:wrap">
         <button class="btn btn-kaspa" id="i-btn">Инициировать вывод</button>
@@ -168,7 +158,7 @@
       <h2 style="font-size:20px">Подписка на алерты</h2>
       <p class="hint">Telegram- и email-алерты + напоминания о чекине. <b><span class="sub-price">100</span> KAS/год, первые 30 дней бесплатно.</b> Ончейн-операции сейфа всегда бесплатны.</p>
       <div class="kv"><span class="k">Статус</span><span class="v" id="sub-status">…</span></div>
-      <!-- Оплата — В КЛИК с desk-кошелька (замечание Майка 09.07): адрес/QR/copy убраны -->
+      <!-- Payment — ONE CLICK from the desk wallet (owner feedback 2026-07-09): address/QR/copy removed -->
       <div id="sub-pay" style="display:none;margin-top:8px">
         <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
           <button class="btn btn-kaspa" id="sub-pay-btn"><span>Оплатить <span class="sub-price">100</span> KAS с desk-кошелька</span></button>
@@ -195,29 +185,55 @@
     </div>
 
     <div style="margin-top:18px;display:flex;gap:14px">
-      <button class="btn btn-ghost" id="forget">Забыть сейф в этом браузере</button>
+      <button class="btn btn-ghost" id="forget">Удалить сейф из Desk</button>
     </div>
   </div>
 </div>
 
-<footer><div class="row wrap"><a class="foot-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="OfficeForge"><img src="/assets/logo.png" alt="OfficeForge"></a><span>Kaspa Safe · non-custodial бета · <a href="https://officeforge.co">OfficeForge</a> · фидбэк: kaspa@officeforge.co · <a href="/ru/privacy.html">Приватность</a></span></div></footer>
+<footer>
+  <div class="foot">
+    <span class="fb">
+      <img class="k" src="/assets/brand/emblem-flat-header.png" alt="" aria-hidden="true">
+      <span>© 2026 Kaspa Forge — сделан ИИ-офисом</span>
+      <a class="foot-ofs-logo" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="Перейти на сайт OfficeForge"><img src="/assets/of-wordmark.png" alt="OfficeForge"></a>
+    </span>
+    <nav aria-label="Подвал">
+      <a href="/ru/safe.html">Сейф</a>
+      <a href="/ru/escrow-index.html">Гарант</a>
+      <a href="/ru/market.html">Маркет</a>
+      <a href="/ru/blog/">Блог</a>
+      <a href="/ru/docs/">Документы</a>
+      <a href="/ru/recover.html">Восстановление</a>
+      <a href="https://github.com/Kaspaforge/kaspaforge" target="_blank" rel="noopener">GitHub</a>
+      <a href="/ru/privacy.html">Приватность</a>
+      <a href="/ru/terms.html">Условия</a>
+      <a href="/ru/security.html">Безопасность</a>
+      <a href="mailto:kaspa@officeforge.co">kaspa@officeforge.co</a>
+    </nav>
+  </div>
+</footer>
 </div>
 
 <script type="module">
 import { boot, core, net, daaToHuman, api, utxosRaw, submitTx, saveVault, loadVault, clearVault,
          loadVaults, saveVaults, setActiveAddr,
-         L, $, kas, copyBtn, qrInto, showErr, renderCoin, explorerTx } from '/assets/app.js?v=15';
+         L, $, kas, copyBtn, qrInto, showErr, renderCoin, explorerTx } from '/assets/app.js?v=18';
 import { requireUnlock, confirmPassword } from '/assets/lock-ui.js';
 import * as session from '/assets/session.js';
-import { fundTargetFromWallet, walletBalance } from '/assets/wallet.js';
+import { fundTargetFromWallet, walletPortfolioBalance } from '/assets/wallet.js?v=2';
 import { alertBox, confirmBox } from '/assets/dialog.js';
+import { createSubscriptionStatusLoader, subscriptionView } from '/assets/safe-subscription.js?v=2';
+
+const loadSubscriptionStatus = createSubscriptionStatusLoader((v) => api(
+  `/api/safe/sub-status?vault_addr=${encodeURIComponent(v.vault_addr)}&token=${encodeURIComponent(v.token)}`
+));
 
 const err = $('err');
-let vault;                       // назначается ПОСЛЕ requireUnlock — loadVault() читает разблокированный профиль
+let vault;                       // assigned AFTER requireUnlock — loadVault() reads the unlocked profile
 let virtualDaa = 0;
-let curAmount = 0;               // сумма в сейфе из последнего setState — для конфирма вывода
-let curVaultUtxos = [];          // все covenant-UTXO сейфа (депозиты) — для разбивки/вывода один/все
-let curUnvaultUtxos = [];        // все unvault-UTXO (идущие выводы) — для сводного отображения/claim
+let curAmount = 0;               // amount in the vault from the last setState — for the withdrawal confirm
+let curVaultUtxos = [];          // all covenant-UTXOs of the vault (deposits) — for breakdown/withdraw one/all
+let curUnvaultUtxos = [];        // all unvault-UTXOs (withdrawals in progress) — for summary display/claim
 const cfg = (v) => JSON.stringify({ hot_pk: v.hot_pk, alarm_pk: v.alarm_pk, delay: v.delay, heir_pk: v.heir_pk || '', inherit_delay: v.inherit_delay || 0, auto_inherit: !!v.auto_inherit, fee_budget: v.fee_budget || 1000000 });
 
 try {
@@ -229,7 +245,7 @@ try {
   if (!vault || !vault.hot_pk) { $('loader').style.display = 'block'; } else start();
 } catch (e) { showErr(err, e); }
 
-// ── портфель сейфов: строки-переключатели + суммарный баланс ──
+// ── vault portfolio: switcher rows + total balance ──
 function short(a) { return a ? a.slice(0, 14) + '…' + a.slice(-6) : ''; }
 function renderBar() {
   const list = loadVaults();
@@ -257,7 +273,7 @@ function renderBar() {
       renderBar();
     };
     $('vb-list').appendChild(row);
-    // баланс строки: covenant-UTXO сейфа; пусто, но известен активный вывод → глянуть unvault-адрес
+    // row balance: the vault's covenant-UTXOs; empty but an active withdrawal is known → check the unvault address
     (async () => {
       try {
         let sompi = JSON.parse(await utxosRaw(v.vault_addr)).filter((u) => u.covenant_id).reduce((s, u) => s + u.amount, 0);
@@ -283,68 +299,6 @@ function switchTo(addr) {
   renderBar();
 }
 
-// Открытие по recovery-листу: .txt (RU или EN) парсится ЛОКАЛЬНО, никуда не отправляется.
-$('sheet-btn').onclick = () => $('sheet-file').click();
-$('sheet-file').onchange = async () => {
-  const f = $('sheet-file').files[0];
-  if (!f) return;
-  try {
-    const text = await f.text();
-    const val = {};
-    for (const line of text.split(/\r?\n/)) {
-      const i = line.indexOf(':');
-      if (i > 0) val[line.slice(0, i).trim()] = line.slice(i + 1).trim();
-    }
-    const pick = (...keys) => { for (const k of keys) if (val[k]) return val[k]; return ''; };
-    const num = (s) => (String(s).match(/\d+/) || [''])[0];
-    const hot = pick('Hot pubkey', 'Горячий pubkey'), alarm = pick('Alarm pubkey', 'Тревожный pubkey');
-    const delay = num(pick('Withdrawal delay', 'Задержка вывода'));
-    if (!hot || !alarm || !delay) throw new Error(L('sheet_bad'));
-    const inh = pick('Inheritance', 'Наследование');
-    const off = /^(выключено|disabled)/i.test(inh) || !inh;
-    $('in-hot').value = hot; $('in-alarm').value = alarm; $('in-delay').value = delay;
-    $('in-heir').value = off ? '' : pick('Heir pubkey', 'Pubkey наследника');
-    $('in-inherit').value = off ? '' : num(inh);
-    $('in-auto').checked = off ? true : /авто|automatic/i.test(inh);
-    $('in-token').value = pick('Service token', 'Сервисный токен');
-    window.__sheetFeeBudget = Number(num(pick('Fee budget', 'Бюджет комиссии'))) || 1000000;
-    // самолечение: если у листа есть адрес и вычисленный не совпал — перебрать оба значения
-    // auto-наследования (историческая рассинхронизация no-heir сейфов), взять совпавший с листом
-    window.__sheetAddr = pick('Vault address', 'Адрес сейфа') || null;
-    $('load-btn').click();
-    if (window.__sheetAddr && vault && vault.vault_addr && window.__sheetAddr !== vault.vault_addr)
-      showErr(err, new Error(L('sheet_mismatch')));
-  } catch (e) { showErr(err, e); }
-  finally { window.__sheetAddr = null; }
-  $('sheet-file').value = '';
-};
-
-$('load-btn').onclick = () => {
-  const firstInt = (s) => Number((String(s).match(/\d+/) || [NaN])[0]); // терпит копипасту «8640 DAA (24 часа)» из листа
-  const heir = $('in-heir').value.trim();
-  const inh = $('in-inherit').value.trim() ? firstInt($('in-inherit').value) : 0;
-  const v = { network: net(), hot_pk: $('in-hot').value.trim(), alarm_pk: $('in-alarm').value.trim(),
-              delay: firstInt($('in-delay').value), heir_pk: heir,
-              // наследование выключено => режим не влияет; канон адреса — false (как при создании)
-              inherit_delay: inh, auto_inherit: (inh > 0 && !!heir) ? $('in-auto').checked : false,
-              fee_budget: window.__sheetFeeBudget || 1000000,
-              token: $('in-token').value.trim() || null };
-  try {
-    v.vault_addr = core.vault_address(cfg(v), net());
-    // если открыли по листу и адрес не сошёлся — при no-heir попробовать флаг auto наоборот
-    const ref = window.__sheetAddr;
-    if (ref && v.vault_addr !== ref && !(inh > 0 && heir)) {
-      const alt = { ...v, auto_inherit: !v.auto_inherit };
-      const altAddr = core.vault_address(cfg(alt), net());
-      if (altAddr === ref) { v.auto_inherit = alt.auto_inherit; v.vault_addr = altAddr; }
-    }
-    vault = v; saveVault(v);
-    $('loader').style.display = 'none';
-    start();
-    renderBar();
-  } catch (e) { showErr(err, e); }
-};
-
 async function start() {
   $('panel').style.display = 'block';
   $('s-addr').textContent = vault.vault_addr;
@@ -354,15 +308,15 @@ async function start() {
     $('row-inherit').style.display = 'flex';
     $('s-inherit').textContent = daaToHuman(vault.inherit_delay);
   } else {
-    $('row-inherit').style.display = 'none'; // переключение с сейфа с наследованием
+    $('row-inherit').style.display = 'none'; // switching from a vault that had inheritance
   }
-  // ключи из шифрованного профиля: ручной ввод показываем ТОЛЬКО когда их там нет
-  // (вольт открыт по публичным параметрам/листу на чужом устройстве). Замечание Майка 09.07.
+  // Рабочие ключи берутся из зашифрованного профиля. Отсутствующий горячий ключ означает неверный
+  // или неполный key file; тревожный ключ по замыслу хранится отдельно на alarm card.
   $('i-hot-block').style.display = vault.hot_sk ? 'none' : 'block';
   $('c-hot-block').style.display = vault.hot_sk ? 'none' : 'block';
   $('u-alarm-block').style.display = vault.alarm_sk ? 'none' : 'block';
-  // свежее устройство: подтянуть активный вывод (dest_pk/unvault) по токену — чтобы отменить кражу
-  // с ЧУЖОГО устройства (dest_pk выбирается при initiate, иначе живёт только в исходном браузере)
+  // fresh device: pull the active withdrawal (dest_pk/unvault) by token — so a theft can be cancelled
+  // from ANOTHER device (dest_pk is chosen at initiate, otherwise it only lives in the original browser)
   if (vault.token && !vault.dest_pk) {
     try {
       const st = await api(`/api/safe/vault-state?vault_addr=${encodeURIComponent(vault.vault_addr)}&token=${vault.token}`);
@@ -370,12 +324,12 @@ async function start() {
     } catch {}
   }
   refresh();
-  if (!window.__tick) window.__tick = setInterval(refresh, 6000); // не плодить интервалы при переключении сейфов
+  if (!window.__tick) window.__tick = setInterval(refresh, 6000); // don't spawn extra intervals when switching vaults
   loadSub();
   loadHeirContact();
 }
 
-// ── контакт наследника (email-уведомление при открытии окна наследования) ──
+// ── heir contact (email notification when the inheritance window opens) ──
 async function loadHeirContact() {
   const block = $('h-contact-block');
   const on = vault.inherit_delay > 0 && !!vault.heir_pk && !!vault.token;
@@ -414,8 +368,8 @@ function pkOk(s) { return typeof s === 'string' && /^[0-9a-f]{64}$/i.test(s); }
 async function refresh() {
   try {
     const info = await api('/api/safe/info'); virtualDaa = info.virtual_daa;
-    // только КОВЕНАНТ-UTXO = настоящий сейф; dust (не-ковенант) на адресе сейфа не должен
-    // маскировать активный вывод как «coins in vault» (аудит F2)
+    // only COVENANT-UTXOs = the real vault; dust (non-covenant) on the vault address must not
+    // mask an active withdrawal as "coins in vault" (audit F2)
     const vList = JSON.parse(await utxosRaw(vault.vault_addr)).filter(u => u.covenant_id);
     let uList = [];
     if (pkOk(vault.dest_pk)) {
@@ -423,8 +377,8 @@ async function refresh() {
       vault.unvault_addr = uAddr;
       uList = JSON.parse(await utxosRaw(uAddr));
     }
-    // сейф выглядит пустым, но есть токен → перепросить у сервера НОВЫЙ активный вывод
-    // (после отмены кражи #1 вор пускает кражу #2 на другой адрес — иначе панель слепа, аудит F1)
+    // the vault looks empty, but there's a token → re-ask the server for a NEW active withdrawal
+    // (after theft #1 is cancelled, the thief starts theft #2 to a different address — otherwise the panel is blind, audit F1)
     let lastWithdrawTxid = null;
     if (!vList.length && !uList.length && vault.token) {
       try {
@@ -440,12 +394,12 @@ async function refresh() {
     curVaultUtxos = vList; curUnvaultUtxos = uList;
     if (vList.length) {
       setState('vault', vList[0]);
-      // сумма в сейфе — ВСЕ ковенант-UTXO (после депозита с деска их может быть несколько)
+      // amount in the vault — ALL covenant-UTXOs (after a deposit from the desk there can be several)
       curAmount = vList.reduce((s, u) => s + u.amount, 0);
       $('s-amount').textContent = kas(curAmount);
-      renderWdBreakdown(vList);   // разбивка по депозитам + «вывести один/все»
-      // монеты в сейфе И идущий вывод одновременно: плашка вывода (с кнопкой отмены) не должна
-      // прятаться за состоянием 'vault' — иначе депозит маскирует вывод/кражу (инцидент 10.07)
+      renderWdBreakdown(vList);   // deposit breakdown + "withdraw one/all"
+      // coins in the vault AND a withdrawal in progress at the same time: the withdrawal panel (with
+      // the cancel button) must not hide behind the 'vault' state — otherwise a deposit masks a withdrawal/theft (2026-07-10 incident)
       if (uList.length) overlayUnvaulting(uList);
     }
     else if (uList.length) setState('unvaulting', uList[0]);
@@ -453,13 +407,13 @@ async function refresh() {
   } catch {}
 }
 
-// Плашка «Идёт вывод» ПОВЕРХ состояния 'vault' (сейф с монетами и активным выводом):
-// открывает и заполняет те же элементы, что unvaulting-ветка setState.
+// The "Withdrawal in progress" panel ON TOP of the 'vault' state (a vault with coins and an active
+// withdrawal): opens and fills the same elements as the unvaulting branch of setState.
 function overlayUnvaulting(list) {
   $('act-unvaulting').style.display = 'block';
   $('row-window').style.display = 'flex';
   const n = list.length, total = list.reduce((s, u) => s + u.amount, 0), u0 = list[0];
-  $('u-amt').textContent = kas(total) + (n > 1 ? ` · ${n} депозитов` : '');   // сколько уходит суммарно
+  $('u-amt').textContent = kas(total) + (n > 1 ? ` · ${n} депозитов` : '');   // total amount leaving
   const age = Math.max(0, virtualDaa - u0.daa);
   const left = Math.max(0, vault.delay - age);
   $('s-window').textContent = left > 0 ? L('win_left')(daaToHuman(left)) : L('win_closed');
@@ -529,25 +483,26 @@ function setState(s, utxo, withdrawTxid) {
 async function loadSub() {
   if (!vault.token) { $('sub-status').textContent = L('no_token_sub'); return; }
   try {
-    const s = await api(`/api/safe/sub-status?vault_addr=${encodeURIComponent(vault.vault_addr)}&token=${vault.token}`);
+    const s = await loadSubscriptionStatus(vault);
     document.querySelectorAll('.sub-price').forEach(el => { el.textContent = s.price_kas; });
-    const until = new Date(s.paid_until * 1000).toISOString().slice(0, 10);
-    $('sub-status').textContent = s.active ? L('sub_active')(until) : L('sub_inactive');
-    $('sub-status').className = s.active ? 'v ok' : 'v warn';
+    const view = subscriptionView(s, 'ru');
+    $('sub-status').textContent = view.status;
+    $('sub-status').className = `v ${view.tone}`;
     if (vault.token) {
       $('email-alert-block').style.display = 'block';
       $('alert-email').value = s.alert_email || '';
     }
-    if (s.sub_addr) {
+    if (view.showPay) {
       $('sub-pay').style.display = 'block';
-      // оплата в клик с desk-кошелька (копипаста адреса убрана — замечание Майка 09.07)
+      $('sub-pay-btn').textContent = view.payLabel;
+      // one-click payment from the desk wallet (address copy-paste removed — owner feedback 2026-07-09)
       $('sub-pay-btn').onclick = async () => {
         const btn = $('sub-pay-btn');
         try {
           const w = session.getProfile().wallet;
           if (!w) { await alertBox('В профиле нет кошелька', { alarm: true }); return; }
           const price = Math.round(Number(s.price_kas) * 1e8);
-          const bal = await walletBalance(w.addr);
+          const bal = await walletPortfolioBalance(undefined, net());
           if (price > bal) { await alertBox(`На desk-кошельке не хватает (${kas(bal)}). Пополни в Деске — SimpleSwap или с любого кошелька.`, { alarm: true }); return; }
           if (!await confirmPassword('Оплата подписки на алерты с desk-кошелька.', {
             context: `<b style="font-family:var(--mono);color:var(--kaspa)">${kas(price)}</b> → подписка на алерты, +1 год` })) return;
@@ -557,7 +512,7 @@ async function loadSub() {
           const ok = $('sub-paid'); ok.style.display = '';
           ok.innerHTML = '<span style="color:var(--kaspa)">✓ Оплата отправлена</span> — год добавится автоматически после подтверждения.';
         } catch (e) {
-          await alertBox((e && e.message) || 'Ошибка', { alarm: true });
+          await alertBox((e && e.message) || 'Error', { alarm: true });
           btn.disabled = false; btn.textContent = `Оплатить ${s.price_kas} KAS с desk-кошелька`;
         }
       };
@@ -565,7 +520,7 @@ async function loadSub() {
   } catch (e) { $('sub-status').textContent = e.message; }
 }
 
-// общий флоу вывода: с ручного адреса (i-btn) и в клик на desk-кошелёк (i-desk-btn)
+// shared withdrawal flow: to a manual address (i-btn) and one-click to the desk wallet (i-desk-btn)
 async function initiateOneTx(utxo, destPk, hotSk) {
   const built = core.build_initiate(cfg(vault), hotSk, destPk, JSON.stringify([utxo]), net());
   const parsed = JSON.parse(built);
@@ -576,13 +531,13 @@ async function initiateOneTx(utxo, destPk, hotSk) {
   return parsed;
 }
 
-// вывести ОДИН депозит (covenant-UTXO)
+// withdraw ONE deposit (covenant-UTXO)
 async function withdrawOne(utxo, destAddr) {
   try {
     if (!utxo) { await alertBox('Нечего выводить', { alarm: true }); return; }
     if (!destAddr) { await alertBox('Укажи адрес получателя', { alarm: true }); return; }
     if (!await confirmBox(L('confirm_wd')(destAddr), { danger: true, ok: 'Вывести' })) return;
-    // конфирм пароля не слепой: РЕАЛЬНАЯ сумма выводимого UTXO и получатель в модалке
+    // the password confirmation isn't blind: the REAL amount of the withdrawn UTXO and the recipient are shown in the modal
     if (!await confirmPassword('Вывод из сейфа — адрес получателя фиксируется навсегда.', {
       context: `<b style="font-family:var(--mono);color:var(--kaspa)">${kas(utxo.amount)}</b><br>→ <span style="font-family:var(--mono)">${short(destAddr)}</span>` })) return;
     const destPk = core.address_to_pubkey(destAddr);
@@ -593,15 +548,17 @@ async function withdrawOne(utxo, destAddr) {
   } catch (e) { showErr(err, e); }
 }
 
-// вывести ВСЕ депозиты на один адрес (N initiate-транзакций → один unvault_addr; вотчер добьёт)
-async function withdrawAll(destAddr) {
+// withdraw any set of deposits to one address (N initiate transactions → one unvault_addr;
+// the covenant requires one input per transaction, so selected/all share the same safe sequence).
+async function withdrawMany(utxos, destAddr, all = false) {
   try {
-    const utxos = curVaultUtxos.slice();
+    utxos = (utxos || []).slice();
     if (!utxos.length) { await alertBox('Нечего выводить', { alarm: true }); return; }
     if (!destAddr) { await alertBox('Укажи адрес получателя', { alarm: true }); return; }
     const total = utxos.reduce((s, u) => s + u.amount, 0);
-    if (!await confirmBox(L('confirm_wd')(destAddr), { danger: true, ok: 'Вывести все' })) return;
-    if (!await confirmPassword('Вывод ВСЕХ депозитов из сейфа — адрес получателя фиксируется навсегда.', {
+    const scope = all ? 'ВСЕХ' : `${utxos.length} ВЫБРАННЫХ`;
+    if (!await confirmBox(L('confirm_wd')(destAddr), { danger: true, ok: all ? 'Вывести все' : 'Вывести выбранные' })) return;
+    if (!await confirmPassword(`Вывод ${scope} депозитов из сейфа — адрес получателя фиксируется навсегда.`, {
       context: `<b style="font-family:var(--mono);color:var(--kaspa)">${kas(total)}</b> · ${utxos.length} депозитов<br>→ <span style="font-family:var(--mono)">${short(destAddr)}</span>` })) return;
     const destPk = core.address_to_pubkey(destAddr);
     const hotSk = vault.hot_sk || $('i-hotsk').value.trim();
@@ -609,54 +566,129 @@ async function withdrawAll(destAddr) {
     let done = 0;
     for (const u of utxos) {
       try { await initiateOneTx(u, destPk, hotSk); done++; }
-      catch (e) { await alertBox(`Запущено ${done} из ${utxos.length} выводов. Остановлено: ${(e && e.message) || e}. Остаток в сейфе — нажми «Вывести все» ещё раз.`, { alarm: true }); break; }
+      catch (e) { await alertBox(`Запущено ${done} из ${utxos.length} выводов. Остановлено: ${(e && e.message) || e}. Остаток остаётся в сейфе — выбери его и повтори.`, { alarm: true }); break; }
     }
     $('i-hotsk').value = '';
-    if (done === utxos.length) await alertBox(`✓ Запущен вывод всех ${done} депозит(ов). Завершатся после окна отмены.`);
+    if (done === utxos.length) await alertBox(`✓ Запущен вывод ${done} депозит(ов). Завершатся после окна отмены.`);
     refresh();
   } catch (e) { showErr(err, e); }
 }
 
-// #i-btn / #i-desk-btn: один депозит → обычный вывод, несколько → «вывести все»
+function withdrawAll(destAddr) {
+  return withdrawMany(curVaultUtxos, destAddr, true);
+}
+
+// #i-btn / #i-desk-btn: one deposit → regular withdrawal, several → "withdraw all"
 function doWithdraw(destAddr) {
   return curVaultUtxos.length > 1 ? withdrawAll(destAddr) : withdrawOne(curVaultUtxos[0], destAddr);
 }
 
-// разбивка по депозитам + релейбл главных кнопок; строки видны только когда депозитов > 1
+const vaultUtxoKey = (u) => `${u.txid}:${u.index}`;
+// The vault refreshes every six seconds and rebuilds the breakdown DOM. Keep the user's
+// selection in data, not in the disposable checkbox elements.
+const selectedVaultUtxoKeys = new Set();
+
+function selectedVaultUtxos() {
+  return curVaultUtxos.filter((u) => selectedVaultUtxoKeys.has(vaultUtxoKey(u)));
+}
+
+async function deskWalletAddress() {
+  let w = null;
+  try { w = session.getProfile().wallet; } catch {}
+  if (!w) { await alertBox('В профиле нет кошелька — открой Деск один раз, он создастся.', { alarm: true }); return null; }
+  return w.addr;
+}
+
+// deposit breakdown + relabel the main buttons; rows are shown only when there's more than 1 deposit
 function renderWdBreakdown(utxos) {
   const box = $('wd-breakdown');
   const multi = utxos.length > 1;
   const total = utxos.reduce((s, u) => s + u.amount, 0);
   $('i-btn').textContent = multi ? `Вывести все (${utxos.length}) · ${kas(total)}` : 'Инициировать вывод';
   $('i-desk-btn').textContent = multi ? 'Вывести все на desk-кошелёк' : 'Вывести на desk-кошелёк';
-  if (!multi) { box.style.display = 'none'; box.textContent = ''; return; }
+  const availableKeys = new Set(utxos.map(vaultUtxoKey));
+  for (const key of selectedVaultUtxoKeys) if (!availableKeys.has(key)) selectedVaultUtxoKeys.delete(key);
+  if (!multi) { selectedVaultUtxoKeys.clear(); box.style.display = 'none'; box.textContent = ''; return; }
   box.style.display = 'block';
   box.textContent = '';
   const hdr = document.createElement('p');
   hdr.className = 'hint'; hdr.style.margin = '0 0 6px';
-  hdr.textContent = `В сейфе ${utxos.length} депозитов — вывести один или все сразу:`;
+  hdr.textContent = `В сейфе ${utxos.length} депозитов — выведи один, выбранные или все сразу:`;
   box.appendChild(hdr);
   utxos.forEach((u) => {
     const row = document.createElement('div');
-    row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-top:1px solid var(--bd-soft)';
+    row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-top:1px solid var(--bd-soft);flex-wrap:wrap';
+    const identity = document.createElement('label');
+    identity.style.cssText = 'display:flex;align-items:center;gap:10px;margin:0';
+    const pick = document.createElement('input');
+    pick.type = 'checkbox'; pick.className = 'wd-pick'; pick.value = vaultUtxoKey(u);
+    pick.checked = selectedVaultUtxoKeys.has(pick.value);
+    pick.setAttribute('aria-label', `Выбрать депозит ${kas(u.amount)}`);
     const amt = document.createElement('span');
     amt.className = 'mono'; amt.textContent = kas(u.amount);
+    identity.appendChild(pick); identity.appendChild(amt);
+    const actions = document.createElement('div');
+    actions.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap';
     const b = document.createElement('button');
     b.className = 'btn btn-ghost'; b.style.cssText = 'padding:6px 14px;font-size:14px';
     b.textContent = 'Вывести';
     b.onclick = () => withdrawOne(u, $('i-dest').value.trim());
-    row.appendChild(amt); row.appendChild(b);
+    const wallet = document.createElement('button');
+    wallet.className = 'btn btn-ghost'; wallet.style.cssText = 'padding:6px 14px;font-size:14px';
+    wallet.textContent = 'На мой кошелёк';
+    wallet.onclick = async () => { const addr = await deskWalletAddress(); if (addr) withdrawOne(u, addr); };
+    actions.appendChild(b); actions.appendChild(wallet);
+    row.appendChild(identity); row.appendChild(actions);
     box.appendChild(row);
   });
+
+  const controls = document.createElement('div');
+  controls.style.cssText = 'display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--bd-soft)';
+  const selectAllLabel = document.createElement('label');
+  selectAllLabel.style.cssText = 'display:flex;align-items:center;gap:8px;margin:0';
+  const selectAll = document.createElement('input');
+  selectAll.type = 'checkbox'; selectAll.id = 'wd-select-all';
+  selectAllLabel.appendChild(selectAll); selectAllLabel.append('Выбрать все');
+  const summary = document.createElement('span');
+  summary.id = 'wd-selected-sum'; summary.className = 'hint'; summary.style.margin = '0';
+  const selected = document.createElement('button');
+  selected.id = 'wd-selected'; selected.className = 'btn btn-ghost'; selected.textContent = 'Вывести выбранные';
+  const selectedDesk = document.createElement('button');
+  selectedDesk.id = 'wd-selected-desk'; selectedDesk.className = 'btn btn-kaspa'; selectedDesk.textContent = 'Вывести выбранные на мой desk-кошелёк';
+  controls.appendChild(selectAllLabel); controls.appendChild(summary); controls.appendChild(selected); controls.appendChild(selectedDesk);
+  box.appendChild(controls);
+
+  const picks = [...box.querySelectorAll('.wd-pick')];
+  const updateSelection = () => {
+    const picked = selectedVaultUtxos();
+    const pickedTotal = picked.reduce((sum, u) => sum + u.amount, 0);
+    summary.textContent = picked.length ? `Выбрано ${picked.length} · ${kas(pickedTotal)}` : 'Ничего не выбрано';
+    selected.disabled = !picked.length; selectedDesk.disabled = !picked.length;
+    selectAll.checked = picked.length === picks.length;
+    selectAll.indeterminate = picked.length > 0 && picked.length < picks.length;
+  };
+  picks.forEach((pick) => { pick.onchange = () => {
+    if (pick.checked) selectedVaultUtxoKeys.add(pick.value); else selectedVaultUtxoKeys.delete(pick.value);
+    updateSelection();
+  }; });
+  selectAll.onchange = () => {
+    picks.forEach((pick) => {
+      pick.checked = selectAll.checked;
+      if (pick.checked) selectedVaultUtxoKeys.add(pick.value); else selectedVaultUtxoKeys.delete(pick.value);
+    });
+    updateSelection();
+  };
+  selected.onclick = () => withdrawMany(selectedVaultUtxos(), $('i-dest').value.trim());
+  selectedDesk.onclick = async () => { const addr = await deskWalletAddress(); if (addr) withdrawMany(selectedVaultUtxos(), addr); };
+  updateSelection();
 }
 $('i-btn').onclick = () => doWithdraw($('i-dest').value.trim());
-// «Вывести на desk-кошелёк»: адрес кошелька из шифрованного профиля, без копипасты (Майк 09.07)
+// "Withdraw to desk wallet": the wallet address comes from the encrypted profile, no copy-paste (owner 2026-07-09)
 $('i-desk-btn').onclick = async () => {
-  let w = null;
-  try { w = session.getProfile().wallet; } catch {}
-  if (!w) { await alertBox('В профиле нет кошелька — открой Деск один раз, он создастся.', { alarm: true }); return; }
-  $('i-dest').value = w.addr;
-  doWithdraw(w.addr);
+  const addr = await deskWalletAddress();
+  if (!addr) return;
+  $('i-dest').value = addr;
+  doWithdraw(addr);
 };
 
 $('c-btn').onclick = async () => {
@@ -694,8 +726,8 @@ $('u-cancel').onclick = async () => {
     if (!alarmSk) { showErr(err, new Error('Введи тревожный ключ из мастер key-file')); return; }
     const built = core.build_cancel(cfg(vault), alarmSk, vault.dest_pk, await utxosRaw(vault.unvault_addr), net());
     await submitTx(built);
-    // отмена вернула средства в сейф — сбрасываем данные завершённого вывода, чтобы панель
-    // не держала устаревший dest вора и заметила НОВЫЙ вывод при повторной краже (аудит F1)
+    // the cancel returned funds to the vault — reset the completed-withdrawal data so the panel
+    // doesn't hold the thief's stale dest and notices a NEW withdrawal on a repeated theft (audit F1)
     vault.dest_pk = null; vault.unvault_addr = null; saveVault(vault);
     $('u-alarmsk').value = ''; refresh();
   } catch (e) { showErr(err, e); }
@@ -703,8 +735,8 @@ $('u-cancel').onclick = async () => {
 
 $('u-complete').onclick = async () => {
   try {
-    // завершаем КАЖДЫЙ созревший unvault-UTXO отдельной транзакцией (contract: inputs.length==1);
-    // не созревший/уже завершённый падает — молча пропускаем (вотчер/повтор добьют)
+    // complete EACH matured unvault-UTXO with a separate transaction (contract: inputs.length==1);
+    // one that isn't matured/already completed fails — silently skip it (the watcher/a retry will finish it)
     const list = (curUnvaultUtxos && curUnvaultUtxos.length) ? curUnvaultUtxos.slice() : JSON.parse(await utxosRaw(vault.unvault_addr));
     let done = 0, lastTxid = null;
     for (const u of list) {
@@ -734,7 +766,7 @@ $('tg-btn').onclick = async () => {
 
 $('forget').onclick = async () => { if ($('forget').disabled) return; if (await confirmBox(L('forget_confirm'), { danger: true, ok: 'Забыть' })) { clearVault(); location.reload(); } };
 </script>
-<script src="/assets/kaspa-widget.js?v=3" defer></script>
+<script src="/assets/kaspa-widget.js?v=4" defer></script>
 <script>if("serviceWorker" in navigator&&/(^|\.)kaspaforge\.org$|(^|\.)officeforge\.co$/.test(location.hostname))navigator.serviceWorker.register("/sw.js");</script>
 </body>
 </html>

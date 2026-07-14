@@ -13,6 +13,9 @@ var KF_RU_MIRROR = /^\/(|index\.html|safe\.html|create\.html|manage\.html|desk\.
    pages on legacy origins are untouched. Styles — own <style> (safe.css is shared by 15+ pages, we don't bump it). */
 (function () {
   if (!/^(kaspaforge\.org|kaspa\.officeforge\.co)$/.test(location.hostname)) return;
+  // The desk cockpit has its own sidebar navigation (spec 2026-07-12) — the workbench bar
+  // would be a second competing nav there. All other pages keep it.
+  if (/^\/(ru\/)?desk\.html$/.test(location.pathname)) return;
   var wrap = document.querySelector('.wrap');
   if (!wrap) return;
   var css = document.createElement('style');
@@ -32,6 +35,11 @@ var KF_RU_MIRROR = /^\/(|index\.html|safe\.html|create\.html|manage\.html|desk\.
     /* seam: overlaps the bar's bottom border — the active tab looks "welded" to the page */
     '.kf-tab.is-on::after{content:"";position:absolute;left:-1px;right:-1px;bottom:-1px;' +
       'height:2px;background:var(--kaspa);border-radius:1px}' +
+    /* mobile: Desk is the permanent way back from every service page; it must never scroll away */
+    '@media(max-width:640px){.kf-tab--desk{order:-2;position:sticky;left:0;z-index:3;' +
+      'color:var(--kaspa);background:var(--iron);border-right-color:var(--bd);' +
+      'box-shadow:10px 0 16px var(--iron)}' +
+      '.kf-tab--desk::before{content:"↩";margin-right:6px;font-size:14px}}' +
     '@media (prefers-reduced-motion:reduce){.kf-tab{transition:none}}';
   document.head.appendChild(css);
 
@@ -56,6 +64,10 @@ var KF_RU_MIRROR = /^\/(|index\.html|safe\.html|create\.html|manage\.html|desk\.
     a.href = links[i][0];
     a.textContent = links[i][1];
     a.className = 'kf-tab';
+    if (links[i][0] === p + '/desk.html') {
+      a.className += ' kf-tab--desk';
+      a.setAttribute('aria-label', ru ? 'Вернуться в Деск' : 'Back to Desk');
+    }
     // /docs/ and /blog/ stay highlighted on their subpages too (/docs/safe.html, /blog/<slug>.html)
     var active = location.pathname === links[i][0] ||
       ((links[i][0].slice(-6) === '/docs/' || links[i][0].slice(-6) === '/blog/') &&
@@ -92,7 +104,9 @@ var KF_RU_MIRROR = /^\/(|index\.html|safe\.html|create\.html|manage\.html|desk\.
     var canL = bar.scrollLeft > 4;
     var canR = bar.scrollLeft + bar.clientWidth < bar.scrollWidth - 4;
     var m = '';
-    if (canL && canR) m = 'linear-gradient(90deg,transparent,#000 28px,#000 calc(100% - 28px),transparent)';
+    // On mobile the sticky Desk control owns the left edge, so only fade the still-scrollable right side.
+    if (window.matchMedia('(max-width:640px)').matches) m = canR ? 'linear-gradient(90deg,#000 calc(100% - 28px),transparent)' : '';
+    else if (canL && canR) m = 'linear-gradient(90deg,transparent,#000 28px,#000 calc(100% - 28px),transparent)';
     else if (canL) m = 'linear-gradient(90deg,transparent,#000 28px)';
     else if (canR) m = 'linear-gradient(90deg,#000 calc(100% - 28px),transparent)';
     bar.style.webkitMaskImage = m;

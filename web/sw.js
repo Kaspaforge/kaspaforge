@@ -2,17 +2,17 @@
    Strategy: network-first with cache fallback — this is a financial app, code freshness matters
    more than speed; the cache exists only so the panel/guide open offline or during a site outage.
    /api/ and non-GET requests are never touched (never cached, always go straight to the network). */
-const CACHE = 'ksafe-v21';
+const CACHE = 'ksafe-v28';
 const PRECACHE = [
   '/', '/create.html', '/manage.html', '/recover.html',
   '/ru/', '/ru/create.html', '/ru/manage.html', '/ru/recover.html',
-  '/assets/safe.css?v=14', '/assets/netstat.js?v=1', '/assets/app.js?v=15', '/assets/identity.js', '/assets/safe-widget.js?v=2',
-  '/assets/nav.js?v=5', '/assets/qrcode.min.js', '/assets/favicon.svg', '/manifest.json',
+  '/assets/safe.css?v=14', '/assets/netstat.js?v=1', '/assets/app.js?v=18', '/assets/identity.js', '/assets/safe-widget.js?v=2',
+  '/assets/nav.js?v=7', '/assets/swap-widget.js?v=5', '/assets/qrcode.min.js', '/assets/favicon.svg', '/manifest.json',
   '/assets/icons/icon-192.png?v=2', '/assets/icons/icon-512.png?v=2',
   '/assets/vault-core-v3/kaspa_safe_core.js', '/assets/vault-core-v3/kaspa_safe_core_bg.wasm',
-  '/assets/vault-core-v6/kaspa_safe_core.js', '/assets/vault-core-v6/kaspa_safe_core_bg.wasm',
-  // desk encryption: session model + personal wallet (shared by Safe/Escrow pages)
-  '/assets/session.js', '/assets/core6.js', '/assets/lock-ui.js', '/assets/wallet.js',
+  '/assets/vault-core-v7/kaspa_safe_core.js', '/assets/vault-core-v7/kaspa_safe_core_bg.wasm',
+  // desk encryption: session model + unified HD wallet (shared by Safe/Escrow pages)
+  '/assets/session.js', '/assets/core7.js', '/assets/lock-ui.js', '/assets/wallet.js?v=2',
 ];
 
 self.addEventListener('install', (e) => {

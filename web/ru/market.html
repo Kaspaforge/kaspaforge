@@ -33,26 +33,26 @@
 ]}
 </script>
 <link rel="stylesheet" href="/assets/safe.css?v=14">
-<script src="/assets/nav.js?v=5" defer></script>
+<script src="/assets/nav.js?v=7" defer></script>
 <style>
-/* market.html: страница-скоуп, не трогает safe.css (шарится ~15 страницами), по образцу
-   desk.html — .row.wrap здесь не футер, footer .row (safe.css) не задет. */
+/* market.html: page-scoped, doesn't touch safe.css (shared by ~15 pages), following the
+   desk.html pattern — .row.wrap here isn't the footer, footer .row (safe.css) is untouched. */
 section .row.wrap{display:flex;flex-wrap:wrap;align-items:center}
 
-/* Trust strip — "escrow обязателен" должно физически считываться, не мелким текстом. */
+/* Trust strip — "escrow is mandatory" needs to physically read as prominent, not fine print. */
 .trust-strip{display:flex;align-items:flex-start;gap:12px;margin-bottom:18px}
 .trust-strip svg{flex:none;margin-top:2px}
 .trust-strip b{color:var(--ingot)}
 
-/* Item/service badge — по The One Accent Rule НЕ бирюзовый (тот зарезервирован под кнопку
-   покупки); нейтральная mono-таблетка, различается только текстом. */
+/* Item/service badge — per The One Accent Rule NOT teal (that's reserved for the buy
+   button); a neutral mono pill, distinguished only by its text. */
 .type-tag{display:inline-flex;align-items:center;font-family:var(--mono);font-size:10.5px;
   letter-spacing:.1em;text-transform:uppercase;color:var(--ash);border:1px solid var(--bd);
   border-radius:4px;padding:3px 7px;white-space:nowrap}
 
-/* Витрина — плитки-карточки (замечание Майка 09.07: список строками читался как «одно
-   объявление висит», ориентир kasmart.org/marketplace). Карточка = <a>, поэтому цвета
-   выставлены явно — глобальный a{color:var(--kaspa)} иначе красит весь текст в бирюзу. */
+/* Storefront — tile cards (owner feedback 2026-07-09: a row list read as "one listing
+   hanging there", reference kasmart.org/marketplace). The card is an <a>, so colors are
+   set explicitly — the global a{color:var(--kaspa)} would otherwise tint all the text teal. */
 #list{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
 .mk-card{display:flex;flex-direction:column;background:var(--plate);border:1px solid var(--bd);
   border-radius:10px;overflow:hidden;color:var(--ash);transition:border-color .15s,transform .15s}
@@ -66,25 +66,29 @@ section .row.wrap{display:flex;flex-wrap:wrap;align-items:center}
 .mk-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .mk-cat{font-size:12px}
 .mk-id{font-family:var(--mono);font-size:11px;color:var(--ash2)}
-/* цена — mono + --kaspa (канон DESIGN.md «комиссии и суммы»; была --ingot вопреки ему) */
+.mk-trust{display:flex;flex-wrap:wrap;gap:5px;margin-top:1px}
+.mk-trust span{display:inline-flex;align-items:center;min-height:23px;padding:3px 6px;border:1px solid var(--bd-soft);
+  border-radius:999px;background:var(--iron);color:var(--ash);font:500 10.5px/1.25 var(--body)}
+.mk-trust .protected{color:var(--kaspa);border-color:rgba(0,193,175,.3);background:rgba(0,193,175,.055)}
+/* price — mono + --kaspa (DESIGN.md canon "fees and amounts"; it was --ingot against that) */
 .mk-price{margin-top:auto;font-family:var(--mono);font-size:15px;font-weight:700;color:var(--kaspa)}
 
-/* Фото в деталке объявления (photo_ids сервер отдаёт давно, фронт их не рендерил) */
+/* Photos on the listing detail page (the server has emitted photo_ids for a while, the frontend just didn't render them) */
 .mk-gallery{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
 .mk-gallery img{max-height:220px;max-width:100%;border-radius:8px;border:1px solid var(--bd);display:block;cursor:zoom-in}
-/* лайтбокс: увеличенное фото на ТОЙ ЖЕ вкладке (замечание Майка), Esc/клик закрывают */
+/* lightbox: enlarged photo in the SAME tab (owner feedback), Esc/click closes it */
 .mk-lb{position:fixed;inset:0;background:rgba(0,0,0,.87);display:none;align-items:center;justify-content:center;z-index:1000;cursor:zoom-out;padding:24px}
 .mk-lb.open{display:flex}
 .mk-lb img{max-width:100%;max-height:100%;border-radius:8px}
 
-.mk-skel{aspect-ratio:4/5;border-radius:10px;background:var(--plate);  /* форма настоящей карточки: фото 4/3 + тело */
+.mk-skel{aspect-ratio:4/5;border-radius:10px;background:var(--plate);  /* shape of the real card: 4/3 photo + body */
   animation:skel-pulse 1.4s ease-in-out infinite}
 @keyframes skel-pulse{0%,100%{opacity:.5}50%{opacity:.9}}
 @media (prefers-reduced-motion:reduce){.mk-skel{animation:none;opacity:.6}}
 
-/* Мини-таймлайн «что будет после Купить» на деталке — словарь .timeline/.tl из escrow.css
-   (маркет escrow.css не грузит — локальная копия нужного минимума, критика 09.07: комиссия
-   и следующие шаги должны быть видны В ТОЧКЕ РЕШЕНИЯ, а не после стены пароля). */
+/* Mini-timeline "what happens after Buy" on the detail page — the .timeline/.tl vocabulary from
+   escrow.css (the market doesn't load escrow.css — a local copy of the minimum needed, feedback
+   2026-07-09: the fee and next steps must be visible AT THE DECISION POINT, not after a password wall). */
 .timeline{display:flex;align-items:center;gap:0}
 .tl{display:flex;flex-direction:column;align-items:center;gap:6px;flex:none}
 .tl-dot{width:13px;height:13px;border-radius:50%;background:var(--bd-soft);border:2px solid var(--bd-soft)}
@@ -92,20 +96,23 @@ section .row.wrap{display:flex;flex-wrap:wrap;align-items:center}
 .tl-bar{flex:1;height:2px;background:var(--bd-soft);margin:0 4px;margin-bottom:18px}
 @media (max-width:520px){.tl-lbl{font-size:9px;letter-spacing:.04em}.tl-bar{margin-bottom:16px}}
 
-/* Панель фильтров: safe.css даёт input/select width:100% — в ряду фильтров размеры свои */
+/* Filters panel: safe.css gives input/select width:100% — the filter row has its own sizing */
 #filters input{flex:1 1 200px;max-width:320px;width:auto}
 #filters select{width:auto;flex:0 1 auto}
 #f-count{margin-left:auto}
-/* «Показать ещё» — вне грида, чтобы не занимать ячейку карточки */
+/* "Show more" — outside the grid, so it doesn't take up a card cell */
 #more{display:flex;justify-content:center;margin:16px 0}
-/* Мобайл: 2 карточки в ряд (при minmax(200px…) на 390px была одна карточка НА ЭКРАН —
-   сравнение товаров невозможно) + клиренс снизу под плавающий виджет Sara (перекрывал
-   цену/зону Купить — критика 09.07) */
+/* Mobile: 2 cards per row (with minmax(200px…) at 390px there was one card PER SCREEN —
+   comparing items was impossible) + bottom clearance for the floating Sara widget (it was
+   overlapping the price/Buy zone — feedback 2026-07-09) */
 @media (max-width:520px){
   #list{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+  .mk-body{padding:11px 10px 12px}.mk-title{font-size:14px;line-height:1.4}
+  .mk-cat{font-size:12.5px}.mk-id{font-size:11.5px}.type-tag{font-size:11px;letter-spacing:.055em}
+  .mk-trust span{font-size:11px;line-height:1.3}.mk-price{font-size:15.5px}
   .wrap{padding-bottom:76px}
 }
-/* лайтбокс: листание и явное закрытие (3 фото листаются, не только зум одного) */
+/* lightbox: paging and an explicit close (3 photos can be paged through, not just zoom on one) */
 .mk-lb button{position:absolute;background:rgba(14,17,22,.7);border:1px solid var(--bd);color:var(--ingot);
   border-radius:8px;cursor:pointer;font-size:22px;line-height:1;padding:10px 14px}
 .mk-lb button:hover{border-color:var(--kaspa);color:var(--kaspa)}
@@ -115,11 +122,11 @@ section .row.wrap{display:flex;flex-wrap:wrap;align-items:center}
 .mk-lb .mk-lb-n{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);
   font-family:var(--mono);font-size:12px;color:var(--ash)}
 
-/* SEO/доверие (замечание Майка 10.07: parsed view почти пуст — краулеры и no-JS видели
-   только фильтры): статичная вывеска над витриной + «механика/FAQ/футер» ПОД ней.
-   H1 здесь — вывеска магазина, не хиро лендинга: кегль скромнее safe.css-дефолта
-   (clamp 34-58px), чтобы витрина не уезжала под сгиб. Всё остальное — словарь DESIGN.md
-   (.eyebrow/.path/.faq/footer), нового CSS не заводим. */
+/* SEO/trust (owner feedback 2026-07-10: the parsed view was nearly empty — crawlers and no-JS saw
+   only the filters): a static storefront sign above the listing grid + "mechanics/FAQ/footer" BELOW it.
+   The H1 here is a shop sign, not a landing-page hero: the size is more modest than safe.css's default
+   (clamp 34-58px), so the storefront doesn't get pushed below the fold. Everything else uses the
+   DESIGN.md vocabulary (.eyebrow/.path/.faq/footer), no new CSS introduced. */
 #intro{margin:10px 0 0}
 #intro h1{font-size:clamp(24px,3.4vw,34px);margin:8px 0 10px}
 #intro .lead{font-size:15px;max-width:64ch;margin:0 0 20px}
@@ -188,7 +195,7 @@ section .row.wrap{display:flex;flex-wrap:wrap;align-items:center}
     </div>
     <div class="path">
       <div class="glyph">3 · Доставка, релиз — или спор</div>
-      <p>Продавец доставил, вы отпустили средства — он получил оплату. Что-то не так — откройте спор: ИИ-медиатор предложит исход за минуты, последнее слово — за человеком-арбитром. Покупатель молчит — авто-релиз защищает продавца. В любом исходе ковенант платит только покупателю или продавцу.</p>
+      <p>Продавец доставил, вы отпустили средства — он получил оплату. <b>Окно споров</b> — ваш бюджет на доставку и проверку: оно стартует с момента фандинга эскроу, и в любой момент до его закрытия можно открыть спор — штатная защита покупателя, а не аварийная кнопка (физтовары — дефолт 7 дней, до 30 дней для международной доставки). Получили товар, а спор уже открыт? Просто нажмите Release. Покупатель молчит — авто-релиз защищает продавца. В любом исходе ковенант платит только покупателю или продавцу.</p>
     </div>
   </div>
 
@@ -216,45 +223,69 @@ section .row.wrap{display:flex;flex-wrap:wrap;align-items:center}
     </details>
     <details>
       <summary>А если продавец ничего не отправит?</summary>
-      <p>Для этого и нужен эскроу. Откройте спор в пределах окна спора объявления: обе стороны излагают требования, чат сделки становится материалами дела, ИИ-медиатор предлагает исход, человек-арбитр закрепляет. Деньги у продавца и не были — они всё время заперты в ковенанте.</p>
+      <p>Для этого и нужен эскроу. Окно спора рассчитано на доставку плюс проверку — таймер идёт с момента фандинга эскроу, а продавец выбирает пресет под расстояние доставки (до 30 дней для международных посылок). Откройте спор в любой момент до закрытия окна: обе стороны излагают требования, чат сделки становится материалами дела, ИИ-медиатор предлагает исход, человек-арбитр закрепляет. Если товар придёт, пока спор открыт, — просто нажмите Release. Деньги у продавца и не были — они всё время заперты в ковенанте.</p>
     </details>
   </div>
 </section>
 
 <footer>
-  <div class="row">
-    <a class="foot-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="OfficeForge"><img src="/assets/logo.png" alt="OfficeForge"></a>
-    <span>Kaspa Marketplace — часть <a href="/ru/kaspa-forge.html">Kaspa Forge</a>, построено ИИ-офисом <a href="https://officeforge.co" target="_blank" rel="noopener">OfficeForge</a> · каждая сделка идёт на ковенантах <a href="/ru/escrow-index.html">Гаранта</a> · обратная связь: kaspa@officeforge.co · <a href="/ru/docs/">Документация</a> · <a href="/ru/blog/">Блог</a> · <a href="/ru/privacy-escrow.html">Приватность</a></span>
+  <div class="foot">
+    <span class="fb">
+      <img class="k" src="/assets/brand/emblem-flat-header.png" alt="" aria-hidden="true">
+      <span>© 2026 Kaspa Forge — сделан ИИ-офисом</span>
+      <a class="foot-ofs-logo" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="Перейти на сайт OfficeForge"><img src="/assets/of-wordmark.png" alt="OfficeForge"></a>
+    </span>
+    <nav aria-label="Подвал">
+      <a href="/ru/safe.html">Сейф</a>
+      <a href="/ru/escrow-index.html">Гарант</a>
+      <a href="/ru/market.html">Маркет</a>
+      <a href="/ru/blog/">Блог</a>
+      <a href="/ru/docs/">Документы</a>
+      <a href="/ru/recover.html">Восстановление</a>
+      <a href="https://github.com/Kaspaforge/kaspaforge" target="_blank" rel="noopener">GitHub</a>
+      <a href="/ru/privacy.html">Приватность</a>
+      <a href="/ru/terms.html">Условия</a>
+      <a href="/ru/security.html">Безопасность</a>
+      <a href="mailto:kaspa@officeforge.co">kaspa@officeforge.co</a>
+    </nav>
   </div>
 </footer>
 
 </div>
 <script type="module">
-// market.html — публичная витрина: browse + detail + кнопка "Купить" на существующий
-// /ru/deal.html?join=<code> (Phase 0, уже негейтован). Никакого крипто/WASM здесь не нужно —
-// только чтение публичных /api/safe/listings* эндпоинтов (Task 4), поэтому boot()/init()
-// (WASM-ядро core, нужное сейфам/сделкам) НЕ импортируется — тот же паттерн, что desk.html's
-// "чистый список" вкладки (renderVaultsTab/renderDealsTab тоже не зовут boot()).
-import { $, kas } from '/assets/app.js?v=15';
+// market.html — the public storefront: browse + detail + a "Buy" button to the existing
+// /ru/deal.html?join=<code> (Phase 0, already ungated). No crypto/WASM is needed here —
+// only reading the public /api/safe/listings* endpoints (Task 4), so boot()/init()
+// (the WASM core needed by vaults/deals) is NOT imported — the same pattern as desk.html's
+// "plain list" tabs (renderVaultsTab/renderDealsTab also don't call boot()).
+import { $, kas } from '/assets/app.js?v=18';
 
-// Локальная копия app.js's приватного (не экспортированного) esc() — тот же однострочник,
-// та же цель: title/description/category приходят от анонимного продавца (AI-модерация
-// фильтрует запрещённые категории, НЕ HTML/script-инъекции) и здесь идут в innerHTML —
-// без экранирования это XSS на публичной странице.
+// Local copy of app.js's private (non-exported) esc() — same one-liner, same purpose:
+// title/description/category come from an anonymous seller (AI moderation filters out
+// prohibited categories, NOT HTML/script injections) and end up in innerHTML here —
+// without escaping this is XSS on a public page.
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-// Отображаемые имена категорий-слагов из API — те же формулировки, что в фильтре <select>.
+// Display names for category slugs from the API — the same wording as in the filter <select>.
 const CATS = { goods: 'Физические товары', otc: 'OTC / обмен криптовалюты', services: 'Услуга / фриланс' };
 const photoUrl = (id) => `/api/safe/listings/photos/${encodeURIComponent(id)}`;
+const shippingText = (region) => {
+  if (!region) return '';
+  if (region === 'Worldwide' || region === 'Весь мир') return 'Весь мир';
+  if (region === 'European Union only' || region === 'Только Евросоюз') return 'Только Евросоюз';
+  if (region === 'EU + USA' || region === 'ЕС + США') return 'ЕС + США';
+  return region;
+};
+const disputeText = (hours) => (hours % 24 === 0 && hours >= 48 ? `${hours / 24} дн` : `${hours} ч`);
 
-const PAGE = 24;          // размер страницы витрины (сервер капает limit на 100)
-let browseOffset = 0;     // сколько карточек уже на витрине — offset для «Показать ещё»
-let cameFromList = false; // деталка открыта кликом по карточке → back-ссылке можно history.back()
+const PAGE = 24;          // storefront page size (the server caps limit at 100)
+let browseOffset = 0;     // how many cards are already on the storefront — offset for "Show more"
+let cameFromList = false; // detail was opened by clicking a card → the back link can use history.back()
 
-// EN-близнец этой же страницы: переключение языка сохраняет и фильтры, и открытую деталку
-// (раньше EN-линк на деталке терял ?id и телепортировал на список другого языка).
+// The EN twin of this same page: switching language preserves both the filters and the open detail
+// (previously the EN link on the detail page lost ?id and teleported to the other language's list).
 const langLink = document.getElementById('lang-link');
-/* #lang-link ушёл из хедера вместе с дублем меню — без guard'а каждый заход валился TypeError'ом */
+/* #lang-link left the header along with the duplicate menu — without a guard every visit threw a TypeError */
 function syncLangLink() { if (langLink) langLink.href = '/market.html' + location.search; }
 
 function filtersToParams() {
@@ -271,8 +302,8 @@ function filtersFromUrl() {
   $('f-category').value = p.get('category') || '';
   $('f-sort').value = p.get('sort') || '';
 }
-// Фильтры живут в URL (replaceState — историю на каждый ввод не засоряем): refresh и шаринг
-// отфильтрованной витрины больше не сбрасывают состояние молча.
+// Filters live in the URL (replaceState — we don't clutter history on every keystroke): a refresh
+// or sharing a filtered storefront no longer silently resets the state.
 function reflectFiltersInUrl() {
   const qs = filtersToParams().toString();
   history.replaceState({}, '', qs ? `?${qs}` : location.pathname);
@@ -284,8 +315,8 @@ async function renderList(append = false) {
   if (!append) {
     browseOffset = 0;
     $('more').innerHTML = '';
-    // Скелетон — не поверх контента: бэкенд SSR-ит первую дюжину карточек прямо в #list
-    // (market_share_page) — их держим на экране, пока не пришли живые данные.
+    // Skeleton — not on top of content: the backend SSRs the first dozen cards straight into #list
+    // (market_share_page) — we keep them on screen until the live data arrives.
     if (!box.children.length) {
       box.innerHTML = '<div class="mk-skel"></div><div class="mk-skel"></div><div class="mk-skel"></div>';
     }
@@ -297,10 +328,10 @@ async function renderList(append = false) {
   try {
     const res = await fetch(`/api/safe/listings?${params}`);
     if (!res.ok) throw new Error('server ' + res.status);
-    total = Number(res.headers.get('x-total-count') || 0); // всего после фильтра (сервер, listings.rs::browse_listings)
+    total = Number(res.headers.get('x-total-count') || 0); // total after filtering (server, listings.rs::browse_listings)
     listings = await res.json(); // GET /api/safe/listings — bare JSON array on success
   } catch {
-    if (append) return; // уже показанные карточки не сносим из-за упавшей догрузки
+    if (append) return; // don't tear down already-shown cards because a "load more" call failed
     box.innerHTML = '<p class="note alarm">Не удалось загрузить объявления.</p>';
     const retry = document.createElement('button');
     retry.className = 'btn btn-ghost';
@@ -314,8 +345,8 @@ async function renderList(append = false) {
   if (!listings.length && !append) {
     const q = $('f-q').value.trim(), cat = $('f-category').value;
     if (q || cat) {
-      // Честный empty state: с активными фильтрами это «ничего не нашлось», а не «маркет
-      // пуст» (критика 09.07: «Объявлений пока нет…» на пустой категории врал).
+      // Honest empty state: with active filters this is "nothing found", not "the market
+      // is empty" (feedback 2026-07-09: "No listings yet…" on an empty category was misleading).
       box.innerHTML = `<p class="hint">Ничего не нашлось${q ? ` по «${esc(q)}»` : ''}${cat ? ` в категории «${esc(CATS[cat] || cat)}»` : ''}.</p>`;
       const reset = document.createElement('button');
       reset.className = 'btn btn-ghost';
@@ -331,7 +362,7 @@ async function renderList(append = false) {
     const card = document.createElement('a');
     card.href = `?id=${l.id}`;
     card.className = 'mk-card';
-    card.innerHTML = '<span class="mk-ph"></span><span class="mk-body"><span class="mk-title"></span><span class="mk-meta"><span class="mk-id"></span><span class="type-tag"></span><span class="mk-cat"></span></span><span class="mk-price"></span></span>';
+    card.innerHTML = '<span class="mk-ph"></span><span class="mk-body"><span class="mk-title"></span><span class="mk-meta"><span class="mk-id"></span><span class="type-tag"></span><span class="mk-cat"></span></span><span class="mk-trust"></span><span class="mk-price"></span></span>';
     card.querySelector('.mk-id').textContent = `#${l.id}`;
     const ph = card.querySelector('.mk-ph');
     if (l.photo_ids && l.photo_ids.length) {
@@ -347,6 +378,12 @@ async function renderList(append = false) {
     card.querySelector('.mk-title').textContent = l.title;
     card.querySelector('.type-tag').textContent = l.listing_type === 'item' ? 'Товар' : 'Услуга';
     card.querySelector('.mk-cat').textContent = CATS[l.category] || l.category;
+    const ship = shippingText(l.shipping_region);
+    const trust = card.querySelector('.mk-trust');
+    const badge = (text, cls = '') => { const el = document.createElement('span'); el.className = cls; el.textContent = text; trust.appendChild(el); };
+    badge('✓ Защищено эскроу', 'protected');
+    badge(`Спор ${disputeText(l.dispute_hours)}`);
+    badge(l.listing_type === 'item' ? (ship ? `Доставка: ${ship}` : 'Физическая доставка') : 'Цифровая услуга');
     card.querySelector('.mk-price').textContent = kas(l.price_sompi);
     card.onclick = (e) => { e.preventDefault(); cameFromList = true; showDetail(l.id); history.pushState({}, '', `?id=${l.id}`); syncLangLink(); };
     box.appendChild(card);
@@ -366,8 +403,8 @@ async function showDetail(id) {
   $('filters').style.display = 'none';
   $('list').style.display = 'none';
   $('more').style.display = 'none';
-  // Статичная вывеска/механика — это контекст ВИТРИНЫ; на деталке товара они шум
-  // (и второй видимый h1 рядом с заголовком объявления).
+  // The static sign/mechanics section is STOREFRONT context; on a listing's detail page they're noise
+  // (and a second visible h1 next to the listing title).
   $('intro').style.display = 'none';
   $('about').style.display = 'none';
   syncLangLink();
@@ -387,16 +424,16 @@ async function showDetail(id) {
   }
   const l = await res.json();
   const buyDisabled = l.status !== 'published' || !l.join_code;
-  // Комиссия эскроу — из публичного invite-превью сделки объявления (listing_json fee не отдаёт,
-  // её задаёт сервер per-deal); превью недоступно → просто без строки, деталку не ломаем.
+  // The escrow fee — from the listing's deal's public invite preview (listing_json doesn't emit
+  // the fee, the server sets it per-deal); if the preview is unavailable → just skip the row, don't break the detail page.
   let inv = null;
   if (!buyDisabled) {
     try { const r = await fetch(`/api/safe/escrow/invite?code=${encodeURIComponent(l.join_code)}`); if (r.ok) inv = await r.json(); } catch {}
   }
-  // photo_ids — sha256-hex, выданный сервером (photo_download отдаёт 400 на всё прочее) —
-  // безопасны в src-атрибуте; photoUrl всё равно прогоняет их через encodeURIComponent.
-  // alt из названия объявления (esc — значение идёт в HTML-атрибут): фото деталки — контент,
-  // не декор; в карточках витрины alt="" остаётся — там тот же текст стоит рядом в .mk-title.
+  // photo_ids — sha256-hex issued by the server (photo_download returns 400 for anything else) —
+  // safe in a src attribute; photoUrl runs them through encodeURIComponent regardless.
+  // alt comes from the listing title (esc — the value goes into an HTML attribute): the detail-page
+  // photo is content, not decoration; storefront cards keep alt="" — the same text sits next to it in .mk-title.
   const gallery = (l.photo_ids && l.photo_ids.length)
     ? `<div class="mk-gallery">${l.photo_ids.map((id, i) => `<img src="${photoUrl(id)}" alt="${esc(l.title)} — фото ${i + 1}">`).join('')}</div>`
     : '';
@@ -411,7 +448,7 @@ async function showDetail(id) {
     ${l.description ? `<p style="white-space:pre-wrap">${esc(l.description)}</p>` : '<p class="hint">Без описания.</p>'}
     <div style="margin:14px 0">
       <div class="kv"><span class="k">Цена</span><span class="v" style="color:var(--kaspa);font-weight:700">${kas(l.price_sompi)}</span></div>
-      <div class="kv"><span class="k">Окно споров</span><span class="v">${l.dispute_hours} ч</span></div>
+      <div class="kv"><span class="k">Окно споров</span><span class="v">${l.dispute_hours % 24 === 0 && l.dispute_hours >= 48 ? (l.dispute_hours / 24) + ' дн' : l.dispute_hours + ' ч'}</span></div>
       <div class="kv"><span class="k">Escrow</span><span class="v ok">обязателен</span></div>
       ${inv && inv.fee_resolve ? `<div class="kv"><span class="k">Комиссия</span><span class="v">${kas(inv.fee_resolve)} при релизе · ${kas(inv.fee_dispute)} при арбитраже</span></div>` : ''}
     </div>
@@ -430,15 +467,15 @@ async function showDetail(id) {
     $('buy-btn').onclick = () => { location.href = `/ru/deal.html?join=${l.join_code}`; };
   }
   wireBackLink(box);
-  // фото — в лайтбокс на этой же вкладке (не target=_blank), с листанием по галерее
+  // photos — open in the lightbox on this same tab (not target=_blank), with gallery paging
   const urls = (l.photo_ids || []).map(photoUrl);
   box.querySelectorAll('.mk-gallery img').forEach((img, i) => { img.onclick = () => openLightbox(urls, i); });
 }
 
-// «← Назад к объявлениям»: раньше это была полная навигация на /ru/market.html — сбрасывала
-// фильтры и замусоривала историю Back только что покинутой деталкой. href остаётся
-// (middle-click работает), обычный клик — SPA-возврат: из списка пришли → history.back()
-// (вернёт и фильтры из URL), диплинк → рисуем список поверх без новой записи в истории.
+// "← Back to listings": this used to be a full navigation to /ru/market.html — it reset the
+// filters and cluttered Back history with the detail page just left. The href stays
+// (middle-click works), a regular click does an SPA return: came from the list → history.back()
+// (restores the filters from the URL too), a deep link → we draw the list on top with no new history entry.
 function wireBackLink(box) {
   const a = box.querySelector('.back-link');
   if (!a) return;
@@ -449,7 +486,7 @@ function wireBackLink(box) {
   };
 }
 
-// ── лайтбокс (с листанием по галерее: стрелки/счётчик/✕, клавиши ←/→/Esc) ──
+// ── lightbox (with gallery paging: arrows/counter/✕, ←/→/Esc keys) ──
 const lb = document.createElement('div');
 lb.className = 'mk-lb';
 lb.innerHTML = '<img alt=""><button class="mk-lb-x" aria-label="Закрыть">✕</button><button class="mk-lb-prev" aria-label="Предыдущее фото">‹</button><button class="mk-lb-next" aria-label="Следующее фото">›</button><span class="mk-lb-n"></span>';
@@ -464,7 +501,7 @@ function lbShow() {
 }
 function openLightbox(urls, idx) { lbUrls = urls; lbIdx = idx; lbShow(); lb.classList.add('open'); }
 const lbStep = (d) => { lbIdx = (lbIdx + d + lbUrls.length) % lbUrls.length; lbShow(); };
-lb.onclick = () => lb.classList.remove('open'); // клик по фону/фото закрывает, как раньше
+lb.onclick = () => lb.classList.remove('open'); // clicking the backdrop/photo closes it, as before
 lb.querySelector('.mk-lb-x').onclick = (e) => { e.stopPropagation(); lb.classList.remove('open'); };
 lb.querySelector('.mk-lb-prev').onclick = (e) => { e.stopPropagation(); lbStep(-1); };
 lb.querySelector('.mk-lb-next').onclick = (e) => { e.stopPropagation(); lbStep(1); };
@@ -482,7 +519,7 @@ function backToList() {
   $('more').style.display = '';
   $('intro').style.display = '';
   $('about').style.display = '';
-  filtersFromUrl(); // фильтры вернувшегося URL (history.back с деталки) — в контролы
+  filtersFromUrl(); // filters from the returned URL (history.back from detail) — into the controls
   syncLangLink();
   renderList();
 }
@@ -507,6 +544,6 @@ syncLangLink();
 if (params.get('id')) showDetail(Number(params.get('id')));
 else renderList();
 </script>
-<script src="/assets/kaspa-widget.js?v=3" defer></script>
+<script src="/assets/kaspa-widget.js?v=4" defer></script>
 </body>
 </html>

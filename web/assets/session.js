@@ -27,7 +27,7 @@ export function isUnlocked() { return _profile !== null; }
 // v3: seed — master seed for deterministic derivation (keys of all future entities are derived
 // from it, so the very first backup export also covers what is created afterwards); deriv —
 // counters of the next index per domain ("vault", "deal", "listing", "chat").
-function emptyProfile() { return { version: 3, seed: null, deriv: {}, wallet: null, vaults: [], deals: [], listings: [], swaps: [], chats: [], txs: [] }; }
+function emptyProfile() { return { version: 3, seed: null, deriv: {}, wallet: null, vaults: [], deals: [], listings: [], swaps: [], chats: [], txs: [], tombstones: { clock: 0, vaults: {}, deals: {} } }; }
 
 export function hasEncryptedProfile(storage = localStorage) {
   const v = storage.getItem(KEY);
@@ -130,13 +130,28 @@ export function exportArmored(password) {
   const fn = _crypto.exportEncrypt || _crypto.encrypt;
   return fn(JSON.stringify(_profile), password);
 }
+// Decrypt a remote age snapshot with THIS device's in-memory password without mutating session or
+// localStorage. Profile Mirror uses this before an explicit merge; a different device password
+// fails closed and leaves the local profile untouched.
+export function decryptArmoredCurrent(armored) {
+  if (_password === null) throw new Error('locked');
+  const json = _crypto.decrypt(armored, _password);
+  return JSON.parse(json);
+}
+// Encrypt a non-mutating projection under this device's current password. Profile Mirror uses
+// this to exclude independent protection keys without ever committing the redacted copy locally.
+export function exportProfile(profile) {
+  if (_password === null) throw new Error('locked');
+  const fn = _crypto.exportEncrypt || _crypto.encrypt;
+  return fn(JSON.stringify(profile), _password);
+}
 export function lock() {
   _profile = null; _password = null;
   if (_idleTimer) { clearTimeout(_idleTimer); _idleTimer = null; }
   const ss = _sstore();
   if (ss) { try { ss.removeItem(SKEY); } catch {} } // auto-lock also kills the tab session
 }
-export function exportCurrent() { return exportArmored(_password); }   // export under the current session password
+export function exportCurrent() { return exportProfile(_profile); }   // export under the current session password
 // Restore: adopt a decrypted profile WHOLESALE (its wallet+data) under `password`. Mirrors onboard, but the profile is given.
 export function adoptProfile(profile, password, storage = localStorage) {
   _seedIfMissing(profile);   // a pre-v3 backup gets a seed right away — otherwise the profile would live without derivation until the next unlock

@@ -31,7 +31,7 @@
 <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
 <!-- NO language auto-redirect (decision 2026-07-11): the site is international, default is always EN;
      Russian is an explicit option (RU link in the header / kf-nav switcher on the other pages) -->
-<link rel="stylesheet" href="/assets/forge-landing.css?v=3">
+<link rel="stylesheet" href="/assets/forge-landing.css?v=6">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebApplication","name":"Kaspa Forge","url":"https://kaspaforge.org/","applicationCategory":"FinanceApplication","operatingSystem":"Web","inLanguage":"en","description":"Non-custodial desk on Kaspa Toccata covenants: vault with a cancel window, covenant escrow for P2P deals and a marketplace — one encrypted profile in your browser.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD","description":"On-chain operations are free; you pay only the Kaspa network fee."}}
 </script>
@@ -43,10 +43,10 @@
     <a class="brand" href="/">
       <img class="brand-lockup" src="/assets/brand/lockup-h-flat-header.png" alt="KaspaForge">
     </a>
-    <a class="by-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="Built by OfficeForge"><img src="/assets/of-wordmark.png" alt="OfficeForge"></a>
     <nav aria-label="Kaspa Forge">
       <a href="/safe.html">Safe</a>
       <a href="/escrow-index.html">Escrow</a>
+      <a href="/contracts.html">Contracts</a>
       <a href="/market.html">Market</a>
       <a href="/blog/">Blog</a>
       <a href="/docs/">Docs</a>
@@ -59,6 +59,7 @@
   <div class="wrap mnav">
     <a href="/safe.html">Safe</a>
     <a href="/escrow-index.html">Escrow</a>
+    <a href="/contracts.html">Contracts</a>
     <a href="/market.html">Market</a>
     <a href="/desk.html">Desk</a>
     <a href="/blog/">Blog</a>
@@ -80,6 +81,17 @@
   </div>
 </div>
 <script src="/assets/netstat.js?v=1" defer></script>
+
+<div class="strip" id="secstat" style="display:none">
+  <div class="wrap strip-in">
+    <span>contracts <b id="sec-contracts">…</b></span>
+    <span>tests <b class="ok" id="sec-tests">…</b></span>
+    <span>release <b id="sec-release">…</b></span>
+    <span><a href="/security.html" id="sec-link">Security ▸</a></span>
+    <span><a href="https://github.com/Kaspaforge/kaspaforge" id="sec-github" target="_blank" rel="noopener">GitHub</a></span>
+  </div>
+</div>
+<script src="/assets/sec-status.js?v=3" defer></script>
 
 <section class="hero">
   <div class="hero-glow" aria-hidden="true"></div>
@@ -158,7 +170,7 @@
       <h2>A vault where theft can be cancelled</h2>
       <p class="d">
         Every withdrawal from the Safe waits out a window you set. The destination address is
-        <b>fixed on-chain the moment a withdrawal starts</b> — nobody can swap it. If the withdrawal
+        <b>fixed on-chain the moment a withdrawal starts</b> — the covenant accepts no other destination. If the withdrawal
         wasn’t yours, one move with a separate <b>alarm key</b> (kept on paper, at home, anywhere
         apart from the hot key) returns everything to the vault.
       </p>
@@ -177,6 +189,9 @@
         <div class="kv"><span class="k">Android</span><span class="v">APK with crypto inside + our F-Droid repo</span></div>
       </div>
       <a class="tool-more" href="/safe.html">How Safe works&nbsp;▸</a>
+      <div style="margin-top:12px;font-size:12px;color:var(--ash2)">
+        <span>Open beta — <a href="/security.html">security &middot; verification</a></span>
+      </div>
     </div>
 
     <div>
@@ -207,7 +222,7 @@
         </div>
       </div>
       <div class="note teal">
-        <b>Lost both keys?</b> We can’t help — and that’s the point: nobody can, including us. Turn
+        <b>Lost both keys?</b> We can’t help — the vault has no backdoor key that could. Turn
         inheritance on, even if the heir is just your own second address.
       </div>
     </div>
@@ -229,10 +244,11 @@
         rejects any other destination.</b> That’s mathematics, not a promise.
       </p>
       <p class="d">
-        Being honest about the boundary: the contract guarantees funds <b>can’t be stolen</b>;
-        the fairness of a verdict is the work of a human arbiter judging your evidence. And the
-        evidence is solid — the deal chat runs on the Kasia protocol, where <b>every message is an
-        end-to-end encrypted Kaspa transaction</b>: nothing can be forged or backdated.
+        Being honest about the boundary: every spend path in the covenant pays a party of the deal —
+        <b>the operator can’t redirect funds</b>; the fairness of a verdict is the work of a human
+        arbiter judging your evidence. And the evidence is solid — the deal chat runs on the Kasia
+        protocol, where <b>every message is an end-to-end encrypted Kaspa transaction</b>, anchored
+        on-chain — it can’t be silently forged or backdated.
       </p>
       <div class="kvs">
         <div class="kv"><span class="k">Deal types</span><span class="v">goods · OTC exchange · service</span></div>
@@ -242,6 +258,9 @@
         <div class="kv"><span class="k">Deal size</span><span class="v m">50 – 10 000 KAS (beta)</span></div>
       </div>
       <a class="tool-more" href="/escrow-index.html">How Escrow works&nbsp;▸</a>
+      <div style="margin-top:12px;font-size:12px;color:var(--ash2)">
+        <span>Open beta — <a href="/security.html">security &middot; verification</a></span>
+      </div>
     </div>
 
     <div>
@@ -371,7 +390,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="#00C1AF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m8 6-5 6 5 6"/><path d="m16 6 5 6-5 6"/><path d="M13.5 4.5 10.5 19.5"/></svg>
         <div>
           <div class="cn">Open code, verifiable claims</div>
-          <div class="cd">Contracts and tools are public at <a href="https://github.com/pcdoctormsk-ctrl/kaspa-safe" target="_blank" rel="noopener">github.com/pcdoctormsk-ctrl/kaspa-safe</a>. Don’t trust the copy on this page — check it.</div>
+          <div class="cd">Contracts and tools are public at <a href="https://github.com/Kaspaforge/kaspaforge" target="_blank" rel="noopener">github.com/Kaspaforge/kaspaforge</a>. Don’t trust the copy on this page — check it.</div>
         </div>
       </li>
     </ul>
@@ -445,7 +464,7 @@
       <h3>Open beta — the honest part</h3>
       <p>
         The contracts passed our full on-chain test cycle and adversarial attacks, and the code is
-        open — but an <b>external audit is still ahead</b>. Until then, treat Forge like a beta:
+        open. Treat Forge like a beta:
         don’t store or trade more than you’d trust to one.
       </p>
       <p>
@@ -455,7 +474,6 @@
       <div class="lim">
         <span>vaults ≤ 5 000 KAS</span>
         <span>deals 50 – 10 000 KAS</span>
-        <span>audit: ahead</span>
       </div>
     </div>
     <div class="price-plate">
@@ -469,6 +487,14 @@
         <tr><td>Escrow: arbitration (only if disputed)</td><td class="m">2 % · min 5 KAS</td></tr>
       </table>
     </div>
+  </div>
+</section>
+
+<section class="band" id="learn">
+  <div class="wrap">
+    <div class="eyebrow">Learn before you lock funds</div>
+    <h2>Verify the security model, then choose a product</h2>
+    <p class="d">Start with the <a href="/docs/">Kaspa Forge documentation</a>, read how <a href="/blog/kaspa-covenants-how-they-work.html">Kaspa covenants enforce spending rules</a>, then inspect the fixed payout paths in <a href="/escrow-index.html">Kaspa Escrow</a>.</p>
   </div>
 </section>
 
@@ -491,8 +517,9 @@
 <footer>
   <div class="wrap foot">
     <span class="fb">
-      <svg class="k" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="46" fill="none" stroke="#00C1AF" stroke-width="8"/><path d="M58 30 v40 M36 32 L54 50 L36 68" fill="none" stroke="#00C1AF" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <span>Kaspa Forge — built by the <a href="https://officeforge.co" target="_blank" rel="noopener">OfficeForge</a> AI office</span>
+      <img class="k" src="/assets/brand/emblem-flat-header.png" alt="" aria-hidden="true">
+      <span>© 2026 Kaspa Forge — built by the</span>
+      <a class="foot-ofs-logo" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="Visit OfficeForge"><img src="/assets/of-wordmark.png" alt="OfficeForge"></a>
     </span>
     <nav aria-label="Footer">
       <a href="/safe.html">Safe</a>
@@ -500,8 +527,11 @@
       <a href="/market.html">Market</a>
       <a href="/blog/">Blog</a>
       <a href="/docs/">Docs</a>
-      <a href="https://github.com/pcdoctormsk-ctrl/kaspa-safe" target="_blank" rel="noopener">GitHub</a>
+      <a href="/recover.html">Recovery</a>
+      <a href="https://github.com/Kaspaforge/kaspaforge" target="_blank" rel="noopener">GitHub</a>
       <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+      <a href="/security.html">Security</a>
       <a href="mailto:kaspa@officeforge.co">kaspa@officeforge.co</a>
     </nav>
   </div>
@@ -521,6 +551,6 @@
 })();
 if ("serviceWorker" in navigator && /^(kaspaforge\.org|kaspa\.officeforge\.co)$/.test(location.hostname)) navigator.serviceWorker.register("/sw-forge.js");
 </script>
-<script src="/assets/kaspa-widget.js?v=3" defer></script>
+<script src="/assets/kaspa-widget.js?v=4" defer></script>
 </body>
 </html>

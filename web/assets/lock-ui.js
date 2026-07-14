@@ -1,6 +1,6 @@
 // kaspa-safe/web/assets/lock-ui.js — DOM gate over session: onboarding/unlock/migration + password re-prompt modal.
 import * as session from './session.js';
-import { core, ready } from './core6.js';
+import { core, ready } from './core7.js';
 import { passphraseStrength, parseProfileFile, isEncryptedProfile } from './identity.js';   // pure (DOM-free) — don't duplicate password-strength logic
 import { promptPassword, confirmBox, trapFocus } from './dialog.js';   // masked password input + focus trap (native prompt showed the password in plain text)
 

@@ -22,7 +22,7 @@
   width:calc(100% - var(--p,0%));background:var(--iron);
   border-left:1px solid rgba(255,255,255,.16);transition:width .5s ease}
 </style>
-<script src="/assets/nav.js?v=5" defer></script>
+<script src="/assets/nav.js?v=7" defer></script>
 <script src="/assets/qrcode.min.js"></script>
 </head>
 <body>
@@ -48,26 +48,16 @@
       <span class="hint" id="vb-total" style="margin:0"></span>
     </div>
     <div id="vb-list"></div>
-    <!-- "+ Add a vault" removed (decision 2026-07-10): new vaults are created on the Desk ("+ New safe" →
-         create.html); the public-parameters loader stays for browsers without vaults. -->
+    <!-- New vaults are created from the Desk; manage.html only operates on vaults in its unified profile. -->
   </div>
 
   <div class="plate" id="loader" style="display:none">
-    <h2 style="font-size:20px">Open a vault</h2>
-    <p class="hint">No vault found in this browser. Open your <a href="/desk.html">Desk</a> and import your master key file, or enter the parameters below (they're public — from your master key file or an old recovery sheet; no keys needed yet).</p>
-    <div style="margin:12px 0 6px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-      <button class="btn btn-kaspa" id="sheet-btn" type="button">Load recovery sheet (.txt)</button>
-      <span class="hint" style="margin:0">the file is read locally in your browser — nothing is uploaded. Or type the values below.</span>
+    <h2 style="font-size:20px">No vaults in this profile</h2>
+    <p class="hint">Vaults are managed through your encrypted Desk profile and master key file. Import or merge that file in Desk Settings, or create a new vault. The alarm key remains on its separate alarm card by design.</p>
+    <div style="margin-top:16px;display:flex;gap:12px;flex-wrap:wrap">
+      <a class="btn btn-kaspa" href="/desk.html#settings">Open Desk Settings</a>
+      <a class="btn btn-ghost" href="/create.html">Create a vault</a>
     </div>
-    <input type="file" id="sheet-file" accept=".txt,text/plain" style="display:none">
-    <label>Hot pubkey</label><input type="text" id="in-hot">
-    <label>Alarm pubkey</label><input type="text" id="in-alarm">
-    <label>Withdrawal delay (DAA)</label><input type="text" id="in-delay">
-    <label>Heir pubkey (optional)</label><input type="text" id="in-heir">
-    <label>Inheritance period (DAA, optional)</label><input type="text" id="in-inherit">
-    <label class="check"><input type="checkbox" id="in-auto" checked> Automatic inheritance (matches how the vault was created)</label>
-    <label>Service token (for alerts; optional)</label><input type="text" id="in-token">
-    <div style="margin-top:16px"><button class="btn btn-kaspa" id="load-btn">Open</button></div>
   </div>
 
   <div id="panel" style="display:none">
@@ -88,8 +78,8 @@
       <h2 style="font-size:20px">Withdraw from the vault</h2>
       <p class="hint">The withdrawal runs with a <span id="i-delay"></span> delay. The destination is locked forever — double-check it.</p>
       <label>Destination address (kaspa:q…)</label><input type="text" id="i-dest" autocomplete="off">
-      <!-- Hot key comes from the encrypted profile (master key file) — the field is shown ONLY
-           when the profile has no key (vault opened via public parameters). Owner feedback 2026-07-09. -->
+      <!-- Hot key comes from the encrypted profile. A missing key means the wrong or incomplete
+           master key file is loaded, so the fallback points back to Desk import. -->
       <div id="i-hot-block" style="display:none">
         <label>Hot key</label><input type="password" id="i-hotsk" autocomplete="off">
         <p class="hint">This browser's profile doesn't hold this vault's hot key — paste it, or import your master key file on the <a href="/desk.html">Desk</a>.</p>
@@ -195,22 +185,48 @@
     </div>
 
     <div style="margin-top:18px;display:flex;gap:14px">
-      <button class="btn btn-ghost" id="forget">Forget this vault in this browser</button>
+      <button class="btn btn-ghost" id="forget">Remove this vault from my Desk</button>
     </div>
   </div>
 </div>
 
-<footer><div class="row wrap"><a class="foot-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="OfficeForge"><img src="/assets/logo.png" alt="OfficeForge"></a><span>Kaspa Safe · non-custodial beta · <a href="https://officeforge.co">OfficeForge</a> · feedback: kaspa@officeforge.co · <a href="/privacy.html">Privacy</a></span></div></footer>
+<footer>
+  <div class="foot">
+    <span class="fb">
+      <img class="k" src="/assets/brand/emblem-flat-header.png" alt="" aria-hidden="true">
+      <span>© 2026 Kaspa Forge — built by the</span>
+      <a class="foot-ofs-logo" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="Visit OfficeForge"><img src="/assets/of-wordmark.png" alt="OfficeForge"></a>
+    </span>
+    <nav aria-label="Footer">
+      <a href="/safe.html">Safe</a>
+      <a href="/escrow-index.html">Escrow</a>
+      <a href="/market.html">Market</a>
+      <a href="/blog/">Blog</a>
+      <a href="/docs/">Docs</a>
+      <a href="/recover.html">Recovery</a>
+      <a href="https://github.com/Kaspaforge/kaspaforge" target="_blank" rel="noopener">GitHub</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+      <a href="/security.html">Security</a>
+      <a href="mailto:kaspa@officeforge.co">kaspa@officeforge.co</a>
+    </nav>
+  </div>
+</footer>
 </div>
 
 <script type="module">
 import { boot, core, net, daaToHuman, api, utxosRaw, submitTx, saveVault, loadVault, clearVault,
          loadVaults, saveVaults, setActiveAddr,
-         L, $, kas, copyBtn, qrInto, showErr, renderCoin, explorerTx } from '/assets/app.js?v=15';
+         L, $, kas, copyBtn, qrInto, showErr, renderCoin, explorerTx } from '/assets/app.js?v=18';
 import { requireUnlock, confirmPassword } from '/assets/lock-ui.js';
 import * as session from '/assets/session.js';
-import { fundTargetFromWallet, walletBalance } from '/assets/wallet.js';
+import { fundTargetFromWallet, walletPortfolioBalance } from '/assets/wallet.js?v=2';
 import { alertBox, confirmBox } from '/assets/dialog.js';
+import { createSubscriptionStatusLoader, subscriptionView } from '/assets/safe-subscription.js?v=2';
+
+const loadSubscriptionStatus = createSubscriptionStatusLoader((v) => api(
+  `/api/safe/sub-status?vault_addr=${encodeURIComponent(v.vault_addr)}&token=${encodeURIComponent(v.token)}`
+));
 
 const err = $('err');
 let vault;                       // assigned AFTER requireUnlock — loadVault() reads the unlocked profile
@@ -283,69 +299,6 @@ function switchTo(addr) {
   renderBar();
 }
 
-// Opening via a recovery sheet: the .txt (RU or EN) is parsed LOCALLY, never uploaded anywhere.
-$('sheet-btn').onclick = () => $('sheet-file').click();
-$('sheet-file').onchange = async () => {
-  const f = $('sheet-file').files[0];
-  if (!f) return;
-  try {
-    const text = await f.text();
-    const val = {};
-    for (const line of text.split(/\r?\n/)) {
-      const i = line.indexOf(':');
-      if (i > 0) val[line.slice(0, i).trim()] = line.slice(i + 1).trim();
-    }
-    const pick = (...keys) => { for (const k of keys) if (val[k]) return val[k]; return ''; };
-    const num = (s) => (String(s).match(/\d+/) || [''])[0];
-    const hot = pick('Hot pubkey', 'Горячий pubkey'), alarm = pick('Alarm pubkey', 'Тревожный pubkey');
-    const delay = num(pick('Withdrawal delay', 'Задержка вывода'));
-    if (!hot || !alarm || !delay) throw new Error(L('sheet_bad'));
-    const inh = pick('Inheritance', 'Наследование');
-    const off = /^(выключено|disabled)/i.test(inh) || !inh;
-    $('in-hot').value = hot; $('in-alarm').value = alarm; $('in-delay').value = delay;
-    $('in-heir').value = off ? '' : pick('Heir pubkey', 'Pubkey наследника');
-    $('in-inherit').value = off ? '' : num(inh);
-    $('in-auto').checked = off ? true : /авто|automatic/i.test(inh);
-    $('in-token').value = pick('Service token', 'Сервисный токен');
-    // fee_budget is optional in the sheet (old sheets lack the line → default 1M); it is part of the address
-    window.__sheetFeeBudget = Number(num(pick('Fee budget', 'Бюджет комиссии'))) || 1000000;
-    // self-healing: if the sheet has an address and the computed one doesn't match — try both values
-    // of auto-inheritance (historical desync of no-heir vaults) and take the one matching the sheet
-    window.__sheetAddr = pick('Vault address', 'Адрес сейфа') || null;
-    $('load-btn').click();
-    if (window.__sheetAddr && vault && vault.vault_addr && window.__sheetAddr !== vault.vault_addr)
-      showErr(err, new Error(L('sheet_mismatch')));
-  } catch (e) { showErr(err, e); }
-  finally { window.__sheetAddr = null; }
-  $('sheet-file').value = '';
-};
-
-$('load-btn').onclick = () => {
-  const firstInt = (s) => Number((String(s).match(/\d+/) || [NaN])[0]); // tolerates pasting "8640 DAA (24 hours)" from the sheet
-  const heir = $('in-heir').value.trim();
-  const inh = $('in-inherit').value.trim() ? firstInt($('in-inherit').value) : 0;
-  const v = { network: net(), hot_pk: $('in-hot').value.trim(), alarm_pk: $('in-alarm').value.trim(),
-              delay: firstInt($('in-delay').value), heir_pk: heir,
-              // inheritance disabled => the mode has no effect; address canon is false (as at creation)
-              inherit_delay: inh, auto_inherit: (inh > 0 && !!heir) ? $('in-auto').checked : false,
-              fee_budget: window.__sheetFeeBudget || 1000000,
-              token: $('in-token').value.trim() || null };
-  try {
-    v.vault_addr = core.vault_address(cfg(v), net());
-    // if opened from a sheet and the address didn't match — for no-heir vaults try the opposite auto flag
-    const ref = window.__sheetAddr;
-    if (ref && v.vault_addr !== ref && !(inh > 0 && heir)) {
-      const alt = { ...v, auto_inherit: !v.auto_inherit };
-      const altAddr = core.vault_address(cfg(alt), net());
-      if (altAddr === ref) { v.auto_inherit = alt.auto_inherit; v.vault_addr = altAddr; }
-    }
-    vault = v; saveVault(v);
-    $('loader').style.display = 'none';
-    start();
-    renderBar();
-  } catch (e) { showErr(err, e); }
-};
-
 async function start() {
   $('panel').style.display = 'block';
   $('s-addr').textContent = vault.vault_addr;
@@ -357,8 +310,8 @@ async function start() {
   } else {
     $('row-inherit').style.display = 'none'; // handles switching away from a vault with inheritance
   }
-  // keys come from the encrypted profile: manual input is shown ONLY when they aren't there
-  // (vault opened via public parameters/sheet on a foreign device). Owner feedback 2026-07-09.
+  // Operational keys come from the encrypted profile. A missing hot key means the wrong or an
+  // incomplete key file is loaded; the alarm key remains separate on its alarm card by design.
   $('i-hot-block').style.display = vault.hot_sk ? 'none' : 'block';
   $('c-hot-block').style.display = vault.hot_sk ? 'none' : 'block';
   $('u-alarm-block').style.display = vault.alarm_sk ? 'none' : 'block';
@@ -530,17 +483,18 @@ function setState(s, utxo, withdrawTxid) {
 async function loadSub() {
   if (!vault.token) { $('sub-status').textContent = L('no_token_sub'); return; }
   try {
-    const s = await api(`/api/safe/sub-status?vault_addr=${encodeURIComponent(vault.vault_addr)}&token=${vault.token}`);
+    const s = await loadSubscriptionStatus(vault);
     document.querySelectorAll('.sub-price').forEach(el => { el.textContent = s.price_kas; });
-    const until = new Date(s.paid_until * 1000).toISOString().slice(0, 10);
-    $('sub-status').textContent = s.active ? L('sub_active')(until) : L('sub_inactive');
-    $('sub-status').className = s.active ? 'v ok' : 'v warn';
+    const view = subscriptionView(s, 'en');
+    $('sub-status').textContent = view.status;
+    $('sub-status').className = `v ${view.tone}`;
     if (vault.token) {
       $('email-alert-block').style.display = 'block';
       $('alert-email').value = s.alert_email || '';
     }
-    if (s.sub_addr) {
+    if (view.showPay) {
       $('sub-pay').style.display = 'block';
+      $('sub-pay-btn').textContent = view.payLabel;
       // one-click payment from the desk wallet (address copy-paste removed — owner feedback 2026-07-09)
       $('sub-pay-btn').onclick = async () => {
         const btn = $('sub-pay-btn');
@@ -548,7 +502,7 @@ async function loadSub() {
           const w = session.getProfile().wallet;
           if (!w) { await alertBox('No wallet in this profile', { alarm: true }); return; }
           const price = Math.round(Number(s.price_kas) * 1e8);
-          const bal = await walletBalance(w.addr);
+          const bal = await walletPortfolioBalance(undefined, net());
           if (price > bal) { await alertBox(`Not enough in the desk wallet (${kas(bal)}). Top it up on the Desk — SimpleSwap or any wallet.`, { alarm: true }); return; }
           if (!await confirmPassword('Paying the alerts subscription from the desk wallet.', {
             context: `<b style="font-family:var(--mono);color:var(--kaspa)">${kas(price)}</b> → alerts subscription, +1 year` })) return;
@@ -596,15 +550,17 @@ async function withdrawOne(utxo, destAddr) {
   } catch (e) { showErr(err, e); }
 }
 
-// withdraw ALL deposits to one address (N initiate transactions → one unvault_addr; the watcher finishes up)
-async function withdrawAll(destAddr) {
+// withdraw any set of deposits to one address (N initiate transactions → one unvault_addr;
+// the covenant requires one input per transaction, so selected/all share the same safe sequence).
+async function withdrawMany(utxos, destAddr, all = false) {
   try {
-    const utxos = curVaultUtxos.slice();
+    utxos = (utxos || []).slice();
     if (!utxos.length) { await alertBox('Nothing to withdraw', { alarm: true }); return; }
     if (!destAddr) { await alertBox('Enter a destination address', { alarm: true }); return; }
     const total = utxos.reduce((s, u) => s + u.amount, 0);
-    if (!await confirmBox(L('confirm_wd')(destAddr), { danger: true, ok: 'Withdraw all' })) return;
-    if (!await confirmPassword('Withdrawing ALL deposits from the vault — the destination is locked forever.', {
+    const scope = all ? 'ALL' : `${utxos.length} SELECTED`;
+    if (!await confirmBox(L('confirm_wd')(destAddr), { danger: true, ok: all ? 'Withdraw all' : 'Withdraw selected' })) return;
+    if (!await confirmPassword(`Withdrawing ${scope} deposits from the vault — the destination is locked forever.`, {
       context: `<b style="font-family:var(--mono);color:var(--kaspa)">${kas(total)}</b> · ${utxos.length} deposits<br>→ <span style="font-family:var(--mono)">${short(destAddr)}</span>` })) return;
     const destPk = core.address_to_pubkey(destAddr);
     const hotSk = vault.hot_sk || $('i-hotsk').value.trim();
@@ -612,17 +568,37 @@ async function withdrawAll(destAddr) {
     let done = 0;
     for (const u of utxos) {
       try { await initiateOneTx(u, destPk, hotSk); done++; }
-      catch (e) { await alertBox(`Started ${done} of ${utxos.length} withdrawals. Stopped: ${(e && e.message) || e}. The rest stays in the safe — press “Withdraw all” again to continue.`, { alarm: true }); break; }
+      catch (e) { await alertBox(`Started ${done} of ${utxos.length} withdrawals. Stopped: ${(e && e.message) || e}. The rest stays in the safe — select it and retry.`, { alarm: true }); break; }
     }
     $('i-hotsk').value = '';
-    if (done === utxos.length) await alertBox(`✓ Started withdrawal of all ${done} deposit(s). They complete after the cancel window.`);
+    if (done === utxos.length) await alertBox(`✓ Started withdrawal of ${done} deposit(s). They complete after the cancel window.`);
     refresh();
   } catch (e) { showErr(err, e); }
+}
+
+function withdrawAll(destAddr) {
+  return withdrawMany(curVaultUtxos, destAddr, true);
 }
 
 // #i-btn / #i-desk-btn: one deposit → regular withdrawal, several → "withdraw all"
 function doWithdraw(destAddr) {
   return curVaultUtxos.length > 1 ? withdrawAll(destAddr) : withdrawOne(curVaultUtxos[0], destAddr);
+}
+
+const vaultUtxoKey = (u) => `${u.txid}:${u.index}`;
+// The vault refreshes every six seconds and rebuilds the breakdown DOM. Keep the user's
+// selection in data, not in the disposable checkbox elements.
+const selectedVaultUtxoKeys = new Set();
+
+function selectedVaultUtxos() {
+  return curVaultUtxos.filter((u) => selectedVaultUtxoKeys.has(vaultUtxoKey(u)));
+}
+
+async function deskWalletAddress() {
+  let w = null;
+  try { w = session.getProfile().wallet; } catch {}
+  if (!w) { await alertBox('No wallet in this profile — open the Desk once to create it.', { alarm: true }); return null; }
+  return w.addr;
 }
 
 // per-deposit breakdown + relabeling of the main buttons; rows visible only when deposits > 1
@@ -632,34 +608,89 @@ function renderWdBreakdown(utxos) {
   const total = utxos.reduce((s, u) => s + u.amount, 0);
   $('i-btn').textContent = multi ? `Withdraw all (${utxos.length}) · ${kas(total)}` : 'Start withdrawal';
   $('i-desk-btn').textContent = multi ? 'Withdraw all to my desk wallet' : 'Withdraw to my desk wallet';
-  if (!multi) { box.style.display = 'none'; box.textContent = ''; return; }
+  const availableKeys = new Set(utxos.map(vaultUtxoKey));
+  for (const key of selectedVaultUtxoKeys) if (!availableKeys.has(key)) selectedVaultUtxoKeys.delete(key);
+  if (!multi) { selectedVaultUtxoKeys.clear(); box.style.display = 'none'; box.textContent = ''; return; }
   box.style.display = 'block';
   box.textContent = '';
   const hdr = document.createElement('p');
   hdr.className = 'hint'; hdr.style.margin = '0 0 6px';
-  hdr.textContent = `This safe holds ${utxos.length} deposits — withdraw one, or all at once:`;
+  hdr.textContent = `This safe holds ${utxos.length} deposits — withdraw one, selected deposits, or all at once:`;
   box.appendChild(hdr);
   utxos.forEach((u) => {
     const row = document.createElement('div');
-    row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-top:1px solid var(--bd-soft)';
+    row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-top:1px solid var(--bd-soft);flex-wrap:wrap';
+    const identity = document.createElement('label');
+    identity.style.cssText = 'display:flex;align-items:center;gap:10px;margin:0';
+    const pick = document.createElement('input');
+    pick.type = 'checkbox'; pick.className = 'wd-pick'; pick.value = vaultUtxoKey(u);
+    pick.checked = selectedVaultUtxoKeys.has(pick.value);
+    pick.setAttribute('aria-label', `Select deposit ${kas(u.amount)}`);
     const amt = document.createElement('span');
     amt.className = 'mono'; amt.textContent = kas(u.amount);
+    identity.appendChild(pick); identity.appendChild(amt);
+    const actions = document.createElement('div');
+    actions.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap';
     const b = document.createElement('button');
     b.className = 'btn btn-ghost'; b.style.cssText = 'padding:6px 14px;font-size:14px';
     b.textContent = 'Withdraw';
     b.onclick = () => withdrawOne(u, $('i-dest').value.trim());
-    row.appendChild(amt); row.appendChild(b);
+    const wallet = document.createElement('button');
+    wallet.className = 'btn btn-ghost'; wallet.style.cssText = 'padding:6px 14px;font-size:14px';
+    wallet.textContent = 'To my wallet';
+    wallet.onclick = async () => { const addr = await deskWalletAddress(); if (addr) withdrawOne(u, addr); };
+    actions.appendChild(b); actions.appendChild(wallet);
+    row.appendChild(identity); row.appendChild(actions);
     box.appendChild(row);
   });
+
+  const controls = document.createElement('div');
+  controls.style.cssText = 'display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--bd-soft)';
+  const selectAllLabel = document.createElement('label');
+  selectAllLabel.style.cssText = 'display:flex;align-items:center;gap:8px;margin:0';
+  const selectAll = document.createElement('input');
+  selectAll.type = 'checkbox'; selectAll.id = 'wd-select-all';
+  selectAllLabel.appendChild(selectAll); selectAllLabel.append('Select all');
+  const summary = document.createElement('span');
+  summary.id = 'wd-selected-sum'; summary.className = 'hint'; summary.style.margin = '0';
+  const selected = document.createElement('button');
+  selected.id = 'wd-selected'; selected.className = 'btn btn-ghost'; selected.textContent = 'Withdraw selected';
+  const selectedDesk = document.createElement('button');
+  selectedDesk.id = 'wd-selected-desk'; selectedDesk.className = 'btn btn-kaspa'; selectedDesk.textContent = 'Withdraw selected to my desk wallet';
+  controls.appendChild(selectAllLabel); controls.appendChild(summary); controls.appendChild(selected); controls.appendChild(selectedDesk);
+  box.appendChild(controls);
+
+  const picks = [...box.querySelectorAll('.wd-pick')];
+  const updateSelection = () => {
+    const picked = selectedVaultUtxos();
+    const pickedTotal = picked.reduce((sum, u) => sum + u.amount, 0);
+    summary.textContent = picked.length ? `${picked.length} selected · ${kas(pickedTotal)}` : '0 selected';
+    selected.disabled = !picked.length; selectedDesk.disabled = !picked.length;
+    selectAll.checked = picked.length === picks.length;
+    selectAll.indeterminate = picked.length > 0 && picked.length < picks.length;
+  };
+  picks.forEach((pick) => { pick.onchange = () => {
+    if (pick.checked) selectedVaultUtxoKeys.add(pick.value); else selectedVaultUtxoKeys.delete(pick.value);
+    updateSelection();
+  }; });
+  selectAll.onchange = () => {
+    picks.forEach((pick) => {
+      pick.checked = selectAll.checked;
+      if (pick.checked) selectedVaultUtxoKeys.add(pick.value); else selectedVaultUtxoKeys.delete(pick.value);
+    });
+    updateSelection();
+  };
+  selected.onclick = () => withdrawMany(selectedVaultUtxos(), $('i-dest').value.trim());
+  selectedDesk.onclick = async () => { const addr = await deskWalletAddress(); if (addr) withdrawMany(selectedVaultUtxos(), addr); };
+  updateSelection();
 }
 $('i-btn').onclick = () => doWithdraw($('i-dest').value.trim());
 // "Withdraw to my desk wallet": wallet address from the encrypted profile, no copy-paste (decision 2026-07-09)
 $('i-desk-btn').onclick = async () => {
-  let w = null;
-  try { w = session.getProfile().wallet; } catch {}
-  if (!w) { await alertBox('No wallet in this profile — open the Desk once to create it.', { alarm: true }); return; }
-  $('i-dest').value = w.addr;
-  doWithdraw(w.addr);
+  const addr = await deskWalletAddress();
+  if (!addr) return;
+  $('i-dest').value = addr;
+  doWithdraw(addr);
 };
 
 $('c-btn').onclick = async () => {
@@ -737,7 +768,7 @@ $('tg-btn').onclick = async () => {
 
 $('forget').onclick = async () => { if ($('forget').disabled) return; if (await confirmBox(L('forget_confirm'), { danger: true, ok: 'Forget' })) { clearVault(); location.reload(); } };
 </script>
-<script src="/assets/kaspa-widget.js?v=3" defer></script>
+<script src="/assets/kaspa-widget.js?v=4" defer></script>
 <script>if("serviceWorker" in navigator&&/(^|\.)kaspaforge\.org$|(^|\.)officeforge\.co$/.test(location.hostname))navigator.serviceWorker.register("/sw.js");</script>
 </body>
 </html>

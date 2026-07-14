@@ -29,7 +29,7 @@
 <meta name="theme-color" content="#0E1116">
 <link rel="manifest" href="/manifest-escrow.json">
 <link rel="apple-touch-icon" href="/assets/icons-escrow/apple-touch-icon.png">
-<script src="/assets/nav.js?v=5" defer></script>
+<script src="/assets/nav.js?v=7" defer></script>
 <link rel="stylesheet" href="/assets/safe.css?v=14">
 <style>
 /* ── escrow landing: covenant diagram (signature visual) + dispute stepper + comparison ── */
@@ -106,8 +106,8 @@
 {"@type":"Question","name":"What if the buyer goes silent after receiving the goods?","acceptedAnswer":{"@type":"Answer","text":"The dispute window protects the seller too: if the buyer neither releases nor disputes, the escrow auto-releases to the seller when the window closes."}},
 {"@type":"Question","name":"What if your site disappears mid-deal?","acceptedAnswer":{"@type":"Answer","text":"The deal is an on-chain contract with an emergency timeout: if the arbiter never rules by the contract deadline, funds go to the default side by themselves. The contract and offline tools are open source — the deal outlives the website."}},
 {"@type":"Question","name":"What does it cost?","acceptedAnswer":{"@type":"Answer","text":"Creating a deal is free. A normal resolution — release, refund or mutual settlement — is 0.5% (min 1.2 KAS). Arbitration is 2% (min 5 KAS). The service fee is enforced by the covenant on every one of these paths; the only path with no service fee is the emergency timeout (the arbiter never ruled). The exact fee is shown before you confirm."}},
-{"@type":"Question","name":"Who sees our chat?","acceptedAnswer":{"@type":"Answer","text":"Only the two of you. The deal chat is on-chain messaging on the Kaspa BlockDAG (Kasia protocol): every message is an end-to-end encrypted transaction, so the thread cannot be forged or backdated. The server relays only ciphertext. The arbiter can read it only if one side deliberately reveals it during a dispute — and the decrypted copy is wiped when the deal closes."}},
-{"@type":"Question","name":"How tested is it?","acceptedAnswer":{"@type":"Answer","text":"Open beta. The contract passed a full on-chain cycle and adversarial attacks on our test range (52/52 in the VM), plus live mainnet dispute runs — but the external audit is still ahead. Deals run from 50 to 10,000 KAS."}}
+{"@type":"Question","name":"Who sees our chat?","acceptedAnswer":{"@type":"Answer","text":"Only the two of you. The deal chat is on-chain messaging on the Kaspa BlockDAG (Kasia protocol): every message is an end-to-end encrypted transaction, anchored on-chain — the thread can't be silently forged or backdated. The server relays only ciphertext. The arbiter can read it only if one side deliberately reveals it during a dispute — and the decrypted copy is wiped when the deal closes."}},
+{"@type":"Question","name":"How tested is it?","acceptedAnswer":{"@type":"Answer","text":"Open beta. The contract passed a full on-chain cycle and adversarial attacks on our test range (52/52 in the VM), plus live mainnet dispute runs. Deals run from 50 to 10,000 KAS."}}
 ]}
 </script>
 </head>
@@ -124,6 +124,7 @@
     <a href="#dispute">Disputes</a>
     <a href="#fees">Fees</a>
     <a href="#faq">FAQ</a>
+    <a href="/contracts.html">Contracts</a>
     <a class="cta" href="https://kaspaforge.org/escrow.html">Create a deal</a>
   </nav>
 </header>
@@ -134,6 +135,15 @@
   <span class="ns-item"><span class="ns-l">Node status</span><span class="ns-v"><span class="ns-dot" id="ns-dot"></span><span id="ns-status">…</span></span></span>
 </div>
 <script src="/assets/netstat.js?v=1" defer></script>
+
+<div class="netstat" id="secstat" style="display:none">
+  <span class="ns-item"><span class="ns-l">Contracts</span><span class="ns-v" id="sec-contracts">…</span></span>
+  <span class="ns-item"><span class="ns-l">Tests</span><span class="ns-v" id="sec-tests">…</span></span>
+  <span class="ns-item"><span class="ns-l">Release</span><span class="ns-v" id="sec-release">…</span></span>
+  <span class="ns-item"><a class="ns-v" href="/security.html" id="sec-link" style="color:var(--kaspa)">Security ▸</a></span>
+  <span class="ns-item"><a class="ns-v" href="https://github.com/Kaspaforge/kaspaforge" id="sec-github" target="_blank" rel="noopener" style="color:var(--kaspa)">GitHub</a></span>
+</div>
+<script src="/assets/sec-status.js?v=3" defer></script>
 
 <div class="hero">
   <div class="txt">
@@ -209,6 +219,7 @@
     <div class="tick" style="left:99%"></div><div class="lbl end">auto-release to seller</div>
   </div>
   <p class="hint" style="margin-top:10px">Dispute window presets: 24–120 h in one-day steps, plus 7 days — the deal creator picks one (defaults follow the type: goods 72 h, OTC 24 h, service 120 h), and the joining party sees it before joining. While the window is open, the buyer can dispute; once it closes, funds flow to the seller on their own.</p>
+  <p class="hint" style="margin-top:10px"><b>OTC deals get an extra layer.</b> When the counter-payment is a supported crypto — USDT/USDC across Tron, TON, Ethereum, BSC, Polygon, Arbitrum and Base, native TRX/TON/ETH/BNB, or BTC/LTC — the seller's payment to the buyer's fixed address is <b>verified live on that blockchain</b>: both sides see a “payment confirmed on-chain” badge once the amount, the recipient and the confirmations all match. It's a signal, not an action — release still needs the buyer's signature. Order is enforced: the buyer locks the KAS first, and the seller's pay button only appears once the escrow is funded. <a href="/docs/escrow.html">More in the docs ▸</a></p>
 </section>
 
 <section id="why">
@@ -216,12 +227,12 @@
   <h2>Six things a human middleman can't give you</h2>
   <div class="grid cols-3" style="margin-top:22px">
     <div class="path">
-      <div class="glyph">Theft is impossible</div>
+      <div class="glyph">Pays only the deal's parties</div>
       <p>The covenant admits a fixed set of outcomes, and in every one the money goes to the buyer, the seller, or the visible service fee. There is no "send elsewhere" path in the script — a guarantor's honesty stops being a factor.</p>
     </div>
     <div class="path">
       <div class="glyph">On-chain chat — the case file</div>
-      <p>The deal chat is not a website chat. It is on-chain messaging on the Kaspa BlockDAG, built on the <b>Kasia protocol</b>: every message is an end-to-end encrypted transaction in the ledger; photos and videos travel encrypted, their fingerprints anchored on-chain. Nobody — including us — can forge, edit or backdate the thread. In a dispute, this chat is the case file.</p>
+      <p>The deal chat is not a website chat. It is on-chain messaging on the Kaspa BlockDAG, built on the <b>Kasia protocol</b>: every message is an end-to-end encrypted transaction in the ledger; photos and videos travel encrypted, their fingerprints anchored on-chain — the thread can't be silently forged, edited or backdated, not even by us. In a dispute, this chat is the case file.</p>
     </div>
     <div class="path">
       <div class="glyph">Three-layer dispute resolution</div>
@@ -237,8 +248,11 @@
     </div>
     <div class="path">
       <div class="glyph">Open source, offline recovery</div>
-      <p>The covenant and the arbiter tool are open (<a href="https://github.com/pcdoctormsk-ctrl/kaspa-safe" target="_blank" rel="noopener">GitHub</a>). Your recovery sheet reopens the deal on any device, the escrow is watchable on any explorer, and the on-chain timeout means it can never hang. <a href="/recover-escrow.html">Recovery &amp; offline →</a></p>
+      <p>The covenant and the arbiter tool are open (<a href="https://github.com/Kaspaforge/kaspaforge" target="_blank" rel="noopener">GitHub</a>). Your recovery sheet reopens the deal on any device, the escrow is watchable on any explorer, and the on-chain timeout means it can never hang. <a href="/recover-escrow.html">Recovery &amp; offline →</a></p>
     </div>
+  </div>
+  <div style="margin-top:14px;font-size:12px;color:var(--ash2)">
+    <span>Open beta — <a href="/security.html">security &middot; verification</a></span>
   </div>
 </section>
 
@@ -246,6 +260,7 @@
   <div class="eyebrow">Disputes</div>
   <h2>When things go wrong, the process is a rail — not a favor</h2>
   <p class="lead" style="margin-top:10px;max-width:64ch">The buyer opens a dispute and the funds freeze in the covenant. From there, resolution runs on a visible track:</p>
+  <p style="margin-top:10px;max-width:68ch">Want the protocol-level view first? Read the <a href="/docs/escrow.html">Escrow security documentation</a> and the guide to <a href="/blog/kaspa-covenants-how-they-work.html">Kaspa covenant mechanics</a>.</p>
   <div class="disp-demo" aria-hidden="true">
     <div class="tl"><span class="tl-dot"></span><span class="tl-lbl">claims</span></div><div class="tl-bar"></div>
     <div class="tl"><span class="tl-dot"></span><span class="tl-lbl">reveal</span></div><div class="tl-bar"></div>
@@ -263,7 +278,7 @@
     </div>
     <div class="plate">
       <div class="kv"><span class="k">Privacy</span><span class="v">until reveal, the arbiter sees only ciphertext; after the deal closes, the revealed copy is wiped</span></div>
-      <div class="kv"><span class="k">Honesty</span><span class="v">AI advises, a human is the final arbiter, the covenant caps the money — theft is off the table, fairness is the arbiter's call on evidence</span></div>
+      <div class="kv"><span class="k">Honesty</span><span class="v">AI advises, a human is the final arbiter, the covenant pays only the deal's parties — fairness is the arbiter's call on evidence</span></div>
       <div class="kv"><span class="k">Amicable exit</span><span class="v">release / refund stay available at any moment of the dispute</span></div>
       <div class="kv"><span class="k">Escrow keys</span><span class="v">never leave your browser — at no stage, dispute included</span></div>
     </div>
@@ -323,7 +338,7 @@
         <tr><td>Who holds the money</td><td class="us">an on-chain covenant — nobody</td><td>a person you have to trust</td></tr>
         <tr><td>Can the middleman steal</td><td class="us">no — the network rejects any other destination</td><td>yes — reputation is the only barrier</td></tr>
         <tr><td>Fee</td><td class="us">0.5% amicable · 2% arbitration</td><td>3–10%</td></tr>
-        <tr><td>Evidence</td><td class="us">on-chain Kasia chat: E2E photo/video, impossible to forge or backdate</td><td>screenshots anyone can forge</td></tr>
+        <tr><td>Evidence</td><td class="us">on-chain Kasia chat: E2E photo/video, anchored on-chain — can't be silently altered or backdated</td><td>screenshots anyone can forge</td></tr>
         <tr><td>If the middleman vanishes</td><td class="us">timeout returns the funds by itself</td><td>money is gone</td></tr>
       </tbody>
     </table>
@@ -356,7 +371,7 @@
     </details>
     <details>
       <summary>Who sees our chat?</summary>
-      <p>Only the two of you. The deal chat is on-chain messaging on the Kaspa BlockDAG (Kasia protocol): every message is an end-to-end encrypted transaction, so the thread cannot be forged or backdated. The server relays only ciphertext. The arbiter can read it only if one side deliberately reveals it during a dispute — and the decrypted copy is wiped when the deal closes. A chat key cannot move funds.</p>
+      <p>Only the two of you. The deal chat is on-chain messaging on the Kaspa BlockDAG (Kasia protocol): every message is an end-to-end encrypted transaction, anchored on-chain — the thread can't be silently forged or backdated. The server relays only ciphertext. The arbiter can read it only if one side deliberately reveals it during a dispute — and the decrypted copy is wiped when the deal closes. A chat key cannot move funds.</p>
     </details>
     <details>
       <summary>What do I need to keep safe?</summary>
@@ -364,21 +379,37 @@
     </details>
     <details>
       <summary>How tested is it?</summary>
-      <p>Open beta. The contract passed a full on-chain cycle and adversarial attacks on our test range (52/52 in the VM), plus live mainnet dispute runs — but the external audit is still ahead. Deals run from 50 to 10,000 KAS.</p>
+      <p>Open beta. The contract passed a full on-chain cycle and adversarial attacks on our test range (52/52 in the VM), plus live mainnet dispute runs. Deals run from 50 to 10,000 KAS.</p>
     </details>
   </div>
 
   <div class="note alarm" style="margin-top:26px">
-    <b>Open beta.</b> Unaudited contract — the external audit is still ahead. Keep deals within the 50–10,000 KAS range and don't
-    escrow more than you'd trust to a beta. The contract guarantees funds can't be stolen; the fairness of a verdict is
-    the arbiter's judgement on the evidence you provide. This is a tool, not financial or legal advice.
+    <b>Open beta.</b> Keep deals within the 50–10,000 KAS range and don't
+    escrow more than you'd trust to a beta. Every spend path in the covenant pays a party of the deal — the operator can't
+    redirect funds; the fairness of a verdict is the arbiter's judgement on the evidence you provide. This is a tool, not financial or legal advice.
   </div>
 </section>
 
 <footer>
-  <div class="row">
-    <a class="foot-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="OfficeForge"><img src="/assets/logo.png" alt="OfficeForge"></a>
-    <span>Kaspa Escrow — built by the <a href="https://officeforge.co" target="_blank" rel="noopener">OfficeForge</a> AI office on Kaspa covenants · sibling of <a href="https://kaspaforge.org">Kaspa Safe</a> · feedback: kaspa@officeforge.co · <a href="/recover-escrow.html">Recover a deal</a> · <a href="/docs/">Docs</a> · <a href="/blog/">Blog</a> · <a href="/privacy-escrow.html">Privacy</a></span>
+  <div class="foot">
+    <span class="fb">
+      <img class="k" src="/assets/brand/emblem-flat-header.png" alt="" aria-hidden="true">
+      <span>© 2026 Kaspa Forge — built by the</span>
+      <a class="foot-ofs-logo" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="Visit OfficeForge"><img src="/assets/of-wordmark.png" alt="OfficeForge"></a>
+    </span>
+    <nav aria-label="Footer">
+      <a href="/safe.html">Safe</a>
+      <a href="/escrow-index.html">Escrow</a>
+      <a href="/market.html">Market</a>
+      <a href="/blog/">Blog</a>
+      <a href="/docs/">Docs</a>
+      <a href="/recover.html">Recovery</a>
+      <a href="https://github.com/Kaspaforge/kaspaforge" target="_blank" rel="noopener">GitHub</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+      <a href="/security.html">Security</a>
+      <a href="mailto:kaspa@officeforge.co">kaspa@officeforge.co</a>
+    </nav>
   </div>
 </footer>
 
@@ -400,7 +431,7 @@ fetch('/api/safe/info').then(function(r){return r.json()}).then(function(i){
   });
 })();
 </script>
-<script src="/assets/kaspa-widget.js?v=3" defer></script>
+<script src="/assets/kaspa-widget.js?v=4" defer></script>
 <script>if("serviceWorker" in navigator&&/(^|\.)kaspaforge\.org$|(^|\.)officeforge\.co$/.test(location.hostname))navigator.serviceWorker.register("/sw-escrow.js");</script>
 </body>
 </html>

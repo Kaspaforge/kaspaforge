@@ -1,7 +1,7 @@
 # Kaspa Safe — mirror the signed APK into GitHub Releases.
 # Trigger: a push of an apk-v* tag (pushed via a deploy key by the release tooling on the
 # operator host, outside this repo — the mirroring PAT has no releases permission, while the
-# workflow's GITHUB_TOKEN has contents:write). Source of truth — https://safe.officeforge.co/dl/
+# workflow's GITHUB_TOKEN has contents:write). Source of truth — https://kaspaforge.org/dl/
 # (the APK lands there AFTER offline signing); the workflow downloads it, verifies the sha256 and attaches it to the release.
 name: release-apk
 
@@ -16,10 +16,10 @@ jobs:
   mirror:
     runs-on: ubuntu-latest
     steps:
-      - name: Fetch signed APK from safe.officeforge.co
+      - name: Fetch signed APK from kaspaforge.org
         run: |
-          curl -fsSLo KaspaSafe.apk https://safe.officeforge.co/dl/KaspaSafe.apk
-          curl -fsSLo KaspaSafe.apk.sha256 https://safe.officeforge.co/dl/KaspaSafe.apk.sha256
+          curl -fsSLo KaspaSafe.apk https://kaspaforge.org/dl/KaspaSafe.apk
+          curl -fsSLo KaspaSafe.apk.sha256 https://kaspaforge.org/dl/KaspaSafe.apk.sha256
           sha256sum -c KaspaSafe.apk.sha256
 
       - uses: softprops/action-gh-release@v2
@@ -28,7 +28,7 @@ jobs:
           body: |
             Signed Android APK (universal, minSdk 24 / Android 7.0+).
 
-            - Primary download: https://safe.officeforge.co/dl/KaspaSafe.apk
+            - Primary download: https://kaspaforge.org/dl/KaspaSafe.apk
             - Verify: `sha256sum -c KaspaSafe.apk.sha256`
             - Built from this repo by the `android-apk` workflow (unsigned, reproducible),
               signed offline by OfficeForge — the signing key never touches CI.

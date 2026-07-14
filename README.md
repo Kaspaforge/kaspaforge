@@ -1,16 +1,21 @@
-# Kaspa Safe & Escrow — contracts + recovery kit
+# Kaspa Forge — contracts, apps & recovery kit
 
-Two non-custodial products built on Kaspa Toccata covenants, and the open-source proof that
-they can't touch your money:
+This is the open-source code behind **Kaspa Forge — Safe + Escrow + Market + Desk**, built
+on Kaspa Toccata covenants. It contains the browser app, contracts, Android client and
+offline recovery tooling needed to verify the platform's non-custodial claims.
 
-- **[Kaspa Safe](https://safe.officeforge.co)** — a vault for KAS. Every withdrawal waits out
+- **[Safe](https://kaspaforge.org/safe.html)** — a vault for KAS. Every withdrawal waits out
   a delay you set and can be cancelled with a separate alarm key.
-- **[Kaspa Escrow / "Garant"](https://escrow.officeforge.co)** — escrow for P2P deals. The
-  money sits in an on-chain contract; even the arbiter can only send it to the buyer, the
-  seller, or the fixed service fee.
+- **[Escrow](https://kaspaforge.org/escrow-index.html)** — escrow for P2P deals. Funds sit in
+  an on-chain contract; even the arbiter can only send them to the buyer, the seller, or the
+  fixed service fee.
+- **[Market](https://kaspaforge.org/market.html)** — a marketplace powered by non-custodial
+  Kaspa payments and escrow.
+- **[Desk](https://kaspaforge.org/desk.html)** — the unified browser workspace for the wallet,
+  safes, escrow deals, listings and opt-in encrypted profile sync.
 
-This repository is the **offline recovery kit** for the vault plus the **on-chain contracts**
-of both products, so you can verify — and, for the vault, operate — everything **without our
+This repository includes the **offline recovery kit** for Safe and the **on-chain contracts**
+for Safe and Escrow, so you can verify — and, for Safe, operate — everything **without our
 website**, against any Kaspa node.
 
 - [`contracts/vault.sil`](contracts/vault.sil) — the vault covenant (Silverscript).
@@ -49,7 +54,7 @@ cd vaultctl && cargo build --release
 Global flags:
 
 - `--node grpc://host:16110` — any Kaspa v2+ node with `--utxoindex`
-  (default: `grpc://node.kaspaforge.org:16110`, the OfficeForge public node).
+  (default: `grpc://node.kaspaforge.org:16110`, the Kaspa Forge public node).
 - `--dry-run` — build and sign the transaction, print its txid, **don't** broadcast.
   Use it first if you're unsure.
 
@@ -98,15 +103,15 @@ covenant compiled into every escrow address on-chain.
 - Anything these contracts allow requires **your** keys (or, for the emergency/auto paths,
   a hard-bound destination) — there is no admin path, for us or anyone.
 
-## Web frontend & Android app
+## Kaspa Forge web frontend & Android app
 
 This repo also contains the full web frontend (`web/`) and a Tauri 2 Android wrapper (`app/`)
 for Kaspa Safe: all assets (including the WASM signing core) are bundled into the APK, so the
 app keeps working even if the website is down — it only needs the HTTP API / a Kaspa node to
 broadcast.
 
-- Signed APK + SHA-256: https://safe.officeforge.co/dl/KaspaSafe.apk (checksum: `KaspaSafe.apk.sha256`);
-  mirrored to [GitHub Releases](https://github.com/pcdoctormsk-ctrl/kaspa-safe/releases) of this repo (tag `apk-v*`, published by the `release-apk` workflow)
+- Signed APK + SHA-256: https://kaspaforge.org/dl/KaspaSafe.apk (checksum: `KaspaSafe.apk.sha256`);
+  mirrored to [GitHub Releases](https://github.com/Kaspaforge/kaspaforge/releases) of this repo (tag `apk-v*`, published by the `release-apk` workflow)
 - CI (`.github/workflows/android-apk.yml`) builds an **unsigned** APK from this repo — reproduce it
   yourself and compare with the signed one (`apksigner` adds only the signature). Release signing
   happens offline; the key never touches CI.

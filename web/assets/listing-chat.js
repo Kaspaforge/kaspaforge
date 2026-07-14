@@ -5,11 +5,11 @@
 //
 // IMPORTANT: import escrow.js at EXACTLY the version (?v=30) the desk loads — a different query
 // string would create a SECOND module instance and a second WASM init. Bumping escrow.js in desk.html — bump it here too.
-import { core, net, api, submitTx, utxosRaw, chatSupported, chatAddress, boot as bootEscrow } from '/assets/escrow.js?v=30';
+import { core, net, api, submitTx, utxosRaw, chatSupported, chatAddress, boot as bootEscrow } from '/assets/escrow.js?v=40';
 
 export { chatSupported, chatAddress };
 
-// The desk boots app.js/core6, NOT escrow.js — without this its WASM core (chat_*) is not
+// The desk boots app.js/core7, NOT escrow.js — without this its WASM core (chat_*) is not
 // initialized. One-shot gate: every desk chat path calls ensureChatReady() first.
 let ready = null;
 export function ensureChatReady() { return (ready ||= bootEscrow()); }

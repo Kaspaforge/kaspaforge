@@ -21,9 +21,9 @@
   var RU = (document.documentElement.lang || 'en').slice(0, 2) === 'ru';
   var T = RU ? {
     btn: 'Спросить Сару',
-    sub: 'Поддержка Kaspa',
-    hello: 'Привет! Я Сара, поддержка Kaspa 🙂 Спрашивай про сейф, сделки-гаранты, маркетплейс и свой деск (профиль, пароль, кошелёк, бэкап). Пароль профиля и приватные ключи я никогда не спрашиваю — и ты их никому не показывай.',
-    ph: 'Вопрос про сейф, Гарант, маркет или деск…',
+    sub: 'Поддержка KaspaForge',
+    hello: 'Привет! Я Сара из поддержки KaspaForge 🙂 Помогу с Деском, Safe, Гарантом, Forge Contracts, маркетплейсом и пополнением через SimpleSwap. Я никогда не попрошу пароль профиля, файл ключей, seed или приватные ключи — никому их не показывай.',
+    ph: 'Вопрос про KaspaForge…',
     send: 'Отправить',
     spam: 'Быстрая проверка от спама…',
     capFail: 'Проверка не прошла — попробуй ещё раз.',
@@ -35,9 +35,9 @@
     net: 'Сетевой сбой — попробуй ещё раз.'
   } : {
     btn: 'Ask Sara',
-    sub: 'Kaspa support',
-    hello: "Hi! I'm Sara, Kaspa support 🙂 Ask about the vault (Safe), escrow deals, the marketplace, or your desk (profile, password, wallet, backup). I'll never ask for your profile password or private keys — don't show them to anyone.",
-    ph: 'Ask about Safe, Escrow, marketplace or your desk…',
+    sub: 'KaspaForge support',
+    hello: "Hi! I'm Sara from KaspaForge support 🙂 I can help with your Desk, Safe, Escrow, Forge Contracts, Marketplace, and SimpleSwap funding. I'll never ask for your profile password, key file, seed, or private keys — never share them with anyone.",
+    ph: 'Ask KaspaForge support…',
     send: 'Send',
     spam: 'Quick spam check…',
     capFail: 'Check failed — try the box again.',

@@ -16,7 +16,7 @@
 <meta name="theme-color" content="#0E1116">
 <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/safe.css?v=14">
-<script src="/assets/nav.js?v=5" defer></script>
+<script src="/assets/nav.js?v=7" defer></script>
 </head>
 <body>
 <div class="wrap">
@@ -42,7 +42,7 @@
 
   <div class="plate">
     <h2 style="font-size:20px">What the app stores on your device</h2>
-    <p>Vault parameters (public keys, delays, the service token, and — if you enter them during an action — nothing: private keys are used in memory for signing and are not persisted by us). This data lives in your browser's / the app's local storage (in your encrypted master key file) and can be wiped with "Forget this vault in this browser". You back up the master key file yourself from your Desk (Export key file).</p>
+    <p>Vault parameters and keys live in your browser's / app's encrypted master profile. “Remove this vault from my Desk” writes an encrypted tombstone, so Forge Sync also removes it from your other devices instead of letting a stale copy bring it back. An explicit key-file import can restore it with a newer version. The server never receives the plaintext profile or private keys.</p>
   </div>
 
   <div class="plate">
@@ -76,9 +76,9 @@
   </div>
 </div>
 
-<footer><div class="row wrap"><a class="foot-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="OfficeForge"><img src="/assets/logo.png" alt="OfficeForge"></a><span>Kaspa Safe · non-custodial beta · <a href="https://officeforge.co">OfficeForge</a> · feedback: kaspa@officeforge.co · <a href="/privacy.html">Privacy</a></span></div></footer>
+<footer><div class="row wrap"><a class="foot-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="OfficeForge"><img src="/assets/logo.png" alt="OfficeForge"></a><span>Kaspa Safe · non-custodial beta · <a href="https://officeforge.co">OfficeForge</a> · feedback: kaspa@officeforge.co · <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a> &middot; <a href="/security.html">Security</a></span></div></footer>
 </div>
-<script src="/assets/kaspa-widget.js?v=3" defer></script>
+<script src="/assets/kaspa-widget.js?v=4" defer></script>
 <script>if("serviceWorker" in navigator&&/(^|\.)kaspaforge\.org$|(^|\.)officeforge\.co$/.test(location.hostname))navigator.serviceWorker.register("/sw.js");</script>
 </body>
 </html>

@@ -3,7 +3,7 @@
    Alarm red is used ONLY for withdrawal cancellation. */
 
 :root{
-  --iron:#0E1116; --steel:#161B22; --plate:#1B222C;
+  --iron:#0E1116; --steel:#161B22; --plate:#1B222C; --plate-2:#121820;   /* nested surface INSIDE a .plate card (spec 2026-07-12 desk cockpit) */
   --bd:rgba(255,255,255,.085); --bd-soft:rgba(255,255,255,.05);
   --ingot:#ECEFF4; --ash:#9AA7BC; --ash2:#6c7a90;
   --kaspa:#00C1AF; --kaspa-soft:#33D6C6; --patina:#0A7C72; --patina-ink:#03302C;
@@ -34,16 +34,12 @@ img.brand-k{width:auto}
 .brand:hover .brand-name{text-shadow:0 0 14px rgba(0,193,175,.55)}
 .brand-name b{color:var(--kaspa);font-weight:600}
 .top nav{margin-left:auto;display:flex;gap:22px;align-items:center}
-/* provenance: OfficeForge logo ("Kaspa Safe by OfficeForge") in the header and footer */
+/* provenance: OfficeForge logo in the header and the shared Kaspa Forge footer */
 .by-ofs{display:inline-flex;align-items:center;opacity:.72;transition:opacity .2s}
 .by-ofs:hover{opacity:1}
 .top .by-ofs:hover img{filter:drop-shadow(0 0 9px rgba(255,178,62,.65))}
 .top .by-ofs{padding-left:14px;border-left:1px solid var(--bd)}
 .top .by-ofs img{height:26px;width:auto;display:block;transition:filter .2s ease}
-footer .foot-ofs{display:inline-flex;opacity:.85;transition:opacity .2s}
-footer .foot-ofs img{transition:filter .2s ease}
-footer .foot-ofs:hover{opacity:1}
-footer .foot-ofs:hover img{filter:drop-shadow(0 0 12px rgba(255,178,62,.55))}
 @media(max-width:600px){.top .by-ofs{display:none}}
 .top nav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ash)}
 .top nav a:hover{color:var(--kaspa)}
@@ -179,10 +175,23 @@ input:focus,select:focus{outline:none;border-color:var(--kaspa)}
 .window-bar .lbl.mid{transform:translateX(-50%)}
 .window-bar .lbl.end{right:0;left:auto}
 
-/* ── footer ── */
-footer{margin-top:70px;border-top:1px solid var(--bd-soft);padding:26px 0 40px;color:var(--ash2);font-size:13px}
-footer .row{display:flex;flex-wrap:wrap;gap:18px;align-items:center}
-footer img{height:34px;opacity:.85}
+/* ── shared Kaspa Forge footer ── */
+footer{width:100vw;margin:70px 0 0 calc(50% - 50vw);border-top:1px solid var(--bd-soft);background:var(--steel);padding:30px 0 36px;color:var(--ash2);font-size:13px}
+footer .foot{max-width:1080px;margin:0 auto;padding:0 22px;display:flex;flex-wrap:wrap;gap:14px 30px;align-items:center}
+footer .fb{display:flex;align-items:center;gap:9px;color:var(--ash)}
+footer .fb .k{display:block;width:auto;height:24px;object-fit:contain}
+footer .foot-ofs-logo{display:flex;align-items:center;flex:none}
+footer .foot-ofs-logo img{display:block;width:auto;height:18px;opacity:.72;transition:opacity .18s ease,filter .18s ease}
+footer .foot-ofs-logo:hover img{opacity:1;filter:drop-shadow(0 0 12px rgba(255,178,62,.55))}
+footer .foot nav{margin-left:auto;display:flex;flex-wrap:wrap;gap:8px 22px}
+footer .foot nav a{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ash2);display:inline-block;padding:8px 0}
+footer .foot nav a:hover{color:var(--kaspa)}
+footer .fb>span{min-width:0}
+@media(max-width:640px){
+  footer{padding-bottom:96px}
+  footer .fb{flex-basis:100%;flex-wrap:wrap}
+  footer .foot nav{margin-left:0}
+}
 
 /* ── QR ── */
 .qr{background:#fff;border-radius:8px;padding:10px;width:fit-content;margin-top:12px}

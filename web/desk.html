@@ -9,9 +9,17 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest-forge.json">
+<link rel="apple-touch-icon" href="/assets/icons/icon-192.png?v=2">
 <meta name="theme-color" content="#0E1116">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Kaspa Forge">
 <link rel="stylesheet" href="/assets/safe.css?v=14">
-<script src="/assets/nav.js?v=5" defer></script>
+<link rel="stylesheet" href="/assets/desk.css?v=12">
+<script src="/assets/nav.js?v=7" defer></script>
+<script src="/assets/netstat.js?v=1" defer></script>
 <script src="/assets/qrcode.min.js"></script>
 <style>
 /* desk.html: page-scoped styles, does not touch safe.css (shared by ~15 pages).
@@ -44,32 +52,13 @@ label.btn{line-height:normal;margin:0}
    while the wallet address/amount and the chat line are <input> without type → bare browser default. */
 /* input.ch-input (not .ch-input): safe.css now styles input:not([type]) with specificity
    (0,1,1) — this selector needs the same to win by source order (page <style> comes later). */
-#wallet-box input,input.ch-input{background:var(--iron);border:1px solid var(--bd);border-radius:9px;
+#view-wallet input,input.ch-input{background:var(--iron);border:1px solid var(--bd);border-radius:9px;
   color:var(--ingot);padding:13px 15px;font-family:var(--mono);font-size:13.5px;min-width:0}
-#wallet-box input::placeholder,input.ch-input::placeholder{color:var(--ash2)}
-#wallet-box input:focus,input.ch-input:focus{outline:none;border-color:var(--kaspa)}
-/* The support widget (fixed, bottom right) must not sit on content — scroll-past headroom (review
-   2026-07-09). Root container only: a bare .wrap would also catch every .row.wrap (class wrap!). */
-body > .wrap{padding-bottom:96px}
+#view-wallet input::placeholder,input.ch-input::placeholder{color:var(--ash2)}
+#view-wallet input:focus,input.ch-input:focus{outline:none;border-color:var(--kaspa)}
 /* Mobile: safe.css hides .vb-addr ≤640px, but in listing/chat lists it carries the STATUS
    ("published · Nd left", "on moderation") — bring it back (review 2026-07-09) */
 @media (max-width:640px){#tab-listings .vb-addr,#tab-chats .vb-addr{display:block;font-size:11px}}
-/* Tab bar sticks to the top: switching tabs on a phone must not require scrolling back past
-   the QR and wallet (review 2026-07-09). The background shields content showing through.
-   gap here, not inline: the mobile media block below must be able to shrink it. */
-#tab-bar{position:sticky;top:0;z-index:5;background:var(--iron);padding:8px 0;margin-bottom:8px;gap:10px}
-/* Mobile: tabs in a single row of equal segments, no wrap to a second line (decision 2026-07-11).
-   min-width:0 + narrow horizontal padding — otherwise the mono caps don't fit at 360px;
-   vertical padding untouched (touch target ≥44px, PRODUCT.md). Chats badge accounted for (gap 4px). */
-@media (max-width:640px){
-  #tab-bar{flex-wrap:nowrap;gap:6px}
-  #tab-bar .btn{flex:1 1 0;min-width:0;padding-left:4px;padding-right:4px;
-    font-size:12px;letter-spacing:.04em;white-space:nowrap;gap:4px}
-  /* the counter doesn't fit a 360px segment — on mobile the badge collapses to a dot */
-  #tab-bar .ch-unread{min-width:8px;height:8px;padding:0;font-size:0;border-radius:4px}
-}
-/* readable line length for the warning (was ~105ch across the full width) */
-#backup-nudge{max-width:74ch}
 /* Safe with a withdrawal in progress: balance and the withdrawing amount as separate lines and
    colors (owner feedback 2026-07-10: "9.99 + 9.96 · withdrawing" read as mush). Teal = still
    in the vault, amber = leaving; labels in small ash caps. */
@@ -94,109 +83,163 @@ body > .wrap{padding-bottom:96px}
      Erase (full-width span + top headroom) — so it isn't tapped by accident next to the others. */
   .desk-utils{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:stretch}
   .desk-utils .btn{width:100%;padding-left:10px;padding-right:10px;font-size:12px;letter-spacing:.04em}
-  #d-lock,.util-sep,#d-wipe{grid-column:1 / -1}
-  .util-sep{width:auto;height:1px;min-height:0;align-self:auto;margin:5px 0}
-  #d-wipe{margin-top:2px}
 }
 </style>
 </head>
 <body>
-<div class="wrap">
+<div id="app" style="display:none">
+  <aside id="side-nav" aria-label="Desk sections"></aside>
+  <main class="desk-main">
+    <header id="topbar">
+      <a class="tb-mobile-brand" href="/" aria-label="Kaspa Forge"><img src="/assets/brand/lockup-h-flat-header.png" alt="KaspaForge"></a>
+      <h1 id="tb-title" data-desk-label="Desk">Overview</h1>
+      <span class="tb-chip" title="Your profile is encrypted with your password and never leaves this browser">🛡 All data encrypted locally</span>
+      <div class="tb-netstat" id="netstat" aria-label="Kaspa node status">
+        <span class="tb-stat"><span class="tb-stat-l">Network</span><span class="tb-stat-v" id="ns-net">…</span></span>
+        <span class="tb-stat"><span class="tb-stat-l">DAA</span><span class="tb-stat-v ns-daa" id="ns-daa">…</span></span>
+        <span class="tb-stat"><span class="tb-stat-l">Node</span><span class="tb-stat-v"><span class="ns-dot" id="ns-dot"></span><span id="ns-status">…</span></span></span>
+      </div>
+      <a class="tb-chip" id="tb-lang" href="/ru/desk.html" hreflang="ru" lang="ru">RU</a>
+      <button id="d-lock" class="btn btn-ghost" title="Lock the desk now (it also auto-locks after 15 min idle)" aria-label="Quick-lock Desk now"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span class="tb-lock-label">Lock</span></button>
+    </header>
 
-<header class="top">
-  <a class="brand" href="/">
-    <img class="brand-k" src="/assets/brand/emblem-flat-header.png" alt="">
-    <span class="brand-name">My Kaspa <b>Desk</b></span>
-  </a>
-  <nav><a href="/docs/desk.html">Docs</a></nav>
-</header>
+    <!-- Critical events live ABOVE the views: an active safe withdrawal must be visible from ANY view (spec §15.5) -->
+    <section class="plate note alarm" id="unvault-alert" style="display:none;margin-bottom:16px"></section>
 
-<main id="app" style="display:none">
-  <!-- Page heading + profile utilities. Previously there was no h1 at all (review 2026-07-09: "a page
-       with no name"), and Import/merge was a label with a hidden input — outside the tab order (a11y). -->
-  <div class="row wrap" style="gap:8px 10px;align-items:center;justify-content:space-between">
-    <h1 style="font-size:clamp(28px,4vw,40px);margin:10px 0 4px">My Kaspa Desk</h1>
-    <div class="desk-utils">
-      <button id="d-export" class="btn btn-ghost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export key</button>
-      <button id="d-import-btn" class="btn btn-ghost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Import / merge</button>
-      <input type="file" id="d-import" accept=".json,.age,application/json,text/plain" hidden>
-      <button id="d-lock" class="btn btn-ghost" title="Lock the desk now (it also auto-locks after 15 min idle)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Lock</button>
-      <span class="util-sep" aria-hidden="true"></span>
-      <button id="d-wipe" class="btn btn-wipe" title="Erase the key file from this browser — for shared or public devices"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>Erase from device</button>
-    </div>
-  </div>
-  <p class="hint" style="margin:0 0 14px">Your wallet, safes, deals, listings and chats — one encrypted profile that lives in this browser.</p>
-  <!-- ONE red plate instead of two in a row (alarm inflation — review 2026-07-09): the "file+password"
-       warning is merged into the nudge; after a real backup no red remains on screen at all. -->
-  <section class="plate note alarm" id="backup-nudge" style="display:none;margin-bottom:16px">
-    <b>Back up your keys.</b> Your profile and wallet live only in this browser, encrypted with your password. Lose the password or the browser without a backup — and access to the funds is gone for good. <b>File + password = access to the funds:</b> keep them apart — not in email, not in unencrypted cloud storage.
-    <div class="row wrap" style="gap:8px;margin-top:10px">
-      <button id="bn-export" class="btn btn-kaspa">Export key file</button>
-      <button id="bn-hide" class="btn btn-ghost">Hide</button>
-    </div>
-  </section>
-  <!-- Yellow "backup is stale" nudge (decision 2026-07-10): an export happened, but new keys
-       (safes/deals/listings) appeared AFTER it — the old file doesn't cover them. The red nudge above
-       is about "no backup at all"; this one — "backup exists but fell behind". Cleared by a fresh export. -->
-  <section class="plate note" id="backup-stale" style="display:none;margin-bottom:16px;border-left-color:#E0A93E;max-width:74ch">
-    <b>Your key-file backup is out of date.</b> <span id="bs-detail"></span> Keys and history added after that export live only in this browser — export a fresh key file so an import on another device is complete.
-    <div class="row wrap" style="gap:8px;margin-top:10px">
-      <button id="bs-export" class="btn btn-kaspa">Export key file</button>
-      <button id="bs-hide" class="btn btn-ghost">Hide</button>
-    </div>
-  </section>
-  <!-- An active withdrawal from a safe is a possible THEFT — nothing on the desk is louder: the banner
-       lives above the wallet/tabs and is visible from any tab. Populated by renderVaultsTab (same
-       detection as manage.html:renderBar: covenant is empty while coins sit on the unvault address). -->
-  <section class="plate note alarm" id="unvault-alert" style="display:none;margin-bottom:16px"></section>
-  <section class="plate" id="wallet-box" style="margin-bottom:16px">
-    <h3>My wallet</h3>
-    <div class="addr"><code id="w-addr"></code><button id="w-copy">copy</button><button id="w-qrbtn" aria-expanded="false">QR</button><button id="w-newaddr" title="New receiving address — derived from your master seed, covered by your existing backup">New address</button></div>
-    <!-- QR behind a toggle: permanently open it ate the first phone screen (review 2026-07-09) -->
-    <div id="w-qr" role="img" aria-label="QR code of the wallet address" style="display:none;margin:10px 0"></div>
-    <div class="row wrap" style="gap:10px;align-items:center">
-      <span aria-live="polite">Balance: <b id="w-bal">…</b> <span id="w-bal-usd" class="hint"></span></span>
-      <button id="w-refresh" class="btn btn-ghost" style="padding:9px 14px" title="Refresh balance and swaps" aria-label="Refresh balance and swaps">↻</button>
-      <button id="w-rescan" class="btn btn-ghost" style="padding:9px 14px" title="Rescan the chain for coins and records derived from your key file — finds funds sitting on previous addresses this desk doesn't show">⟲ Rescan</button>
-      <a id="w-addr-ex" class="hint" target="_blank" rel="noopener" style="display:none">explorer ↗</a>
-    </div>
-    <div id="w-oldaddrs" class="hint" style="display:none;margin-top:8px"></div>
-    <div class="row wrap" style="gap:8px;margin-top:10px">
-      <input id="w-to" list="w-contacts" placeholder="kaspa:… recipient address" aria-label="Recipient address" style="flex:1;min-width:min(260px,100%)">
-      <!-- autocomplete from the profile address book (contacts): picking by name inserts the address -->
-      <datalist id="w-contacts"></datalist>
-      <input id="w-amt" placeholder="KAS" inputmode="decimal" aria-label="Amount in KAS" style="width:150px">
-      <button id="w-max" class="btn btn-ghost" title="Entire balance minus network fee">Max</button>
-      <button id="w-send" class="btn btn-kaspa">Send</button>
-      <!-- Deposit into a safe is NOT a transfer to the vault address (that doesn't create the covenant,
-           create.html warns about it): wallet → the safe's funding address → build_fund in the same click. -->
-      <button id="w-tosafe" class="btn btn-ghost" title="Deposit the entered amount into your safe — via its funding address, locked into the vault covenant in the same click">To safe</button>
-    </div>
-    <div id="w-swap" style="margin-top:14px"></div>
-    <div id="w-myswaps" style="margin-top:12px"></div>
-    <div id="w-mytxs" style="margin-top:12px"></div>
-  </section>
-  <div id="tab-bar" class="row wrap" role="tablist" aria-label="Desk sections">
-    <button id="tab-btn-vaults" class="btn btn-ghost" role="tab" aria-selected="true">Safes</button>
-    <!-- Escrow/Market labels (decision 2026-07-10) — after the product names; ids and #deals/#listings
-         in the hash stay as is: external links already point at them -->
-    <button id="tab-btn-deals" class="btn btn-ghost" role="tab" aria-selected="false">Escrow <span id="deals-badge" class="ch-unread" style="display:none"></span></button>
-    <button id="tab-btn-listings" class="btn btn-ghost" role="tab" aria-selected="false">Market</button>
-    <button id="tab-btn-chats" class="btn btn-ghost" role="tab" aria-selected="false">Chats <span id="chats-badge" class="ch-unread" style="display:none"></span></button>
-  </div>
-  <div id="tab-vaults" role="tabpanel"></div>
-  <div id="tab-deals" role="tabpanel" style="display:none"></div>
-  <div id="tab-listings" role="tabpanel" style="display:none"></div>
-  <div id="tab-chats" role="tabpanel" style="display:none"></div>
-</main>
+    <section id="view-overview" aria-label="Overview">
+      <div class="ov-grid">
+        <div class="plate ov-hero">
+          <h3>Wallet balance</h3>
+          <div class="oh-bal"><span id="ov-bal" aria-live="polite">…</span><span class="hint" id="ov-bal-usd"></span></div>
+          <div class="addr"><code id="ov-addr"></code><button id="ov-copy">copy</button></div>
+          <div class="hint" id="ov-upd" style="margin-top:4px"></div>
+          <div class="row wrap ov-actions">
+            <button id="ov-send" class="btn btn-kaspa">↗ Send</button>
+            <button id="ov-receive" class="btn btn-ghost">↓ Receive</button>
+            <button id="ov-tosafe" class="btn btn-ghost">⛨ Move to Safe</button>
+          </div>
+        </div>
+        <div class="plate" id="sec-health" aria-live="polite"><h3>Security health</h3></div>
+      </div>
+      <div class="ov-cards">
+        <div class="plate ov-card" id="ov-card-safes">
+          <a class="oc-head" data-nav="safes" href="#safes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><b>Safes</b><span class="oc-n" data-slot="n">…</span></a>
+          <div class="oc-sum hint" data-slot="sum"></div>
+          <div class="oc-empty" data-slot="empty"><p>Store funds in isolated on-chain safes only you control.</p><a href="/create.html">＋ Create your first safe</a></div>
+          <a class="oc-next" data-slot="next" style="display:none"></a>
+        </div>
+        <div class="plate ov-card" id="ov-card-escrow">
+          <a class="oc-head" data-nav="escrow" href="#escrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><b>Escrow</b><span class="oc-n" data-slot="n">…</span></a>
+          <div class="oc-sum hint" data-slot="sum"></div>
+          <div class="oc-empty" data-slot="empty"><p>Create protected agreements with built-in dispute resolution.</p><a href="/escrow.html">＋ Create your first escrow</a></div>
+          <a class="oc-next" data-slot="next" style="display:none"></a>
+        </div>
+        <div class="plate ov-card" id="ov-card-market">
+          <a class="oc-head" data-nav="market" href="#market"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg><b>My listings</b><span class="oc-n" data-slot="n">…</span></a>
+          <div class="oc-sum hint" data-slot="sum"></div>
+          <div class="oc-empty" data-slot="empty"><p>Buy and sell with non-custodial escrow built into every deal.</p><a href="/market.html">Browse marketplace</a></div>
+          <a class="oc-next" data-slot="next" style="display:none"></a>
+        </div>
+      </div>
+      <section class="plate" id="ov-activity">
+        <div class="activity-head"><h3>Recent activity</h3><div class="activity-filters" role="group" aria-label="Filter activity">
+          <button class="active" data-tx-filter="all">All</button><button data-tx-filter="in">Incoming</button><button data-tx-filter="out">Outgoing</button><button data-tx-filter="pending">Pending</button>
+        </div></div>
+        <div id="w-mytxs"></div>
+        <a class="activity-more" data-nav="wallet" href="#wallet">View all activity →</a>
+      </section>
+    </section>
+    <section id="view-wallet" style="display:none">
+      <section class="plate" id="wallet-box">
+        <h3>My wallet</h3>
+        <div class="addr"><code id="w-addr"></code><button id="w-copy">copy</button><button id="w-qrbtn" aria-expanded="false">QR</button><button id="w-newaddr" title="New receiving address — derived from your master seed, covered by your existing backup">New address</button></div>
+        <!-- QR behind a toggle: permanently open it ate the first phone screen (review 2026-07-09) -->
+        <div id="w-qr" role="img" aria-label="QR code of the wallet address" style="display:none;margin:10px 0"></div>
+        <div class="row wrap" style="gap:10px;align-items:center">
+          <span aria-live="polite">Balance: <b id="w-bal">…</b> <span id="w-bal-usd" class="hint"></span></span>
+          <button id="w-refresh" class="btn btn-ghost" style="padding:9px 14px" title="Refresh balance and swaps" aria-label="Refresh balance and swaps">↻</button>
+          <button id="w-rescan" class="btn btn-ghost" style="padding:9px 14px" title="Force a full scan for wallet addresses and records derived from your master seed">⟲ Rescan</button>
+          <a id="w-addr-ex" class="hint" target="_blank" rel="noopener" style="display:none">explorer ↗</a>
+        </div>
+      </section>
+      <section class="plate" id="wallet-actions">
+        <h3>Actions</h3>
+        <div class="row wrap" id="w-send-row" style="gap:8px;margin-top:10px">
+          <input id="w-to" list="w-contacts" placeholder="kaspa:… recipient address" aria-label="Recipient address" style="flex:1;min-width:min(260px,100%)">
+          <!-- autocomplete from the profile address book (contacts): picking by name inserts the address -->
+          <datalist id="w-contacts"></datalist>
+          <input id="w-amt" placeholder="KAS" inputmode="decimal" aria-label="Amount in KAS" style="width:150px">
+          <button id="w-max" class="btn btn-ghost" title="Entire balance minus network fee">Max</button>
+          <button id="w-send" class="btn btn-kaspa">Send</button>
+          <!-- Deposit into a safe is NOT a transfer to the vault address (that doesn't create the covenant,
+               create.html warns about it): wallet → the safe's funding address → build_fund in the same click. -->
+          <button id="w-tosafe" class="btn btn-ghost" title="Deposit the entered amount into your safe — via its funding address, locked into the vault covenant in the same click">To safe</button>
+          <select id="w-safe-target" aria-label="Choose a safe" style="display:none;width:auto;max-width:260px;min-width:170px"></select>
+        </div>
+      </section>
+      <section class="plate" id="wallet-previous" style="display:none">
+        <h3>Previous addresses</h3>
+        <div id="w-oldaddrs"></div>
+      </section>
+      <section class="plate" id="wallet-swap-card">
+        <h3>Swap via SimpleSwap</h3>
+        <div id="w-swap" style="margin-top:14px"></div>
+        <div id="w-myswaps" style="margin-top:12px"></div>
+      </section>
+      <section class="plate" id="wallet-activity">
+        <div class="activity-head"><div><h3>Activity</h3><p class="hint">On-chain history across current and previous wallet addresses.</p></div><div class="activity-filters" role="group" aria-label="Filter activity">
+          <button class="active" data-tx-filter="all">All</button><button data-tx-filter="in">Incoming</button><button data-tx-filter="out">Outgoing</button><button data-tx-filter="pending">Pending</button>
+        </div></div>
+        <div id="w-mytxs-all"></div>
+      </section>
+    </section>
+    <section id="view-safes" style="display:none"><div id="tab-vaults"></div></section>
+    <section id="view-escrow" style="display:none"><div id="tab-deals"></div></section>
+    <section id="view-market" style="display:none"><div id="tab-listings"></div></section>
+    <section id="view-chats" style="display:none"><div id="tab-chats"></div></section>
+    <section id="view-settings" style="display:none">
+      <section class="plate">
+        <h3>Profile &amp; backup</h3>
+        <p class="hint">One encrypted key file (.age) covers your wallet, safes, deals, listings and chats — including ones you create later (they derive from the same master seed).</p>
+        <p class="hint" id="st-backup-info"></p>
+        <div class="desk-utils">
+          <button id="d-export" class="btn btn-kaspa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export key file</button>
+          <button id="d-import-btn" class="btn btn-ghost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Import / merge</button>
+          <input type="file" id="d-import" accept=".json,.age,application/json,text/plain" hidden>
+        </div>
+      </section>
+      <section class="plate">
+        <h3>Forge Sync <span class="tb-chip">Beta</span></h3>
+        <p class="hint">End-to-end encrypted mirror for devices holding copies of the same profile — including copies made before Forge Sync existed. The server cannot read it. Alarm, heir and arbiter keys stay local and are omitted automatically.</p>
+        <p class="hint"><b id="st-sync-status">Off</b> · Manual sync only. Your offline backup is still required.</p>
+        <button id="st-sync-btn" class="btn btn-ghost">Enable sync</button>
+      </section>
+      <section class="plate">
+        <h3>Security</h3>
+        <p class="hint">Your plaintext profile never leaves this browser. If you enable Forge Sync, the server receives only an additional encrypted copy. The desk auto-locks after 15 minutes idle; every money operation re-asks the password.</p>
+        <button id="st-lock" class="btn btn-ghost">Lock now</button>
+      </section>
+      <section class="plate">
+        <h3>Preferences</h3>
+        <p class="hint">Language: English · <a href="/ru/desk.html" hreflang="ru" lang="ru">Русская версия</a></p>
+      </section>
+      <section class="plate dz">
+        <h3>Danger zone</h3>
+        <p class="hint">Removes local access on THIS device only — your funds stay on-chain and can be restored from an exported .age key file on any device.</p>
+        <button id="d-wipe" class="btn btn-wipe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>Erase from this device</button>
+      </section>
+    </section>
+  </main>
 
+  <nav id="bottom-nav" aria-label="Desk sections"></nav>
+  <div id="bn-sheet" hidden></div>
 </div>
 <script type="module">
-import { boot, net, kas, $, setActiveAddr, removeVault, utxosRaw, utxosSum, submitTx, daaToHuman, qrInto, genToken } from '/assets/app.js?v=15';
-import { mountSwapWidget } from '/assets/swap-widget.js?v=3';
+import { boot, net, kas, $, setActiveAddr, removeVault, utxosRaw, utxosSum, submitTx, daaToHuman, qrInto, genToken } from '/assets/app.js?v=18';
+import { mountSwapWidget } from '/assets/swap-widget.js?v=5';
 import { requireUnlock, confirmPassword } from '/assets/lock-ui.js';
 import * as session from '/assets/session.js';
-import { getVaults, setVaults, getDeals, setDeals, getListings, setListings, getSwaps, getChats, setChats, loadProfile, saveProfile, parseProfileFile, mergeProfile, isEncryptedProfile } from '/assets/identity.js';
+import { getVaults, setVaults, getDeals, setDeals, getListings, setListings, getSwaps, getChats, setChats, loadProfile, saveProfile, parseProfileFile, mergeProfile, reviveProfileRecords, isEncryptedProfile } from '/assets/identity.js';
 // getTxs/setTxs — via the namespace, NOT destructuring: identity.js is cached without ?v, and a fresh
 // page with an old module in cache would crash the whole import ("does not provide an export").
 // Namespace import of the same URL = the same module instance, but a missing export isn't fatal.
@@ -207,22 +250,67 @@ const setTxs = identityNs.setTxs || (() => {});
 const getContacts = identityNs.getContacts || (() => []);
 const setContacts = identityNs.setContacts || (() => {});
 import { ensureChatReady, chatSupported, chatAddress, genChatKeys, startThread, myThreads, fetchThread, chatKeyFunded, sendThreadMsg, decryptMsgs } from '/assets/listing-chat.js?v=1';
-import { core, ready as coreReady } from '/assets/core6.js';
-import { walletBalance, sendFromWallet, sendPlan } from '/assets/wallet.js';
+import { core, ready as coreReady } from '/assets/core7.js';
+import { walletBalance, walletPortfolioBalance, walletPlan, syncWalletAddresses, sendFromWallet, fundTargetFromWallet } from '/assets/wallet.js?v=2';
 // api — from escrow.js (not app.js): a relative fetch against location.origin, without app.js's
 // cross-origin API_ORIGIN (see Task 5). kas is NOT imported from here — app.js already provides a
 // binding with that name (a duplicate 'kas' declaration in the module would be a SyntaxError); the
 // same kas serves both tabs.
-import { api, forgottenDealIds, unforgetDeal } from '/assets/escrow.js?v=31';
+import { api, forgottenDealIds, unforgetDeal } from '/assets/escrow.js?v=40';
 import { alertBox, confirmBox, promptPassword } from '/assets/dialog.js';
 // promptText — a new dialog.js export: namespace guard in case an old module is cached
 import * as dialogNs from '/assets/dialog.js';
 const promptText = dialogNs.promptText || (async () => null);
 import { restoreFromSeeds } from '/assets/restore.js';
-// newcomer tour: auto-starts off the onboarding mark (lock-ui), skippable, shown once
-import { maybeStartDeskTour } from '/assets/desk-tour.js';
+import { VIEWS, resolveRoute } from '/assets/desk-routes.js?v=1';
+import { safesCard, escrowCard, marketCard } from '/assets/desk-overview.js?v=1';
+import { maybeStartDeskTour } from '/assets/desk-tour.js?v=4';
+import { mountProfileMirror } from '/assets/profile-mirror-ui.js?v=2';
+import { mirrorProjection, profileHash } from '/assets/profile-mirror.js';
+import { createSubscriptionStatusLoader, subscriptionView } from '/assets/safe-subscription.js?v=2';
+
+const loadSubscriptionStatus = createSubscriptionStatusLoader((v) => api(
+  `/api/safe/sub-status?vault_addr=${encodeURIComponent(v.vault_addr)}&token=${encodeURIComponent(v.token)}`
+));
+
+// ── cockpit nav: one LINKS source builds sidebar + bottom nav + More sheet.
+// The RU mirror overrides only L (labels); markup/logic stay byte-identical.
+const L = { overview: 'Overview', wallet: 'Wallet', safes: 'Safes', escrow: 'Escrow',
+  market: 'Market', chats: 'Chats', settings: 'Settings', help: 'Help', more: 'More',
+  nonCustodial: 'Non-custodial by design. Plaintext keys and data exist only inside your unlocked browser.' };
+const ICONS = {
+  overview: '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>',
+  wallet: '<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>',
+  safes: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+  escrow: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
+  market: '<path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/>',
+  chats: '<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>',
+  settings: '<circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>',
+  help: '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+  more: '<circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>',
+};
+const ic = (k) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k]}</svg>`;
+const navItem = (v, cls) =>
+  `<a class="${cls}" data-nav="${v}" href="#${v}">${ic(v)}<span>${L[v]}</span>` +
+  (v === 'escrow' || v === 'chats' ? `<span class="ch-unread${cls === 'bn-item' ? ' bn-bdg' : ''}" data-badge="${v}" style="display:none"></span>` : '') + '</a>';
+function buildNav() {
+  document.getElementById('side-nav').innerHTML =
+    `<a class="sn-brand" href="/" aria-label="Kaspa Forge"><img src="/assets/brand/lockup-h-flat-header.png" alt="KaspaForge"></a>` +
+    ['overview', 'wallet', 'safes', 'escrow', 'market', 'chats'].map((v) => navItem(v, 'sn-item')).join('') +
+    `<div class="sn-foot">${navItem('settings', 'sn-item')}` +
+    `<a class="sn-item" href="/docs/desk.html">${ic('help')}<span>${L.help}</span></a>` +
+    `<div class="sn-note">🛡 ${L.nonCustodial}</div></div>`;
+  document.getElementById('bottom-nav').innerHTML =
+    ['overview', 'wallet', 'safes', 'chats'].map((v) => navItem(v, 'bn-item')).join('') +
+    `<button class="bn-item" id="bn-more">${ic('more')}<span>${L.more}</span><span class="ch-unread bn-bdg" data-badge="more" style="display:none"></span></button>`;
+  document.getElementById('bn-sheet').innerHTML =
+    ['escrow', 'market', 'settings'].map((v) => navItem(v, 'sn-item')).join('') +
+    `<a class="sn-item" href="/docs/desk.html">${ic('help')}<span>${L.help}</span></a>`;
+}
+buildNav();
 
 const info = await boot();
+$('tb-lang').onclick = (e) => { e.preventDefault(); location.href = '/ru/desk.html' + location.search + location.hash; };
 // Entry via ?chat= (a buyer from the market) — a password wall with context explaining why it exists:
 // same opts.context as the market join flow (review 2026-07-09: buyers hit the wall with no explanation)
 const chatParamId = Number(new URLSearchParams(location.search).get('chat'));
@@ -230,16 +318,26 @@ const chatParamId = Number(new URLSearchParams(location.search).get('chat'));
 // from escrow.js aren't used: their network is initialized only by escrow.js:boot(), which the desk never calls.
 const usd = (sompi) => info.kas_usd > 0 && sompi > 0
   ? ' (≈ $' + ((sompi / 1e8) * info.kas_usd).toLocaleString('en-US', { maximumFractionDigits: 2 }) + ')' : '';
+const usdBalance = (sompi) => info.kas_usd > 0
+  ? '≈ $' + ((sompi / 1e8) * info.kas_usd).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' USD'
+  : '';
 const exTx = (txid) => net() === 'mainnet' && txid ? `https://kaspa.stream/transactions/${encodeURIComponent(txid)}` : null;
 const exAddr = (a) => net() === 'mainnet' && a ? `https://kaspa.stream/addresses/${a}` : null;
 const escHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 await requireUnlock(info.network, chatParamId ? {
   context: `You are opening a secure chat about listing #${chatParamId} — its chat key will be saved into your encrypted profile.` } : {});
-$('app').style.display = 'block';
+$('app').style.display = '';
+// A remote merge replaces the in-memory profile, but these views are hand-rendered DOM.
+// Redraw every profile-backed surface so records from another device appear without F5.
+function refreshProfileViewsAfterSync() {
+  renderWallet(); renderSecurityHealth(); renderVaultsTab(); renderDealsTab(); renderListingsTab(); renderChatsTab();
+  renderMySwaps(true); renderTxs(); renderContactsDatalist(); refreshOldBal(); renderSettingsInfo();
+}
+mountProfileMirror({ onProfileChanged: refreshProfileViewsAfterSync });
 // BEFORE the first renderWallet() (the function hoists, let doesn't): the widget mounts once
 let walletSwapMounted = false;
 applyPrefs();   // UI prefs from the key file → local storage keys (only if not set yet)
-renderWallet(); renderBackupNudge(); renderVaultsTab(); renderDealsTab(); renderListingsTab();
+renderWallet(); renderSecurityHealth(); renderVaultsTab(); renderDealsTab(); renderListingsTab();
 renderMySwaps(true); // statuses of unfinished swaps refresh on entry
 
 // ── restore scan from the master seed: self-healing of profile records ───────
@@ -258,7 +356,7 @@ async function runRestoreScan() {
   const rep = await restoreFromSeeds([p.seed], p, net(), forgottenDealIds());
   if (rep.vaults + rep.deals + rep.listings + rep.chats + rep.addresses > 0) {
     session.commit(p);
-    renderWallet(); renderBackupNudge(); renderVaultsTab(); renderDealsTab(); renderListingsTab(); renderChatsTab(); renderTxs(); refreshOldBal();
+    renderWallet(); renderSecurityHealth(); renderVaultsTab(); renderDealsTab(); renderListingsTab(); renderChatsTab(); renderTxs(); refreshOldBal();
   }
   // a network failure would have thrown earlier — the mark is set only after a successful run
   localStorage.setItem('kaspa-restore-scanned', core.derive_token(p.seed, 'scan-mark', 0).slice(0, 16));
@@ -285,12 +383,11 @@ function restoreReport(rep) {
   if (rep.addresses) parts.push(`addresses with funds: ${rep.addresses}`);
   return parts.join(', ');
 }
-maybeRestoreScan();
+maybeRestoreScan().finally(() => refreshWalletBalance());
 
 renderTxs();
 renderContactsDatalist();
 refreshDealsBadge();
-maybeStartDeskTour();
 
 // ── "make a backup" nudge: the sk copy lives only in this browser — keeps reminding until
 // a real export happens (localStorage) or it is hidden for the session (sessionStorage) ──
@@ -304,9 +401,9 @@ async function profileSig(p) {
     v: (p.vaults || []).map((x) => x.vault_addr).sort(),
     d: (p.deals || []).map((x) => String(x.id)).sort(),
     l: (p.listings || []).map((x) => String(x.id)).sort(),
-    // wallet addresses (active + past): an address change / Collect rotation must ask for
-    // a fresh export — the old file doesn't know walletOld, and on a new device coins on
-    // rotated addresses are invisible (field scenario 2026-07-11). Swaps and buyer chats with
+    // wallet addresses (active + past): an address change still asks for a fresh export so the
+    // selected receiving address is preserved explicitly (funded derived addresses are discovered
+    // from the seed automatically). Swaps and buyer chats with
     // their OWN key are also history/access absent from the old file. The txs journal isn't hashed:
     // the sliding cap of 50 would light the nudge on every send, and history is on-chain now.
     w: [p.wallet && p.wallet.addr, ...(p.walletOld || []).map((x) => x.addr)].filter(Boolean).sort(),
@@ -327,71 +424,110 @@ async function profileSig(p) {
     w: lists.w.length, s: lists.s.length, c: lists.c.length, b: lists.b.length, n: lists.n.length };
 }
 async function recordBackupSig() {
-  try { localStorage.setItem('kaspa-backup-sig', JSON.stringify(await profileSig(loadProfile()))); } catch {}
+  try {
+    localStorage.setItem('kaspa-backup-sig',
+      JSON.stringify({ ...(await profileSig(loadProfile())), t: Date.now() }));
+  } catch {}
 }
 
-async function renderBackupNudge() {
-  const done = localStorage.getItem('kaspa-backup-done') === '1';
-  const hid = sessionStorage.getItem('kaspa-backup-hide') === '1';
-  const show = !done && !hid;
-  $('backup-nudge').style.display = show ? 'block' : 'none';
-  // yellow nudge: an export happened, but new keys appeared since — the file doesn't cover them
-  let stale = false;
-  if (done && sessionStorage.getItem('kaspa-backup-stale-hide') !== '1') {
+async function renderSecurityHealth() {
+  const box = $('sec-health'); if (!box) return;
+  let profile;
+  try { profile = loadProfile(); } catch { return; }
+  const syncEnabled = !!profile.mirror;
+  let syncCheckpoint = null, syncCurrent = false;
+  if (syncEnabled) {
     try {
-      const cur = await profileSig(loadProfile());
+      syncCheckpoint = JSON.parse(localStorage.getItem(`kaspa-forge-mirror-state:${profile.mirror.profile_id}`) || 'null');
+      syncCurrent = !!syncCheckpoint
+        && syncCheckpoint.profile_hash === await profileHash(mirrorProjection(profile));
+    } catch {}
+  }
+  const syncVersion = Number.isInteger(Number(syncCheckpoint?.version)) ? Number(syncCheckpoint.version) : null;
+  const done = localStorage.getItem('kaspa-backup-done') === '1';
+  let stale = false, detail = '';
+  if (done) {
+    try {
+      const cur = await profileSig(profile);
       const rec = JSON.parse(localStorage.getItem('kaspa-backup-sig') || 'null');
       if (!rec) {
-        // the export predates this check — what it covers is unknown.
-        // cur.w > 1 = there are PAST addresses (the active one always exists): such an export
-        // definitely predates the walletOld era and contains no address list.
         stale = cur.v + cur.d + cur.l + cur.s + cur.c + cur.b + cur.n > 0 || cur.w > 1;
-        if (stale) $('bs-detail').textContent = "The last export predates this check, so we can't tell what it covers.";
+        if (stale) detail = "The last export predates coverage tracking — we can't tell what it covers.";
       } else if (rec.h !== cur.h) {
         stale = true;
         const parts = [];
-        if (cur.v > rec.v) parts.push(`safes: ${cur.v - rec.v}`);
-        if (cur.d > rec.d) parts.push(`deals: ${cur.d - rec.d}`);
-        if (cur.l > rec.l) parts.push(`listings: ${cur.l - rec.l}`);
-        // older sig records (pre 2026-07-11) lack w/s/c: comparisons with undefined are false → generic text below
-        if (cur.w > rec.w) parts.push(`wallet addresses: ${cur.w - rec.w}`);
-        if (cur.s > rec.s) parts.push(`swaps: ${cur.s - rec.s}`);
-        if (cur.c > rec.c) parts.push(`chats: ${cur.c - rec.c}`);
-        if (cur.b > rec.b) parts.push(`contacts: ${cur.b - rec.b}`);
-        if (cur.n > rec.n) parts.push(`notes: ${cur.n - rec.n}`);
-        $('bs-detail').textContent = parts.length
-          ? `New since the last export — ${parts.join(', ')}.`
-          : 'The profile changed since the last export.';
+        if (cur.v > rec.v) parts.push(`safes +${cur.v - rec.v}`);
+        if (cur.d > rec.d) parts.push(`deals +${cur.d - rec.d}`);
+        if (cur.l > rec.l) parts.push(`listings +${cur.l - rec.l}`);
+        if (cur.w > rec.w) parts.push(`wallet addresses +${cur.w - rec.w}`);
+        if (cur.s > rec.s) parts.push(`swaps +${cur.s - rec.s}`);
+        if (cur.c > rec.c) parts.push(`chats +${cur.c - rec.c}`);
+        if (cur.b > rec.b) parts.push(`contacts +${cur.b - rec.b}`);
+        if (cur.n > rec.n) parts.push(`notes +${cur.n - rec.n}`);
+        detail = parts.length ? `New since backup: ${parts.join(' · ')}.`
+          : 'The profile changed since backup.';
       }
-    } catch { /* profile locked (auto-lock) — decide on the next render */ }
+    } catch { return; }   // profile locked (auto-lock) — decide on the next render
   }
-  $('backup-stale').style.display = stale ? 'block' : 'none';
-  // duplicate CTA (review 2026-07-09): while either nudge is on screen, its Export is the only one
-  $('d-export').style.display = (show || stale) ? 'none' : '';
+  const backupOk = done && !stale;
+  const okN = 1 + (backupOk ? 1 : 0);
+  const item2st = backupOk ? '<span class="st ok">current</span>'
+    : `<span class="st warn">${done ? 'outdated' : 'missing'}</span>`;
+  const item2hint = backupOk ? ''
+    : `<div class="sh-note"><b>${done ? escHtml(detail) : 'No offline recovery file.'}</b><span>${done
+      ? syncEnabled
+        ? syncCurrent ? 'Sync covers these changes. Export .age for offline recovery.' : 'Sync now or export .age to cover these changes.'
+        : 'These changes exist only in this browser.'
+      : syncEnabled ? 'Export .age for independent recovery.' : 'Export .age and keep it apart from the password.'}</span></div>`;
+  const syncStatus = !syncEnabled ? 'off'
+    : syncVersion !== null ? syncCurrent ? `enabled · v${syncVersion}` : `v${syncVersion} · changes`
+      : 'not synced';
+  const syncDetails = syncEnabled
+    ? '<details class="sh-details"><summary>Sync &amp; backup details</summary><p>Forge Sync does not replace .age. Alarm, heir and arbiter keys stay on this device.</p></details>'
+    : '';
+  box.innerHTML = `<h3>Security health</h3>
+    <div class="hint">Recovery · ${okN} of 2</div>
+    <div class="sh-bar"><i style="width:${okN * 50}%"></i></div>
+    <div class="sh-item">✓ Profile encrypted <span class="st ok">complete</span></div>
+    <div class="sh-item">${syncEnabled ? '✓' : '○'} Forge Sync <span class="st ${syncEnabled ? 'ok' : ''}">${escHtml(syncStatus)}</span></div>
+    <div class="sh-item">${backupOk ? '✓' : '⚠'} Offline backup ${item2st}</div>${item2hint}
+    <div class="desk-utils sh-actions">
+      <button id="sh-export" class="btn ${backupOk ? 'btn-ghost' : 'btn-kaspa'}">Export backup</button>
+      <button id="sh-sync" class="btn ${syncEnabled ? 'btn-kaspa' : 'btn-ghost'}" ${syncEnabled ? '' : 'disabled'}>Sync now</button>
+    </div>
+    ${syncDetails}`;
+  box.querySelector('#sh-export').onclick = doExport;
+  if (syncEnabled) box.querySelector('#sh-sync').onclick = () => $('st-sync-btn').click();
 }
-$('bn-export').onclick = () => $('d-export').click();
-$('bn-hide').onclick = () => { sessionStorage.setItem('kaspa-backup-hide', '1'); renderBackupNudge(); };
-$('bs-export').onclick = () => $('d-export').click();
-$('bs-hide').onclick = () => { sessionStorage.setItem('kaspa-backup-stale-hide', '1'); renderBackupNudge(); };
 $('d-import-btn').onclick = () => $('d-import').click();   // a real button: the label was outside the tab order
 // manual lock (previously only the 15-min auto-lock): lock and immediately show the unlock overlay in place
 $('d-lock').onclick = () => { session.lock(); requireUnlock(info.network); };
-  // "Erase from device" (internet-cafe scenario): full cleanup of the key file from the browser —
-  // profile, backup/scan marks, legacy mirrors, tab session. NO password prompt: erasing reveals
-  // no keys, and a forgotten password must not block cleanup on a shared device.
-  $('d-wipe').onclick = async () => {
-    const backedUp = localStorage.getItem('kaspa-backup-done');
-    const warn = backedUp
-      ? 'Erase the key file from THIS browser?\n\nThe wallet, safes, deals, listings and chats will disappear from this device. You can restore everything later from your exported .age backup on any device.'
-      : '⚠ NO BACKUP has been exported from this browser!\n\nErasing now means PERMANENT loss of access to this profile\u2019s wallet and safes. Export the key file first (button above).';
-    if (!await confirmBox(warn, { danger: true, ok: 'Erase', cancel: 'Cancel' })) return;
-    if (!await confirmBox('Last check: erase the profile from this browser?', { danger: true, ok: 'Erase', cancel: 'Cancel' })) return;
-    session.lock();
-    for (const store of [localStorage, sessionStorage]) {
-      for (const k of Object.keys(store)) if (k.startsWith('kaspa-')) store.removeItem(k);
-    }
-    location.reload();   // a clean desk: onboarding overlay, as on a new device
-  };
+$('st-lock').onclick = () => $('d-lock').click();
+// "Erase from device" (internet-cafe scenario) — deliberately NO password (canon dd5d9c74):
+// a forgotten password must not block cleanup on a shared device; erasing reveals no keys.
+// Flow: backup status → what gets deleted → type ERASE → final confirm. Never say "delete funds".
+$('d-wipe').onclick = async () => {
+  const backedUp = localStorage.getItem('kaspa-backup-done') === '1';
+  let stale = false;
+  try {
+    const rec = JSON.parse(localStorage.getItem('kaspa-backup-sig') || 'null');
+    stale = !rec || rec.h !== (await profileSig(loadProfile())).h;
+  } catch { stale = true; }   // locked profile — can't verify, be honest about it
+  const status = backedUp
+    ? (stale ? '⚠ Your backup may be OUT OF DATE — it may not cover recent changes.'
+             : '✓ Your backup is up to date.')
+    : '⚠ NO backup has been exported from this browser — erasing means PERMANENT loss of access to this profile’s wallet and safes.';
+  const what = 'This will erase from THIS browser only: the encrypted profile (wallet, safes, deals, listings, chats, contacts, notes), backup marks and the tab session.\n\nYour funds stay on-chain; access can be restored from an exported .age key file on any device.';
+  if (!await confirmBox(status + '\n\n' + what, { danger: true, ok: 'Continue', cancel: 'Cancel' })) return;
+  const word = await promptText('Type ERASE to confirm removing local access from this device:');
+  if (word == null) return;
+  if (word.trim().toUpperCase() !== 'ERASE') { await alertBox('Not erased — the confirmation word did not match.'); return; }
+  if (!await confirmBox('Last check: erase the profile from this browser?', { danger: true, ok: 'Erase', cancel: 'Cancel' })) return;
+  session.lock();
+  for (const store of [localStorage, sessionStorage])
+    for (const k of Object.keys(store)) if (k.startsWith('kaspa-')) store.removeItem(k);
+  location.reload();   // a clean desk: onboarding overlay, as on a new device
+};
 
 $('w-qrbtn').onclick = () => {
   const q = $('w-qr'); const open = q.style.display === 'none';
@@ -400,15 +536,39 @@ $('w-qrbtn').onclick = () => {
 };
 
 // ── "My wallet": the profile's personal P2PK address (not a safe) — balance + send + fund-in ──
-function setBal(s) { $('w-bal').textContent = kas(s); $('w-bal-usd').textContent = usd(s); }
+var lastBalTs = 0;
+function setBal(s) {
+  $('w-bal').textContent = kas(s); $('w-bal-usd').textContent = usd(s);
+  $('ov-bal').textContent = kas(s); $('ov-bal-usd').textContent = usdBalance(s);
+  lastBalTs = Date.now(); renderBalAge();
+}
+async function refreshWalletBalance(forceDiscovery = false) {
+  let profile;
+  try {
+    profile = loadProfile();
+    // Never hide a known on-chain balance behind the slower seed gap scan after a page reload.
+    setBal(await walletPortfolioBalance(profile, net(), { discover: false }));
+    renderOldAddrs(profile.wallet);
+  } catch (e) { console.warn('[wallet-balance]', e); }
+  try {
+    if (!profile) profile = loadProfile();
+    const added = await syncWalletAddresses(profile, net(), forceDiscovery);
+    if (added) {
+      profile = loadProfile();
+      setBal(await walletPortfolioBalance(profile, net(), { discover: false }));
+      renderOldAddrs(profile.wallet);
+    }
+  } catch (e) { console.warn('[wallet-discovery]', e); }
+}
+function renderBalAge() {
+  if (!lastBalTs) return;
+  const s = Math.round((Date.now() - lastBalTs) / 1000);
+  $('ov-upd').textContent = s < 8 ? 'Updated just now'
+    : 'Updated ' + (s < 90 ? s + 's' : Math.round(s / 60) + ' min') + ' ago';
+}
 
-// Past wallet addresses: a PERMANENT compound button (decision 2026-07-10: a safe withdrawal lands
-// on the address fixed at initiation — i.e. possibly one ALREADY rotated away; the button must
-// always exist, and balances must be checked by a fresh request at click time, not at render time).
-
-// The "Previous addresses" row balance — a single refresh point: on render, on ↻ and on the 30s tick.
-// Previously the balance was sampled once at render, and after Collect "hold X KAS" stuck until F5
-// (bug found 2026-07-11: the sweep was still in flight at redraw time, and the tick never touched this row).
+// Previous addresses are receive aliases of the same HD wallet. Their UTXOs are included in the
+// headline balance and can be spent directly; this row is only an address/balance breakdown.
 async function refreshOldBal() {
   if (!document.getElementById('w-old-bal')) return;
   let olds;
@@ -420,31 +580,32 @@ async function refreshOldBal() {
   const bals = await Promise.all(olds.map((o) => walletBalance(o.addr)));
   const t = bals.reduce((a, b) => a + b, 0);
   const el = document.getElementById('w-old-bal');   // the DOM may have re-rendered while the fetch was in flight
-  if (el) el.innerHTML = t ? `hold <b>${kas(t)}</b>${usd(t)}` : 'empty now — safe withdrawals may still arrive here';
+  if (el) el.innerHTML = t ? `Included in wallet balance: <b>${kas(t)}</b>${usd(t)}` : 'No coins here now. Safe withdrawals may still arrive here.';
 }
 
 async function renderOldAddrs(w) {
   const box = $('w-oldaddrs');
+  const card = $('wallet-previous');
   const olds = (loadProfile().walletOld || []).filter((x) => x.addr && x.addr !== w.addr);
-  if (!olds.length) { box.style.display = 'none'; return; }
-  box.style.display = '';
+  if (!olds.length) { card.style.display = 'none'; return; }
+  card.style.display = '';
   box.innerHTML = '';
   // the counter is an expander: address list with rotation date (retired is written by rotation) and explorer link
   const head = document.createElement('button');
   head.type = 'button';
-  head.style.cssText = 'background:none;border:none;color:inherit;font:inherit;cursor:pointer;padding:0;text-decoration:underline dotted';
+  head.className = 'btn btn-ghost old-view';
   head.setAttribute('aria-expanded', 'false');
-  const setHead = (open) => { head.textContent = `Previous addresses: ${olds.length} ${open ? '▾' : '▸'}`; };
+  const setHead = (open) => { head.textContent = open ? 'Hide addresses' : `View addresses (${olds.length})`; };
   setHead(false);
-  const bal = document.createElement('span'); bal.id = 'w-old-bal'; bal.textContent = '…';
-  box.append(head, document.createTextNode(' · '), bal);
-  const btn = document.createElement('button');
-  btn.className = 'btn btn-ghost'; btn.style.cssText = 'padding:6px 12px;margin-left:8px';
-  const label = 'Collect to current address';
-  btn.textContent = label;
-  box.appendChild(btn);
+  const summary = document.createElement('div'); summary.className = 'old-summary';
+  const copy = document.createElement('div'); copy.className = 'old-copy';
+  const count = document.createElement('strong'); count.textContent = `${olds.length} saved address${olds.length === 1 ? '' : 'es'}`;
+  const bal = document.createElement('span'); bal.id = 'w-old-bal'; bal.textContent = 'Checking balances…';
+  copy.append(count, bal);
+  const actions = document.createElement('div'); actions.className = 'old-actions';
+  actions.append(head); summary.append(copy, actions); box.appendChild(summary);
   const listEl = document.createElement('div');
-  listEl.style.cssText = 'display:none;margin-top:4px';
+  listEl.className = 'old-list'; listEl.style.display = 'none';
   box.appendChild(listEl);
   head.onclick = () => {
     const open = listEl.style.display === 'none';
@@ -454,7 +615,7 @@ async function renderOldAddrs(w) {
     if (open && !listEl.childElementCount) {
       for (const o of olds) {
         const rowEl = document.createElement('div');
-        rowEl.style.cssText = 'font-family:var(--mono);display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:2px';
+        rowEl.className = 'old-row';
         const a = document.createElement('span'); a.textContent = shortAddr(o.addr);
         rowEl.append(a);
         if (o.retired) {
@@ -469,46 +630,7 @@ async function renderOldAddrs(w) {
       }
     }
   };
-  const freshBals = () => Promise.all(olds.map((o) => walletBalance(o.addr)));
   refreshOldBal();
-  btn.onclick = async () => {
-    btn.disabled = true; btn.textContent = 'Checking…';
-    const bals = await freshBals();                       // fresh balances AT click time
-    const total = bals.reduce((a, b) => a + b, 0);
-    if (!total) {
-      btn.disabled = false; btn.textContent = label;
-      await alertBox('Previous addresses are empty right now. If a safe withdrawal is on its way to one of them, press this button again after it completes.');
-      return;
-    }
-    const ok = await confirmPassword('Collecting coins from previous addresses to the current one.', {
-      context: `<b style="font-family:var(--mono);color:var(--kaspa)">${kas(total)}</b>${usd(total)}<br>→ <span style="font-family:var(--mono)">${escHtml(shortAddr(w.addr))}</span>` });
-    if (!ok) { btn.disabled = false; btn.textContent = label; return; }
-    btn.textContent = 'Collecting…';
-    let swept = false;
-    try {
-      await coreReady;
-      for (const [j, o] of olds.entries()) {
-        if (!bals[j]) continue;
-        const plan = await sendPlan(o.addr);   // fee from the node's feerate, the same UTXO set goes into the build
-        const built = core.build_sweep(o.sk, w.addr, plan.raw, net(), String(plan.fee));
-        await submitTx(built);
-      }
-      swept = true;
-      await alertBox('Collected ✓ The balance will land on the current address within seconds.');
-    } catch (e) { await alertBox(e.message || 'Error', { alarm: true }); }
-    // don't redraw from the old UTXO set: wait until the sweep lands (usually seconds),
-    // otherwise "hold X KAS" resurrects with the old figure (bug 2026-07-11)
-    if (swept) {
-      btn.textContent = 'Updating…';
-      for (let i = 0; i < 10; i++) {
-        if (!(await freshBals()).reduce((a, b) => a + b, 0)) break;
-        await new Promise((r) => setTimeout(r, 2000));
-      }
-    }
-    btn.disabled = false; btn.textContent = label;
-    renderWallet();
-    renderTxs();   // the collect is a transaction too: show the "internal" row right away
-  };
 }
 
 function renderWallet() {
@@ -522,7 +644,7 @@ function renderWallet() {
     // previously a fixed 0.001 KAS < the real fee was subtracted, and Send failed with "amount+fee exceeds balance"
     const btn = $('w-max'); btn.disabled = true;
     try {
-      const { balance, fee } = await sendPlan(w.addr);
+      const { balance, fee } = await walletPlan(loadProfile(), net());
       const v = Math.max(0, balance - fee);
       $('w-amt').value = v > 0 ? (v / 1e8).toFixed(8).replace(/\.?0+$/, '') : '';
     } catch (e) { await alertBox(e.message || 'Error', { alarm: true }); }
@@ -532,17 +654,18 @@ function renderWallet() {
     await navigator.clipboard.writeText(w.addr);
     const b = $('w-copy'); const t = b.textContent; b.textContent = 'ok'; setTimeout(() => (b.textContent = t), 900);
   };
-  walletBalance(w.addr).then(setBal);
+  walletPortfolioBalance(loadProfile(), net(), { discover: false }).then(setBal).catch((e) => console.warn('[wallet-balance]', e));
   renderOldAddrs(w);
+  renderSafeTargetPicker();
   // "New address": the next wallet key from the master seed — the KEY is covered by an old export,
   // but the address LIST (walletOld/active) is absent from it: on another device coins on
   // rotated addresses are invisible. So after a change we light the yellow nudge (profileSig
   // hashes the addresses) and honestly ask for a fresh export. The old address moves to walletOld:
-  // its coins stay in the balance; sweeping is the button below.
+  // its coins stay in the unified balance and are spent directly — no sweep is required.
   $('w-newaddr').onclick = async () => {
     const p = loadProfile();
     if (!p.seed) { await alertBox('This profile has no master seed yet — lock and unlock the desk once, then retry.'); return; }
-    const ok = await confirmBox('Generate a new receiving address?\nThe current address keeps working: its coins stay in your balance, and you can sweep them to the new address anytime.');
+    const ok = await confirmBox('Generate a new receiving address?\nThe current address keeps working and its coins remain in the same wallet balance. No transfer or collect is required.');
     if (!ok) return;
     const used = new Set([p.wallet.pk, ...(p.walletOld || []).map((x) => x.pk)]);
     p.deriv = p.deriv || {};
@@ -554,8 +677,8 @@ function renderWallet() {
     p.wallet = { sk: k.sk, pk: k.pk, addr: core.pubkey_to_address(k.pk, net()), deriv_i: p.deriv.wallet - 1 };
     session.commit(p);
     renderWallet();
-    renderBackupNudge();   // the address list changed — the old export is incomplete, the nudge will say so
-    await alertBox('New address is active ✓\nIts key is derived from your master seed, but the address list itself travels in the key file — export a fresh one so other devices see all your addresses.');
+    renderSecurityHealth();   // the address list changed — the old export is incomplete, the nudge will say so
+    await alertBox('New receiving address is active ✓\nAll addresses derived from your master seed share one wallet balance. Other devices discover funded addresses automatically.');
   };
 
   $('w-send').onclick = async () => {
@@ -567,7 +690,7 @@ function renderWallet() {
     if (!to.startsWith(prefix) || to.length < prefix.length + 40) {
       await alertBox(`The recipient address must start with ${prefix}… — check what you pasted.`, { alarm: true }); return;
     }
-    const bal = await walletBalance(w.addr);
+    const bal = await walletPortfolioBalance(loadProfile(), net());
     if (amt > bal) { await alertBox(`That's more than the wallet balance (${kas(bal)}).`, { alarm: true }); return; }
     // the confirmation is NOT blind: amount and recipient right in the modal (P0 of the 2026-07-09
     // desk review) — you confirm what you see, not what you remember
@@ -589,7 +712,7 @@ function renderWallet() {
     const amt = Math.round(parseFloat($('w-amt').value) * 1e8);
     const all = getVaults().filter((x) => !x.draft);
     // one-click deposit is only possible with the funding key in the profile (create.html writes it at creation)
-    const targets = all.filter((x) => x.funding_sk && x.funding_pk && x.hot_pk && (!x.network || x.network === net()));
+    const targets = safeDepositTargets();
     if (!targets.length) {
       await alertBox(all.length
         ? "This browser's profile doesn't hold your safe's funding key — import the master key file you created it with, or top it up from the safe's own page."
@@ -597,24 +720,17 @@ function renderWallet() {
       return;
     }
     if (!(amt > 0)) { await alertBox('Enter an amount in KAS'); return; }
-    const bal = await walletBalance(w.addr);
+    const bal = await walletPortfolioBalance(loadProfile(), net());
     if (amt > bal) { await alertBox(`That's more than the wallet balance (${kas(bal)}).`, { alarm: true }); return; }
-    if (targets.length === 1) { depositToSafe(w, targets[0], amt); return; }
-    // multiple safes — a compact picker under the send row
-    const pick = ensurePickBox();
-    const lbl = document.createElement('span');
-    lbl.className = 'hint'; lbl.style.margin = '0'; lbl.textContent = `Deposit ${kas(amt)} into:`;
-    pick.appendChild(lbl);
-    for (const t of targets) {
-      const b = document.createElement('button');
-      b.className = 'btn btn-ghost'; b.textContent = t.label || shortAddr(t.vault_addr);
-      b.onclick = () => { pick.remove(); depositToSafe(w, t, amt); };
-      pick.appendChild(b);
+    const target = targets.length === 1
+      ? targets[0]
+      : targets.find((v) => v.vault_addr === $('w-safe-target').value);
+    if (!target) {
+      await alertBox('Choose which safe should receive this deposit.');
+      $('w-safe-target').focus();
+      return;
     }
-    const x = document.createElement('button');
-    x.className = 'btn btn-ghost'; x.textContent = '×'; x.setAttribute('aria-label', 'Cancel');
-    x.onclick = () => pick.remove();
-    pick.appendChild(x);
+    await depositToSafe(w, target, amt);
   };
   // SimpleSwap fund-in — the same shared widget as create/deal; kind:wallet (swaps only to
   // one's own address, server-side check address_to==target). The token is written into the profile
@@ -629,6 +745,37 @@ function renderWallet() {
         renderMySwaps();
       } });
   }
+  $('ov-addr').textContent = shortAddr(w.addr);
+}
+$('ov-copy').onclick = async () => {
+  try { const w = loadProfile().wallet; await navigator.clipboard.writeText(w.addr);
+    $('ov-copy').textContent = 'copied ✓'; setTimeout(() => { $('ov-copy').textContent = 'copy'; }, 1500);
+  } catch {}
+};
+$('ov-send').onclick = () => { go('wallet'); $('w-to').focus(); };
+$('ov-tosafe').onclick = () => { go('wallet'); $('w-amt').focus(); };
+$('ov-receive').onclick = showReceive;
+function showReceive() {
+  let w; try { w = loadProfile().wallet; } catch { return; }
+  if (!w) return;
+  const el = document.createElement('div');
+  el.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(8,10,14,.92);padding:20px';
+  el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true');
+  el.innerHTML = `<div class="plate" style="max-width:420px;width:100%;text-align:center">
+    <h3>Receive KAS</h3>
+    <div id="rc-qr" role="img" aria-label="QR code of the wallet address" style="display:flex;justify-content:center;margin:10px 0"></div>
+    <code style="word-break:break-all;font-size:12.5px">${w.addr}</code>
+    <div class="row wrap" style="gap:8px;margin-top:12px;justify-content:center">
+      <button id="rc-copy" class="btn btn-kaspa">Copy address</button>
+      <button id="rc-x" class="btn btn-ghost">Close</button></div></div>`;
+  document.body.appendChild(el);
+  qrInto(el.querySelector('#rc-qr'), w.addr);
+  el.querySelector('#rc-copy').onclick = async () => {
+    try { await navigator.clipboard.writeText(w.addr); el.querySelector('#rc-copy').textContent = 'Copied ✓'; } catch {}
+  };
+  el.querySelector('#rc-x').onclick = () => el.remove();
+  el.addEventListener('keydown', (e) => { if (e.key === 'Escape') el.remove(); });
+  el.querySelector('#rc-x').focus();
 }
 
 // send success — a plate with the txid and an explorer link instead of alert('Sent'): "the chain is
@@ -650,15 +797,30 @@ function renderSendResult(txid, label = '✓ Sent') {
 // A direct transfer to the vault address does NOT create the covenant (create.html explicitly forbids
 // sending that way) — the correct route: wallet → the safe's funding address (its key is in the profile
 // since creation) → build_fund → covenant. Both steps in one click; Kaspa confirms in seconds.
-function ensurePickBox() {
-  let box = document.getElementById('w-vault-pick');
-  if (box) box.remove();
-  box = document.createElement('div');
-  box.id = 'w-vault-pick';
-  box.className = 'row wrap';
-  box.style.cssText = 'gap:8px;margin-top:10px;align-items:center';
-  $('w-swap').before(box);
-  return box;
+function safeDepositTargets() {
+  return getVaults().filter((v) => !v.draft && v.funding_sk && v.funding_pk && v.hot_pk && (!v.network || v.network === net()));
+}
+
+function renderSafeTargetPicker() {
+  const select = $('w-safe-target');
+  const targets = safeDepositTargets();
+  const previous = select.value;
+  select.textContent = '';
+  if (targets.length > 1) {
+    const placeholder = document.createElement('option');
+    placeholder.value = ''; placeholder.disabled = true; placeholder.textContent = 'Choose a safe';
+    select.appendChild(placeholder);
+  }
+  for (const v of targets) {
+    const option = document.createElement('option');
+    option.value = v.vault_addr;
+    option.textContent = `${v.label || 'Safe'} · ${shortAddr(v.vault_addr)}`;
+    select.appendChild(option);
+  }
+  if (targets.some((v) => v.vault_addr === previous)) select.value = previous;
+  else if (targets.length === 1) select.value = targets[0].vault_addr;
+  else select.value = '';
+  select.style.display = targets.length > 1 ? '' : 'none';
 }
 
 async function depositToSafe(w, v, amt) {
@@ -829,7 +991,7 @@ function injectNote(row, getNote, setNote, ph) {
     const t = await promptText('Note (leave empty to remove):', { value: getNote() || '', placeholder: ph, maxlength: 200 });
     if (t === null) return;
     try { setNote(t.trim()); } catch { return; }   // profile locked (auto-lock)
-    show(); renderBackupNudge();
+    show(); renderSecurityHealth();
   };
   row.querySelector('.vb-addr').after(pen);
   row.insertAdjacentElement('afterend', noteEl);
@@ -859,7 +1021,7 @@ async function editContact(addr) {
     if (name.trim()) list.push({ addr, name: name.trim() });
     setContacts(list);
   } catch { return; }   // profile locked (auto-lock)
-  txsLastJson = ''; renderTxs(); renderContactsDatalist(); renderBackupNudge();
+  txsLastJson = ''; renderTxs(); renderContactsDatalist(); renderSecurityHealth();
 }
 
 // ── "Transactions": the wallet's on-chain history — ALL incoming and outgoing across all profile
@@ -870,7 +1032,7 @@ async function editContact(addr) {
 // journal (profile.txs, written by wallet.js:sendFromWallet) stays: it supplies pending rows until
 // the indexer sees a fresh send, and the whole history on non-mainnet networks with no indexer.
 // var, not let: renderTxs is called from top level (after the restore scan) BEFORE this line — let would be a TDZ
-var txsBusy = false, txsLastJson = '';
+var txsBusy = false, txsLastJson = '', txFilter = 'all', txRowsCache = [], txJournalOnly = false, txTagsCache = new Map();
 async function renderTxs() {
   if (txsBusy) return;   // the 30s tick on top of a manual ↻ — don't run two fetches at once
   txsBusy = true;
@@ -943,81 +1105,76 @@ async function renderTxsInner() {
   drawTxs(rows, !chain, tags);
 }
 function drawTxs(rows, journalOnly, tags) {
-  const box = $('w-mytxs');
-  if (!rows.length) { box.innerHTML = ''; return; }
+  txRowsCache = rows; txJournalOnly = journalOnly; txTagsCache = tags;
+  txFilter = txFilter || 'all';
+  const boxes = [$('w-mytxs'), $('w-mytxs-all')].filter(Boolean);
+  const more = document.querySelector('.activity-more');
+  if (more) more.style.display = rows.length ? 'flex' : 'none';
+  if (!rows.length) {
+    for (const box of boxes) box.innerHTML = '<div class="activity-empty"><span class="empty-icon">↺</span><strong>No activity yet</strong><p>Your transactions and security updates will appear here.</p></div>';
+    return;
+  }
   const hidden = localStorage.getItem('kaspa-txs-hide') === '1';
-  box.innerHTML = '';
-  const head = document.createElement('div');
-  head.className = 'row wrap';
-  head.style.cssText = 'gap:10px;align-items:baseline';
-  const ttl = document.createElement('span');
-  ttl.className = 'hint';
-  ttl.textContent = journalOnly ? `Sent transactions (${rows.length})` : `Transactions (${rows.length})`;
-  const hideBtn = document.createElement('button');
-  hideBtn.className = 'btn btn-ghost'; hideBtn.style.cssText = 'padding:4px 10px;font-size:11px';
-  hideBtn.textContent = hidden ? 'Show' : 'Hide';
-  hideBtn.onclick = () => { localStorage.setItem('kaspa-txs-hide', hidden ? '0' : '1'); setPref('txsHide', !hidden); txsLastJson = ''; renderTxs(); };
-  head.append(ttl, hideBtn);
-  if (!hidden && journalOnly) {   // the on-chain list can't be "cleared" — Clear is journal-only
-    const clearBtn = document.createElement('button');
-    clearBtn.className = 'btn btn-ghost'; clearBtn.style.cssText = 'padding:4px 10px;font-size:11px';
-    clearBtn.textContent = 'Clear';
-    clearBtn.onclick = async () => {
-      if (!await confirmBox('Clear the sent-transactions list? This only clears the journal in this browser — the transactions themselves stay on-chain.', { ok: 'Clear' })) return;
-      setTxs([]); txsLastJson = ''; renderTxs();
-    };
-    head.append(clearBtn);
+  if (hidden) {
+    for (const box of boxes) {
+      box.innerHTML = '<div class="activity-hidden">Activity is hidden. <button type="button">Show</button></div>';
+      box.querySelector('button').onclick = () => { localStorage.setItem('kaspa-txs-hide', '0'); setPref('txsHide', false); drawTxs(txRowsCache, txJournalOnly, txTagsCache); };
+    }
+    return;
   }
-  box.appendChild(head);
-  if (hidden) return;
-  for (const r of rows) {
-    const row = document.createElement('div');
-    row.className = 'hint';
-    row.style.cssText = 'font-family:var(--mono);display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:4px';
-    const when = document.createElement('span');
-    when.textContent = new Date(r.time * 1000).toLocaleString();
-    const amt = document.createElement('span');
-    if (r.dir === 'in') { amt.style.color = 'var(--kaspa)'; amt.textContent = '+' + kas(r.amount); }
-    else if (r.dir === 'self') { amt.textContent = kas(r.amount); }
-    else { amt.textContent = '−' + kas(r.amount); }
-    const dest = document.createElement('span');
-    const tagOf = (a) => (a && tags.get(a)) || null;
-    if (r.dir === 'in') dest.textContent = '← ' + (tagOf(r.other) || contactName(r.other) || (r.other ? shortAddr(r.other) : 'network'));
-    else if (r.dir === 'self') dest.textContent = '⟳ internal (own addresses)';
-    else dest.textContent = '→ ' + (tagOf(r.other) || contactName(r.other) || shortAddr(r.other));
-    row.append(when, amt, dest);
-    // ✎ — label the counterparty (address book); safe addresses already carry a telling tag
-    if (r.other && !tagOf(r.other)) {
-      const pen = document.createElement('button');
-      pen.textContent = '✎'; pen.title = 'Name this address'; pen.setAttribute('aria-label', 'Name this address');
-      pen.style.cssText = 'background:none;border:none;color:var(--ash);cursor:pointer;padding:0 2px;font-size:13px;line-height:1';
-      pen.onclick = () => editContact(r.other);
-      row.append(pen);
+  const visible = rows.filter((r) => txFilter === 'all' || (txFilter === 'pending' ? r.pending : r.dir === txFilter));
+  const dayStart = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const today = dayStart(new Date());
+  const groupOf = (r) => { const age = Math.round((today - dayStart(new Date(r.time * 1000))) / 86400000); return age <= 0 ? 'Today' : age === 1 ? 'Yesterday' : 'Earlier'; };
+  const timeOf = (r) => { const d = new Date(r.time * 1000); return groupOf(r) === 'Earlier'
+    ? d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+    : d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }); };
+  const tagOf = (a) => (a && tags.get(a)) || null;
+  const renderList = (box, source) => {
+    box.innerHTML = '';
+    if (!source.length) { box.innerHTML = '<div class="activity-none">No transactions match this filter.</div>'; return; }
+    let lastGroup = '';
+    for (const r of source) {
+      const group = groupOf(r);
+      if (group !== lastGroup) { const g = document.createElement('div'); g.className = 'tx-group'; g.textContent = group; box.appendChild(g); lastGroup = group; }
+      const peer = tagOf(r.other) || contactName(r.other) || (r.other ? shortAddr(r.other) : 'Kaspa network');
+      const row = document.createElement('div'); row.className = 'tx-row';
+      const icon = document.createElement('span'); icon.className = 'tx-icon'; icon.textContent = r.dir === 'in' ? '↓' : r.dir === 'self' ? '↔' : '↑';
+      const title = document.createElement('span'); title.className = 'tx-title'; title.textContent = r.dir === 'in' ? 'Received' : r.dir === 'self' ? 'Internal move' : 'Sent';
+      const counter = document.createElement('span'); counter.className = 'tx-counter';
+      const counterText = document.createElement('span'); counterText.className = 'tx-counter-text';
+      counterText.textContent = r.dir === 'in' ? `From ${peer}` : r.dir === 'self' ? 'Wallet → own address' : `To ${peer}`; counter.appendChild(counterText);
+      if (r.other && !tagOf(r.other)) { const edit = document.createElement('button'); edit.className = 'tx-edit'; edit.textContent = '✎'; edit.title = 'Name this address'; edit.setAttribute('aria-label', 'Name this address'); edit.onclick = () => editContact(r.other); counter.appendChild(edit); }
+      const amount = document.createElement('span'); amount.className = 'tx-amount' + (r.dir === 'in' ? ' in' : ''); amount.textContent = (r.dir === 'in' ? '+' : r.dir === 'out' ? '−' : '') + kas(r.amount);
+      const status = document.createElement('span'); status.className = 'tx-status' + (r.pending ? ' pending' : ''); status.textContent = r.pending ? 'Pending' : r.local ? 'Saved locally' : r.dir === 'self' ? 'Internal' : 'Confirmed';
+      const when = document.createElement('time'); when.className = 'tx-time'; when.dateTime = new Date(r.time * 1000).toISOString(); when.textContent = timeOf(r);
+      const link = document.createElement('a'); link.className = 'tx-link'; const href = exTx(r.txid); if (href) { link.href = href; link.target = '_blank'; link.rel = 'noopener'; link.textContent = '↗'; link.title = 'Open in explorer'; } else { link.textContent = '·'; link.setAttribute('aria-hidden', 'true'); }
+      row.append(icon, title, counter, amount, status, when, link); box.appendChild(row);
     }
-    if (r.pending) {
-      const pnd = document.createElement('span');
-      pnd.textContent = 'pending…'; pnd.style.opacity = '.7';
-      row.append(pnd);
-    }
-    const link = exTx(r.txid);
-    if (link) {
-      const a = document.createElement('a');
-      a.href = link; a.target = '_blank'; a.rel = 'noopener'; a.textContent = '↗';
-      row.append(a);
-    }
-    box.appendChild(row);
-  }
+  };
+  renderList($('w-mytxs'), visible.slice(0, 5));
+  renderList($('w-mytxs-all'), visible);
+  const tools = document.createElement('div'); tools.className = 'activity-tools';
+  const hideBtn = document.createElement('button'); hideBtn.type = 'button'; hideBtn.textContent = 'Hide activity'; hideBtn.onclick = () => { localStorage.setItem('kaspa-txs-hide', '1'); setPref('txsHide', true); drawTxs(txRowsCache, txJournalOnly, txTagsCache); }; tools.appendChild(hideBtn);
+  if (journalOnly) { const clearBtn = document.createElement('button'); clearBtn.type = 'button'; clearBtn.textContent = 'Clear local journal'; clearBtn.onclick = async () => { if (!await confirmBox('Clear the sent-transactions list? This only clears the journal in this browser — the transactions themselves stay on-chain.', { ok: 'Clear' })) return; setTxs([]); txsLastJson = ''; renderTxs(); }; tools.appendChild(clearBtn); }
+  $('w-mytxs-all').appendChild(tools);
 }
+
+for (const btn of document.querySelectorAll('[data-tx-filter]')) btn.onclick = () => {
+  txFilter = btn.dataset.txFilter;
+  for (const other of document.querySelectorAll('[data-tx-filter]')) other.classList.toggle('active', other.dataset.txFilter === txFilter);
+  drawTxs(txRowsCache, txJournalOnly, txTagsCache);
+};
 
 // ↻ — instant refresh of the balance (current AND past addresses), swap statuses and history
 // (auto — every 30s below)
 $('w-refresh').onclick = () => {
-  try { const w = loadProfile().wallet; if (w) walletBalance(w.addr).then(setBal); } catch {}
+  refreshWalletBalance(true);
   renderMySwaps(true); renderTxs(); refreshOldBal();
 };
 // ⟲ Rescan — a forced restore scan from the seed (decision 2026-07-11): the auto-scan runs once per
 // device, and coins that arrived on a past derived address LATER were impossible to see
-// (only a key-file re-import fixed it). Findings land in "Previous addresses" → Collect.
+// (only a key-file re-import fixed it). Funded addresses join the unified wallet automatically.
 $('w-rescan').onclick = async () => {
   const b = $('w-rescan');
   b.disabled = true; const orig = b.textContent; b.textContent = 'Scanning…';
@@ -1027,7 +1184,7 @@ $('w-rescan').onclick = async () => {
       await alertBox('This profile has no master seed, so there is nothing to derive a scan from. Records made on other devices arrive via Import / merge.');
     else if (rep.vaults + rep.deals + rep.listings + rep.chats + rep.addresses > 0)
       await alertBox(`Recovered from the server using your key file: ${restoreReport(rep)}.`
-        + (rep.addresses ? '\nCoins found on previous addresses show under “Previous addresses” — collect them to the current one in one click.' : ''));
+        + (rep.addresses ? '\nCoins on the recovered addresses are already included in the wallet balance.' : ''));
     else
       await alertBox('Nothing new found — everything derived from your key file is already on this desk.');
   } catch (e) { await alertBox('Rescan failed: ' + (e.message || e), { alarm: true }); }
@@ -1035,22 +1192,23 @@ $('w-rescan').onclick = async () => {
 };
 // an incoming swap/safe withdrawal is visible without F5 (balance + history + the past-addresses row;
 // the backend caches history for 30s, so the tick doesn't hammer the indexer); after auto-lock the
-// profile is locked — the tick silently skips. renderBackupNudge lazily catches up the "backup is stale"
+// profile is locked — the tick silently skips. renderSecurityHealth lazily catches up the "backup is stale"
 // nudge for profile mutations without an explicit re-render (swap, market chat): pure local SHA-256.
 setInterval(() => {
-  try { const w = loadProfile().wallet; if (w) walletBalance(w.addr).then(setBal); } catch {}
-  renderTxs(); refreshOldBal(); renderBackupNudge(); refreshDealsBadge();
+  refreshWalletBalance();
+  renderTxs(); refreshOldBal(); renderSecurityHealth(); refreshDealsBadge(); renderBalAge();
 }, 30000);
 
-$('d-export').onclick = async () => {
+async function doExport() {
   if (!await confirmPassword('Exporting the key file')) return;
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([session.exportCurrent()], { type: 'text/plain' }));
   a.download = 'kaspa-office-profile.age'; a.click();
   localStorage.setItem('kaspa-backup-done', '1');
-  await recordBackupSig();   // the fresh file covers the current profile — the yellow nudge goes out
-  renderBackupNudge();
-};
+  await recordBackupSig();
+  renderSecurityHealth(); renderSettingsInfo();
+}
+$('d-export').onclick = doExport;
 $('d-import').onchange = async (e) => {
   const file = e.target.files[0]; if (!file) return;
   if (!await confirmPassword('Importing a key file')) { e.target.value = ''; return; }
@@ -1061,12 +1219,12 @@ $('d-import').onchange = async (e) => {
     try { imported = parseProfileFile(core.decrypt_profile(text, pw)); } catch { await alertBox('Wrong password or corrupted file', { alarm: true }); e.target.value = ''; return; }
   } else { try { imported = parseProfileFile(text); } catch { await alertBox("Doesn't look like a key file", { alarm: true }); e.target.value = ''; return; } }
   const local = loadProfile();
-  const merged = mergeProfile(local, imported);              // keeps the CURRENT wallet by default
+  const merged = reviveProfileRecords(mergeProfile(local, imported), imported); // explicit import may restore deleted records
   // wallet conflict: NEVER drop the other sk silently — ask. The losing wallet is no longer
   // "replaced" but lives on in "Previous addresses" (mergeProfile puts it into walletOld):
-  // both sides' coins stay visible and collectable (bug 2026-07-11 — walletOld was getting lost).
+  // both sides' coins stay visible in one spendable balance (bug 2026-07-11 — walletOld was getting lost).
   if (imported.wallet && local.wallet && imported.wallet.addr !== local.wallet.addr) {
-    const switchTo = await confirmBox(`The file contains a DIFFERENT wallet:\n${imported.wallet.addr}\n\nSwitch to it? The current wallet ${local.wallet.addr.slice(0, 20)}… moves to “Previous addresses” — its coins stay visible and collectable. «Keep current» does the reverse: the file's wallet lands in “Previous addresses”. Safes/deals/listings merge either way.`,
+    const switchTo = await confirmBox(`The file contains a DIFFERENT wallet:\n${imported.wallet.addr}\n\nSwitch to it? The current wallet ${local.wallet.addr.slice(0, 20)}… moves to “Previous addresses” — its coins remain in the unified spendable balance. «Keep current» does the reverse: the file's wallet lands in “Previous addresses”. Safes/deals/listings merge either way.`,
       { danger: true, ok: 'Switch wallet', cancel: 'Keep current' });
     if (switchTo) {
       // rotate together with walletOld: the chosen one becomes active (out of "past"), the former goes into "past"
@@ -1095,34 +1253,90 @@ $('d-import').onchange = async (e) => {
     if (rep.vaults + rep.deals + rep.listings + rep.chats + rep.addresses > 0) session.commit(merged);
     if (merged.seed) localStorage.setItem('kaspa-restore-scanned', core.derive_token(merged.seed, 'scan-mark', 0).slice(0, 16));
   } catch (err) { console.warn('[restore]', err); }
-  renderWallet(); renderBackupNudge(); renderVaultsTab(); renderDealsTab(); renderListingsTab(); renderChatsTab();
+  renderWallet(); renderSecurityHealth(); renderVaultsTab(); renderDealsTab(); renderListingsTab(); renderChatsTab();
   renderTxs();   // the new wallet's history — right after the key-file load, don't wait for the 30s tick
   renderContactsDatalist();   // the address book may have arrived in the file
   const restoredN = rep ? rep.vaults + rep.deals + rep.listings + rep.chats + rep.addresses : 0;
   await alertBox('Imported ✓' + (restoredN ? `\nRecovered from the server: ${restoreReport(rep)}.` : '')); e.target.value = '';
 };
 
-var curTab = null;   // active tab: its badge doesn't accumulate (see markDealsSeen/markChatsSeen)
-function switchTab(name) {
+var curTab = null;   // active VIEW; escrow/chats badge semantics rely on it (markDealsSeen etc.)
+const VIEW_TITLES = { overview: L.overview, wallet: L.wallet, safes: L.safes,
+  escrow: L.escrow, market: L.market, chats: L.chats, settings: L.settings };
+function showView(name) {
   curTab = name;
-  $('tab-vaults').style.display = name === 'vaults' ? 'block' : 'none';
-  $('tab-deals').style.display = name === 'deals' ? 'block' : 'none';
-  $('tab-listings').style.display = name === 'listings' ? 'block' : 'none';
-  $('tab-chats').style.display = name === 'chats' ? 'block' : 'none';
-  $('tab-btn-vaults').classList.toggle('active', name === 'vaults');
-  $('tab-btn-deals').classList.toggle('active', name === 'deals');
-  $('tab-btn-listings').classList.toggle('active', name === 'listings');
-  $('tab-btn-chats').classList.toggle('active', name === 'chats');
-  for (const t of ['vaults', 'deals', 'listings', 'chats'])
-    $('tab-btn-' + t).setAttribute('aria-selected', String(t === name));
-  // leaving the chats tab silences the open thread's polling
+  for (const v of VIEWS) {
+    const sec = $('view-' + v);
+    if (sec) sec.style.display = v === name ? 'block' : 'none';
+  }
+  for (const el of document.querySelectorAll('[data-nav]')) {
+    const on = el.dataset.nav === name;
+    el.classList.toggle('active', on);
+    if (on) el.setAttribute('aria-current', 'page'); else el.removeAttribute('aria-current');
+  }
+  $('tb-title').textContent = VIEW_TITLES[name] || name;
+  $('topbar').classList.toggle('is-internal', name !== 'overview');
+  $('bn-sheet').hidden = true;
   if (name !== 'chats') closeChatPanel();
-  // the tab survives a reload and is shareable by link (#deals|#listings|#chats) — review 2026-07-09;
-  // replaceState: no history spam, Back goes to the previous PAGE, not the previous tab
+  // replaceState (not location.hash=): no history spam — Back leaves the desk, not walks the views
   history.replaceState(null, '', '#' + name);
-  // a visit = "seen": the tab badge goes out at once; it relights only for events newer than this moment
-  if (name === 'deals') markDealsSeen();
-  if (name === 'chats') updateChatsBadge();   // marks seen internally (curTab is already 'chats')
+  if (name === 'escrow') markDealsSeen();
+  if (name === 'chats') updateChatsBadge();
+}
+const VIEW_RENDER = { overview: () => renderSecurityHealth(), safes: renderVaultsTab,
+  escrow: renderDealsTab, market: renderListingsTab, chats: renderChatsTab,
+  settings: () => renderSettingsInfo() };
+function go(name) { showView(name); (VIEW_RENDER[name] || (() => {}))(); }
+
+function ovSet(kind, m) {
+  const card = $('ov-card-' + kind); if (!card) return;
+  card.querySelector('[data-slot=n]').textContent = m.count;
+  const bits = [];
+  if (m.sumSompi != null && m.count) bits.push(kas(m.sumSompi) + (kind === 'escrow' ? ' in escrow' : ' total'));
+  if (m.attention) bits.push(m.attention + (m.attention === 1 ? ' needs' : ' need') + ' attention');
+  card.querySelector('[data-slot=sum]').textContent = m.count ? (bits.join(' · ') || 'All clear') : '';
+  const empty = card.querySelector('[data-slot=empty]');
+  if (empty) empty.style.display = m.count ? 'none' : 'flex';
+  const nx = card.querySelector('[data-slot=next]');
+  if (m.next) {
+    nx.style.display = 'flex'; nx.textContent = '→ ' + m.next.label; nx.href = m.next.href;
+    nx.onclick = m.next.href.startsWith('#')
+      ? (e) => { e.preventDefault(); go(m.next.href.slice(1)); }
+      : (m.next.vault ? () => setActiveAddr(m.next.vault) : null);
+  } else nx.style.display = 'none';
+}
+var ovBal = new Map();
+function ovRefreshSafes() { try { ovSet('safes', safesCard(getVaults(), ovBal)); } catch {} }
+function ovRefreshEscrow() { dealMaps(); try { ovSet('escrow', escrowCard(getDeals(), dealStates, dealChatUnread)); } catch {} }
+function ovRefreshMarket() { try { ovSet('market', marketCard(getListings(), Date.now() / 1000)); } catch {} }
+
+var navCounts = { escrow: 0, chats: 0 };
+function setNavBadge(kind, n) {
+  // lazy init (TDZ precedent, see dealMaps()): refreshDealsBadge() runs at top level (line ~292)
+  // BEFORE this module reaches `var navCounts = {...}` further down in source order.
+  navCounts = navCounts || { escrow: 0, chats: 0 };
+  navCounts[kind] = n;
+  for (const el of document.querySelectorAll(`[data-badge="${kind}"]`)) {
+    el.style.display = n ? 'inline-flex' : 'none';
+    if (n) el.textContent = n;
+  }
+  const more = navCounts.escrow;   // Escrow is hidden under More on mobile; Chats has its own bottom-nav badge
+  for (const el of document.querySelectorAll('[data-badge="more"]')) {
+    el.style.display = more ? 'inline-flex' : 'none';
+    if (more) el.textContent = more;
+  }
+}
+function renderSettingsInfo() {
+  const el = $('st-backup-info'); if (!el) return;
+  let rec = null; try { rec = JSON.parse(localStorage.getItem('kaspa-backup-sig') || 'null'); } catch {}
+  if (!rec) {
+    el.textContent = localStorage.getItem('kaspa-backup-done') === '1'
+      ? 'Last export: before coverage tracking — export a fresh file to see what it covers.'
+      : 'No key file has been exported from this browser yet.';
+    return;
+  }
+  el.textContent = `Last export: ${rec.t ? new Date(rec.t).toLocaleString() : 'unknown date'}`
+    + ` · covers ${rec.v} safes, ${rec.d} deals, ${rec.l} listings, ${rec.w} wallet addresses, ${rec.c} chats, ${rec.b} contacts.`;
 }
 
 // ── "Safes" tab: the profile's safes + each one's balance ──
@@ -1170,15 +1384,94 @@ async function announceUnvault(v, un) {
   line.querySelector('.unv-open').onclick = () => setActiveAddr(v.vault_addr);
   if (ua.childElementCount) line.style.marginTop = '8px';
   ua.appendChild(line);
+  // one main event + "and N more" (canon dd5d9c74 item 13): extra withdrawal lines collapse
+  // behind a single link — no wall of red plates, and nothing is hidden for good.
+  const lines = [...ua.children].filter((el) => el.dataset && el.dataset.addr);
+  let moreEl = ua.querySelector('.unv-more');
+  if (lines.length > 1) {
+    if (!moreEl) {
+      moreEl = document.createElement('a');
+      moreEl.className = 'unv-more'; moreEl.href = '#safes';
+      moreEl.style.cssText = 'display:block;margin-top:8px;font-weight:700';
+      moreEl.onclick = (e) => { e.preventDefault(); go('safes'); };
+      ua.appendChild(moreEl);
+    }
+    for (const [i, el] of lines.entries()) el.style.display = i === 0 ? '' : 'none';
+    moreEl.textContent = `⚠ …and ${lines.length - 1} more withdrawal${lines.length > 2 ? 's' : ''} in progress — open Safes`;
+  }
   ua.style.display = 'block';
 }
 
+async function mountAlertsSubscription(host, v) {
+  const card = document.createElement('div');
+  card.className = 'safe-sub';
+  card.innerHTML = `<span class="safe-sub-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg></span>
+    <span class="safe-sub-copy"><strong>Alerts subscription</strong><span class="safe-sub-status" role="status">Checking status…</span></span>
+    <span class="safe-sub-actions"></span>`;
+  host.appendChild(card);
+  const status = card.querySelector('.safe-sub-status');
+  const actions = card.querySelector('.safe-sub-actions');
+  const manage = document.createElement('a');
+  manage.className = 'safe-sub-manage'; manage.href = '/manage.html'; manage.textContent = 'Manage →';
+  manage.onclick = () => { setActiveAddr(v.vault_addr); setPref('activeVault', v.vault_addr); };
+  actions.appendChild(manage);
+  if (!v.token) {
+    status.textContent = 'Unavailable — this safe has no service token';
+    return;
+  }
+  try {
+    const s = await loadSubscriptionStatus(v);
+    const view = subscriptionView(s, 'en');
+    status.textContent = view.status;
+    status.classList.add(view.tone);
+    if (view.badge) {
+      const active = document.createElement('span');
+      active.className = 'safe-sub-active'; active.textContent = view.badge;
+      actions.prepend(active);
+    }
+    if (!view.showPay) return;
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-ghost btn-sm safe-sub-pay';
+    btn.textContent = view.payLabel;
+    actions.prepend(btn);
+    btn.onclick = async () => {
+      const original = btn.textContent;
+      try {
+        const wallet = session.getProfile().wallet;
+        if (!wallet) { await alertBox('No wallet in this profile', { alarm: true }); return; }
+        const price = Math.round(Number(s.price_kas) * 1e8);
+        const balance = await walletPortfolioBalance(loadProfile(), net());
+        if (price > balance) {
+          await alertBox(`Not enough in the desk wallet (${kas(balance)}). Top it up on the Desk — SimpleSwap or any wallet.`, { alarm: true });
+          return;
+        }
+        if (!await confirmPassword('Paying the alerts subscription from the desk wallet.', {
+          context: `<b style="font-family:var(--mono);color:var(--kaspa)">${kas(price)}</b> → alerts subscription, +1 year`
+        })) return;
+        btn.disabled = true; btn.textContent = 'Paying…';
+        await fundTargetFromWallet(wallet, s.sub_addr, price, net());
+        btn.remove();
+        status.textContent = 'Payment sent — awaiting confirmation. Alerts require Telegram or email to be connected.';
+        status.classList.remove('ok'); status.classList.add('warn');
+        renderTxs(); renderWallet();
+      } catch (e) {
+        btn.disabled = false; btn.textContent = original;
+        await alertBox((e && e.message) || 'Error', { alarm: true });
+      }
+    };
+  } catch (e) {
+    status.textContent = 'Subscription status is temporarily unavailable';
+  }
+}
+
 async function renderVaultsTab() {
+  ovBal = new Map(); ovRefreshSafes();
   const list = getVaults();
   const box = $('tab-vaults');
   const ua = $('unvault-alert'); ua.style.display = 'none'; ua.innerHTML = '';
   if (!list.length) {
-    box.innerHTML = '<p class="hint">No safes yet. <a href="/create.html">Create one</a>.</p>';
+    box.innerHTML = '<div class="section-empty"><span class="empty-icon">⛨</span><strong>No safes yet</strong><p>Create an isolated on-chain safe with delayed withdrawals and recovery protection.</p><a href="/create.html" class="btn btn-kaspa">Create your first safe</a></div>';
+    ovRefreshSafes();
     return;
   }
   box.innerHTML = '';
@@ -1203,6 +1496,8 @@ async function renderVaultsTab() {
       wrap.appendChild(drow); wrap.appendChild(rm); box.appendChild(wrap);
       continue;
     }
+    const entry = document.createElement('section');
+    entry.className = 'safe-entry';
     const row = document.createElement('a');
     row.href = '/manage.html';
     row.className = 'vb-item';
@@ -1217,11 +1512,12 @@ async function renderVaultsTab() {
       row.querySelector('.vb-addr').after(b);
     }
     row.onclick = () => { setActiveAddr(v.vault_addr); setPref('activeVault', v.vault_addr); }; // synchronous, BEFORE the browser follows the href
-    box.appendChild(row);
+    entry.appendChild(row); box.appendChild(entry);
     injectNote(row,
       () => (getVaults().find((x) => x.vault_addr === v.vault_addr) || {}).note,
       (t) => { const arr = getVaults(); const rec = arr.find((x) => x.vault_addr === v.vault_addr); if (rec) { rec.note = t; setVaults(arr); } },
       'why this safe, whose funds…');
+    mountAlertsSubscription(entry, v);
     // balance — async, as in manage.html (utxos by vault_addr, only the safe's covenant UTXOs; doesn't block row rendering)
     (async () => {
       try {
@@ -1250,7 +1546,8 @@ async function renderVaultsTab() {
           row.querySelector('.vb-dot').classList.add('unvaulting');
           announceUnvault(v, un);
         } else if (!sompi) row.querySelector('.vb-amt').textContent = 'empty';
-      } catch { row.querySelector('.vb-amt').textContent = '—'; }
+        ovBal.set(v.vault_addr, { sompi, withdrawing: !!un, strays: strays.length > 0 && !!v.hot_sk }); ovRefreshSafes();
+      } catch { row.querySelector('.vb-amt').textContent = '—'; ovBal.set(v.vault_addr, { sompi: 0 }); ovRefreshSafes(); }
     })();
   }
   box.insertAdjacentHTML('beforeend', '<p style="margin-top:12px"><a href="/create.html" class="btn btn-ghost">+ New safe</a></p>');
@@ -1309,7 +1606,7 @@ function markDealsSeen() {
   for (const [id, last] of dealChatLast) s.deals[id] = Math.max(s.deals[id] || 0, last);
   saveTabSeen(s);
   dealChatNew.clear();
-  const b = $('deals-badge'); if (b) b.style.display = 'none';
+  setNavBadge('escrow', 0);
 }
 function markChatsSeen() {
   const s = tabSeen(); s.chats = s.chats || {};
@@ -1346,13 +1643,10 @@ async function refreshDealsBadge() {
       if (fresh) dealChatNew.set(d.id, fresh); else dealChatNew.delete(d.id);
     } catch { /* offline — keep the previous counter values */ }
   }
-  if (curTab === 'deals') markDealsSeen();   // the tab is open: shown = seen
+  if (curTab === 'escrow') markDealsSeen();   // the tab is open: shown = seen
   const total = [...dealChatNew.values()].reduce((a, b) => a + b, 0);
-  const b = $('deals-badge');
-  if (b) {
-    b.style.display = total ? 'inline-flex' : 'none';
-    if (total) b.textContent = total;
-  }
+  setNavBadge('escrow', total);
+  ovRefreshEscrow();
   syncDealRowBadges();
 }
 
@@ -1360,7 +1654,8 @@ async function renderDealsTab() {
   const list = getDeals();
   const box = $('tab-deals');
   if (!list.length) {
-    box.innerHTML = '<p class="hint">No deals yet. <a href="/escrow.html">Create or join one</a>.</p>';
+    box.innerHTML = '<div class="section-empty"><span class="empty-icon">⌁</span><strong>No escrow deals yet</strong><p>Create a protected deal or join one using an invitation code.</p><a href="/escrow.html" class="btn btn-kaspa">Create or join a deal</a></div>';
+    ovRefreshEscrow();
     return;
   }
   box.innerHTML = '';
@@ -1389,6 +1684,7 @@ async function renderDealsTab() {
       try {
         const st = await api(`/api/safe/escrow/state?id=${d.id}&token=${encodeURIComponent(d.token)}`);
         dealMaps(); dealStates.set(d.id, st.state);
+        ovRefreshEscrow();
         const dot = row.querySelector('.vb-dot');
         if (st.state === 'disputed') dot.classList.add('unvaulting');
         else if (st.state && st.state !== 'closed' && st.state !== 'expired') dot.classList.add('vault');
@@ -1398,6 +1694,7 @@ async function renderDealsTab() {
   }
   syncDealRowBadges();
   box.insertAdjacentHTML('beforeend', '<p style="margin-top:12px"><a href="/escrow.html" class="btn btn-ghost">+ New deal</a></p>');
+  ovRefreshEscrow();
 }
 
 // ── "Listings" tab: the profile's listings (owner-only, from identity.js — Task 7) ──
@@ -1405,7 +1702,8 @@ async function renderListingsTab() {
   const list = getListings();
   const box = $('tab-listings');
   if (!list.length) {
-    box.innerHTML = '<p class="hint">No listings yet — every one ships with escrow built in. <a href="/listing-new.html">Create one</a>.</p>';
+    box.innerHTML = '<div class="section-empty"><span class="empty-icon">◇</span><strong>No listings yet</strong><p>Publish an item or service with non-custodial escrow built into every sale.</p><a href="/listing-new.html" class="btn btn-kaspa">Create your first listing</a><a href="/market.html" class="hint" style="margin-top:12px">Browse marketplace →</a></div>';
+    ovRefreshMarket();
     return;
   }
   // status and publication term change WITHOUT this browser's involvement (30-day expiry,
@@ -1520,6 +1818,7 @@ async function renderListingsTab() {
     box.appendChild(wrap);
   }
   box.insertAdjacentHTML('beforeend', '<p style="margin-top:12px"><a href="/listing-new.html" class="btn btn-ghost">+ New listing</a></p>');
+  ovRefreshMarket();
 }
 
 // ── "Chats" tab: listing chats (pre-deal questions about listings, spec
@@ -1663,9 +1962,7 @@ function updateChatsBadge() {
   const seen = tabSeen().chats || {};
   let n = 0;
   try { n = getChats().filter((c) => chatUnread(c) && (c.last_id || 0) > (seen[c.thread_id] ?? -1)).length; } catch {}
-  const b = $('chats-badge');
-  b.style.display = n ? 'inline-flex' : 'none';
-  if (n) b.textContent = n;
+  setNavBadge('chats', n);
 }
 
 async function openChatPanel(entry) {
@@ -1782,7 +2079,7 @@ async function openChatPanel(entry) {
 async function handleChatParam() {
   const listingId = Number(new URLSearchParams(location.search).get('chat'));
   if (!listingId) return;
-  switchTab('chats');
+  go('chats');
   await renderChatsTab();
   const mine = getListings().find((l) => l.id === listingId);
   if (mine) return; // seller: the request list is already on screen
@@ -1811,24 +2108,25 @@ async function handleChatParam() {
   }
 }
 
-$('tab-btn-vaults').onclick = () => { switchTab('vaults'); renderVaultsTab(); };
-$('tab-btn-deals').onclick = () => { switchTab('deals'); renderDealsTab(); };
-$('tab-btn-listings').onclick = () => { switchTab('listings'); renderListingsTab(); };
-$('tab-btn-chats').onclick = () => { switchTab('chats'); renderChatsTab(); };
-const HASH_TABS = ['vaults', 'deals', 'listings', 'chats'];
-switchTab(HASH_TABS.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'vaults');
+for (const a of document.querySelectorAll('[data-nav]'))
+  a.addEventListener('click', (e) => { e.preventDefault(); go(a.dataset.nav); });
+$('bn-more').onclick = () => { $('bn-sheet').hidden = !$('bn-sheet').hidden; };
+window.addEventListener('hashchange', () => go(resolveRoute(location.hash)));
+go(resolveRoute(location.hash));
 renderChatsTab(); // the unread badge on the button — without waiting for a tab click
 handleChatParam();
+maybeStartDeskTour({ navigate: go });
 // notifications live in an OPEN desk too: every 30s refresh threads and the badge (no WASM, API only);
 // an open panel polls itself (5s) — leave it alone, don't redraw the list over text being typed
 setInterval(async () => {
   if (chatPanelId) return;
   try {
     await refreshChatThreads();
-    if ($('tab-chats').style.display !== 'none') renderChatsTab(); else updateChatsBadge();
+    if (curTab === 'chats') renderChatsTab(); else updateChatsBadge();
   } catch { /* profile locked (auto-lock) or offline — quietly skip the tick */ }
 }, 30000);
 </script>
-<script src="/assets/kaspa-widget.js?v=3" defer></script>
+<script>if("serviceWorker" in navigator&&/^(kaspaforge\.org|kaspa\.officeforge\.co)$/.test(location.hostname))navigator.serviceWorker.register("/sw-forge.js");</script>
+<script src="/assets/kaspa-widget.js?v=4" defer></script>
 </body>
 </html>

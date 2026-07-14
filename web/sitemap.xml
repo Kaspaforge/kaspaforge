@@ -102,6 +102,34 @@
     <priority>0.3</priority>
   </url>
   <url>
+    <loc>https://kaspaforge.org/terms.html</loc>
+    <lastmod>2026-07-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/terms.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/terms.html"/>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/ru/terms.html</loc>
+    <lastmod>2026-07-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/terms.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/terms.html"/>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/security.html</loc>
+    <lastmod>2026-07-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/security.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/security.html"/>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/ru/security.html</loc>
+    <lastmod>2026-07-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/security.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/security.html"/>
+    <priority>0.3</priority>
+  </url>
+  <url>
     <loc>https://kaspaforge.org/privacy-escrow.html</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/privacy-escrow.html"/>
     <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/privacy-escrow.html"/>
@@ -142,6 +170,22 @@
     <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/docs/desk.html"/>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/docs/security.html</loc>
+    <lastmod>2026-07-13</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/docs/security.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/docs/security.html"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/ru/docs/security.html</loc>
+    <lastmod>2026-07-13</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/docs/security.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/docs/security.html"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://kaspaforge.org/docs/safe.html</loc>

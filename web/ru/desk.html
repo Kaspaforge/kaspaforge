@@ -9,258 +9,357 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest-forge.json">
+<link rel="apple-touch-icon" href="/assets/icons/icon-192.png?v=2">
 <meta name="theme-color" content="#0E1116">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Kaspa Forge">
 <link rel="stylesheet" href="/assets/safe.css?v=14">
-<script src="/assets/nav.js?v=5" defer></script>
+<link rel="stylesheet" href="/assets/desk.css?v=12">
+<script src="/assets/nav.js?v=7" defer></script>
+<script src="/assets/netstat.js?v=1" defer></script>
 <script src="/assets/qrcode.min.js"></script>
 <style>
-/* desk.html: страница-скоуп, не трогает safe.css (шарится ~15 страницами).
-   .row.wrap здесь — не футер: скоуп через main/section, footer .row (safe.css) не задет.
-   main — потому что корень страницы теперь <main id=app> (a11y-критика 09.07). */
+/* desk.html: page-scoped, does not touch safe.css (shared by ~15 pages).
+   .row.wrap here is not the footer: scoped via main/section, footer .row (safe.css) is untouched.
+   main — because the page root is now <main id=app> (a11y review 2026-07-09). */
 main .row.wrap,section .row.wrap{display:flex;flex-wrap:wrap;align-items:center}
-/* активный таб — по образцу .vb-item.active (border-color:var(--kaspa);background:var(--plate)) */
+/* active tab — modeled on .vb-item.active (border-color:var(--kaspa);background:var(--plate)) */
 .btn-ghost.active{color:var(--kaspa);border-color:var(--kaspa);background:var(--plate)}
-/* label.btn (Импорт/объединить): наследует line-height body против normal у <button> + safe.css
-   label{margin:16px 0 6px} — разная высота и уровень кнопок в одном ряду (замечание Майка) */
+/* label.btn (Import/merge): inherits body line-height vs. normal on <button> + safe.css
+   label{margin:16px 0 6px} — mismatched height/baseline of buttons in one row (owner's note) */
 label.btn{line-height:normal;margin:0}
-/* Item/service badge — тот же .type-tag, что market.html/listing-new.html (Tasks 5-6): по The One
-   Accent Rule НЕ бирюзовый (тот зарезервирован под кнопку покупки), нейтральная mono-таблетка. */
+/* Item/service badge — same .type-tag as market.html/listing-new.html (Tasks 5-6): per The One
+   Accent Rule NOT teal (that's reserved for the buy button), neutral mono pill instead. */
 .type-tag{display:inline-flex;align-items:center;font-family:var(--mono);font-size:10.5px;
   letter-spacing:.1em;text-transform:uppercase;color:var(--ash);border:1px solid var(--bd);
   border-radius:4px;padding:3px 7px;white-space:nowrap}
-/* Листинг-чат (вкладка Чаты): пузыри в духе чата сделки, бирюза только у непрочитанного бейджа */
+/* Listing chat (Chats tab): bubbles styled like the deal chat, teal only on the unread badge */
 .ch-msgs{display:flex;flex-direction:column;gap:6px;max-height:340px;overflow-y:auto;padding:12px;
   background:var(--iron);border:1px solid var(--bd);border-radius:8px}
 .ch-b{max-width:78%;padding:8px 11px;border-radius:10px;font-size:14px;white-space:pre-wrap;word-break:break-word}
 .ch-b.mine{align-self:flex-end;background:var(--patina-ink);border:1px solid rgba(0,193,175,.35)}
 .ch-b.theirs{align-self:flex-start;background:var(--plate);border:1px solid var(--bd)}
 .ch-b .ts{display:block;font-family:var(--mono);font-size:10px;color:var(--ash);margin-top:3px}
-/* AA-контраст мелкого mono-меты: ash2 (#6c7a90) на steel/plate < 4.5:1 при 10-11.5px — на этой
-   странице поднимаем до ash (DESIGN.md сам ограничивает ash2 крупным кеглем) */
+/* AA contrast of small mono meta: ash2 (#6c7a90) on steel/plate < 4.5:1 at 10-11.5px — on this
+   page we bump it up to ash (DESIGN.md itself restricts ash2 to large type) */
 .vb-addr{color:var(--ash)}
 .ch-unread{display:inline-flex;min-width:18px;height:18px;align-items:center;justify-content:center;
   background:var(--kaspa);color:var(--patina-ink);border-radius:9px;font-size:11px;font-weight:700;padding:0 5px}
-/* Современные поля (замечание Майка 09.07): safe.css стилизует только input[type=text|password],
-   а адрес/сумма кошелька и строка чата — <input> без type → голый браузерный дефолт. */
-/* input.ch-input (не .ch-input): safe.css теперь стилизует input:not([type]) со специфичностью
-   (0,1,1) — селектору нужна та же, чтобы победить порядком (страничный <style> позже). */
-#wallet-box input,input.ch-input{background:var(--iron);border:1px solid var(--bd);border-radius:9px;
+/* Modern fields (owner's note 2026-07-09): safe.css only styles input[type=text|password],
+   while the wallet address/amount and chat input are <input> with no type → bare browser default. */
+/* input.ch-input (not .ch-input): safe.css now styles input:not([type]) with specificity
+   (0,1,1) — the selector needs the same to win by source order (page <style> comes later). */
+#view-wallet input,input.ch-input{background:var(--iron);border:1px solid var(--bd);border-radius:9px;
   color:var(--ingot);padding:13px 15px;font-family:var(--mono);font-size:13.5px;min-width:0}
-#wallet-box input::placeholder,input.ch-input::placeholder{color:var(--ash2)}
-#wallet-box input:focus,input.ch-input:focus{outline:none;border-color:var(--kaspa)}
-/* Sara-виджет (fixed, правый низ) не должен садиться на контент — запас на докрутку (критика
-   09.07). Только корневой контейнер: голый .wrap зацепил бы и каждый .row.wrap (класс wrap!). */
-body > .wrap{padding-bottom:96px}
-/* Мобайл: safe.css прячет .vb-addr ≤640px, но в списках объявлений/чатов там живёт СТАТУС
-   («published · ещё N дн», «на модерации») — возвращаем (критика 09.07) */
+#view-wallet input::placeholder,input.ch-input::placeholder{color:var(--ash2)}
+#view-wallet input:focus,input.ch-input:focus{outline:none;border-color:var(--kaspa)}
+/* Mobile: safe.css hides .vb-addr ≤640px, but in listing/chat lists that's where the STATUS
+   lives ("published · N days left", "in moderation") — bring it back (review 2026-07-09) */
 @media (max-width:640px){#tab-listings .vb-addr,#tab-chats .vb-addr{display:block;font-size:11px}}
-/* Таб-бар липнет к верху: переключение вкладок на телефоне не требует скролла назад через
-   QR и кошелёк (критика 09.07). Фон — щит от просвечивающего контента.
-   gap здесь, не инлайном: мобильный медиа-блок ниже должен уметь его ужать. */
-#tab-bar{position:sticky;top:0;z-index:5;background:var(--iron);padding:8px 0;margin-bottom:8px;gap:10px}
-/* Мобайл: вкладки одним рядом равными сегментами, без переноса на вторую строку (Майк 11.07).
-   min-width:0 + узкий горизонтальный padding — иначе mono-капс не влезает в 360px;
-   вертикальный padding не трогаем (тач-цель ≥44px, PRODUCT.md). Бейдж Чатов учтён (gap 4px). */
-@media (max-width:640px){
-  #tab-bar{flex-wrap:nowrap;gap:6px}
-  #tab-bar .btn{flex:1 1 0;min-width:0;padding-left:4px;padding-right:4px;
-    font-size:12px;letter-spacing:.04em;white-space:nowrap;gap:4px}
-  /* счётчик в сегмент 360px не влезает — на мобиле бейдж превращается в точку */
-  #tab-bar .ch-unread{min-width:8px;height:8px;padding:0;font-size:0;border-radius:4px}
-}
-/* читабельная строка предупреждения (детектор: ~105ch на всю ширину) */
-#backup-nudge{max-width:74ch}
-/* Сейф с идущим выводом: баланс и выводимая сумма — отдельными строками и цветами (замечание
-   Майка 10.07: «9,99 + 9,96 · выводится» читалось как каша). Бирюза = осталось в сейфе,
-   янтарь = уходит; подписи мелким ash-капсом. */
+/* Safe with an active withdrawal in progress: balance and the withdrawing amount as separate
+   lines/colors (owner's note 2026-07-10: "9.99 + 9.96 · withdrawing" read as a jumble). Teal =
+   remains in the safe, amber = leaving; labels in small ash caps. */
 .vb-amt.split{display:flex;flex-direction:column;align-items:flex-end;gap:2px;line-height:1.25}
 .vb-amt.split .lbl{color:var(--ash);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em}
-/* Профильный тулбар (Экспорт / Импорт / Запереть ┃ Стереть) — desk.html scope. Иконки — inline SVG
-   (stroke:currentColor → цвет и ховер наследуются от кнопки, отдельных ассетов не нужно). */
+/* Profile toolbar (Export / Import / Lock ┃ Wipe) — desk.html scope. Icons are inline SVG
+   (stroke:currentColor → color and hover are inherited from the button, no separate assets needed). */
 .desk-utils{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .desk-utils .btn{gap:8px}
 .desk-utils .btn svg{width:17px;height:17px;flex:none}
-/* вертикальный разделитель перед деструктивной кнопкой (десктоп) — отделяет «Стереть» от трио */
+/* vertical divider before the destructive button (desktop) — separates "Wipe" from the trio */
 .util-sep{width:1px;align-self:stretch;min-height:24px;background:var(--bd);margin:0 4px}
-/* «Стереть с устройства» — единственный деструктив: приглушённо-красная рамка, на ховере наливается.
-   Стиль классом, НЕ инлайном: свой :hover (специфичность класса) корректно перебивает базовый —
-   прежний инлайн-цвет глушил ховер (color/border-color инлайна били .btn-ghost:hover). */
+/* "Wipe from device" — the only destructive action: muted red outline, fills in on hover.
+   Styled via a class, NOT inline: its own :hover (class specificity) correctly overrides the base —
+   the previous inline color used to kill the hover (inline color/border-color beat .btn-ghost:hover). */
 .btn-wipe{background:transparent;color:#E0644E;border:1px solid #E0644E55}
 .btn-wipe:not(:disabled):hover{color:#fff;background:#E0644E;border-color:#E0644E;
   box-shadow:0 0 18px rgba(224,100,78,.35)}
 @media (max-width:640px){
-  /* Телефон: ровная сетка вместо рваного flex-wrap (кнопки были «раскиданы друг под другом»).
-     Экспорт｜Импорт в две колонки, Запереть на всю ширину, затем разделитель-хайрлайн и обособленная
-     Стереть (span на всю ширину + запас сверху) — чтобы её не ткнули случайно рядом с другими. */
+  /* Phone: an even grid instead of ragged flex-wrap (buttons used to be "scattered under each other").
+     Export｜Import in two columns, Lock full-width, then a hairline divider and a separated
+     Wipe button (full-width span + top margin) — so it can't be tapped by accident next to the others. */
   .desk-utils{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:stretch}
   .desk-utils .btn{width:100%;padding-left:10px;padding-right:10px;font-size:12px;letter-spacing:.04em}
-  #d-lock,.util-sep,#d-wipe{grid-column:1 / -1}
-  .util-sep{width:auto;height:1px;min-height:0;align-self:auto;margin:5px 0}
-  #d-wipe{margin-top:2px}
 }
 </style>
 </head>
 <body>
-<div class="wrap">
+<div id="app" style="display:none">
+  <aside id="side-nav" aria-label="Разделы деска"></aside>
+  <main class="desk-main">
+    <header id="topbar">
+      <a class="tb-mobile-brand" href="/ru/" aria-label="Kaspa Forge"><img src="/assets/brand/lockup-h-flat-header.png" alt="KaspaForge"></a>
+      <h1 id="tb-title" data-desk-label="Деск">Обзор</h1>
+      <span class="tb-chip" title="Ваш профиль зашифрован паролем и никогда не покидает этот браузер">🛡 Все данные зашифрованы локально</span>
+      <div class="tb-netstat" id="netstat" aria-label="Статус ноды Kaspa">
+        <span class="tb-stat"><span class="tb-stat-l">Сеть</span><span class="tb-stat-v" id="ns-net">…</span></span>
+        <span class="tb-stat"><span class="tb-stat-l">DAA</span><span class="tb-stat-v ns-daa" id="ns-daa">…</span></span>
+        <span class="tb-stat"><span class="tb-stat-l">Нода</span><span class="tb-stat-v"><span class="ns-dot" id="ns-dot"></span><span id="ns-status">…</span></span></span>
+      </div>
+      <a class="tb-chip" id="tb-lang" href="/desk.html" hreflang="en" lang="en">EN</a>
+      <button id="d-lock" class="btn btn-ghost" title="Замкнуть деск сейчас (также авто-замок через 15 мин простоя)" aria-label="Быстро замкнуть Деск"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span class="tb-lock-label">Замкнуть</span></button>
+    </header>
 
-<header class="top">
-  <a class="brand" href="/ru/">
-    <img class="brand-k" src="/assets/brand/emblem-flat-header.png" alt="">
-    <span class="brand-name">My Kaspa <b>Desk</b></span>
-  </a>
-  <nav><a href="/ru/docs/desk.html">Доки</a></nav>
-</header>
+    <!-- Critical events live ABOVE the views: an active safe withdrawal must be visible from ANY view (spec §15.5) -->
+    <section class="plate note alarm" id="unvault-alert" style="display:none;margin-bottom:16px"></section>
 
-<main id="app" style="display:none">
-  <!-- Заголовок страницы + утилити профиля. Раньше h1 не было вовсе (критика 09.07: «страница
-       без имени»), а «Импорт» был label с hidden input — вне tab-order (a11y). -->
-  <div class="row wrap" style="gap:8px 10px;align-items:center;justify-content:space-between">
-    <h1 style="font-size:clamp(28px,4vw,40px);margin:10px 0 4px">Мой Kaspa Desk</h1>
-    <div class="desk-utils">
-      <button id="d-export" class="btn btn-ghost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Экспорт ключей</button>
-      <button id="d-import-btn" class="btn btn-ghost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Импорт / объединить</button>
-      <input type="file" id="d-import" accept=".json,.age,application/json,text/plain" hidden>
-      <button id="d-lock" class="btn btn-ghost" title="Заблокировать деск сейчас (авто-лок — через 15 мин простоя)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Запереть</button>
-      <span class="util-sep" aria-hidden="true"></span>
-      <button id="d-wipe" class="btn btn-wipe" title="Стереть файл ключей из этого браузера — для чужих и общих устройств"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>Стереть с устройства</button>
-    </div>
-  </div>
-  <p class="hint" style="margin:0 0 14px">Кошелёк, сейфы, сделки, объявления и чаты — один шифрованный профиль, живущий в этом браузере.</p>
-  <!-- ОДНА красная плашка вместо двух подряд (инфляция тревоги — критика 09.07): предупреждение
-       «файл+пароль» слито в надж; после реального бэкапа красного на экране нет вообще. -->
-  <section class="plate note alarm" id="backup-nudge" style="display:none;margin-bottom:16px">
-    <b>Сделай бэкап ключей.</b> Профиль и кошелёк живут только в этом браузере и зашифрованы твоим паролем. Потеряешь пароль или браузер без бэкапа — доступ к средствам не вернуть. <b>Файл + пароль = доступ к средствам:</b> храни их раздельно — не в почте и не в незашифрованном облаке.
-    <div class="row wrap" style="gap:8px;margin-top:10px">
-      <button id="bn-export" class="btn btn-kaspa">Экспортировать файл ключей</button>
-      <button id="bn-hide" class="btn btn-ghost">Скрыть</button>
-    </div>
-  </section>
-  <!-- Жёлтый надж «бэкап устарел» (Майк 10.07): экспорт был, но ПОСЛЕ него появились новые
-       ключи (сейфы/сделки/объявления) — старый файл их не покрывает. Красный надж выше — про
-       «бэкапа нет вовсе»; этот — про «бэкап есть, но отстал». Гасится свежим экспортом. -->
-  <section class="plate note" id="backup-stale" style="display:none;margin-bottom:16px;border-left-color:#E0A93E;max-width:74ch">
-    <b>Бэкап файла ключей устарел.</b> <span id="bs-detail"></span> Ключи и история, появившиеся после того экспорта, живут только в этом браузере — экспортируй свежий файл ключей, чтобы импорт на другом устройстве был полным.
-    <div class="row wrap" style="gap:8px;margin-top:10px">
-      <button id="bs-export" class="btn btn-kaspa">Экспортировать файл ключей</button>
-      <button id="bs-hide" class="btn btn-ghost">Скрыть</button>
-    </div>
-  </section>
-  <!-- Активный вывод из сейфа — возможная КРАЖА, громче этого на деске ничего нет: баннер живёт
-       над кошельком/табами и виден с любой вкладки. Наполняет renderVaultsTab (тот же детект,
-       что в manage.html:renderBar: covenant пуст, а на unvault-адресе лежат монеты). -->
-  <section class="plate note alarm" id="unvault-alert" style="display:none;margin-bottom:16px"></section>
-  <section class="plate" id="wallet-box" style="margin-bottom:16px">
-    <h3>Мой кошелёк</h3>
-    <div class="addr"><code id="w-addr"></code><button id="w-copy">копировать</button><button id="w-qrbtn" aria-expanded="false">QR</button><button id="w-newaddr" title="Новый адрес приёма — выводится из мастер-seed, покрыт существующим бэкапом">Новый адрес</button></div>
-    <!-- QR за тоглом: вечно открытый съедал первый экран телефона (критика 09.07) -->
-    <div id="w-qr" role="img" aria-label="QR-код адреса кошелька" style="display:none;margin:10px 0"></div>
-    <div class="row wrap" style="gap:10px;align-items:center">
-      <span aria-live="polite">Баланс: <b id="w-bal">…</b> <span id="w-bal-usd" class="hint"></span></span>
-      <button id="w-refresh" class="btn btn-ghost" style="padding:9px 14px" title="Обновить баланс и свопы" aria-label="Обновить баланс и свопы">↻</button>
-      <button id="w-rescan" class="btn btn-ghost" style="padding:9px 14px" title="Пересканировать цепь: монеты и записи, выведенные из файла ключей — находит средства на прошлых адресах, которых деск не показывает">⟲ Рескан</button>
-      <a id="w-addr-ex" class="hint" target="_blank" rel="noopener" style="display:none">эксплорер ↗</a>
-    </div>
-    <div id="w-oldaddrs" class="hint" style="display:none;margin-top:8px"></div>
-    <div class="row wrap" style="gap:8px;margin-top:10px">
-      <input id="w-to" list="w-contacts" placeholder="kaspa:… адрес получателя" aria-label="Адрес получателя" style="flex:1;min-width:min(260px,100%)">
-      <!-- автодополнение из адресной книги профиля (contacts): выбор по имени подставляет адрес -->
-      <datalist id="w-contacts"></datalist>
-      <input id="w-amt" placeholder="KAS" inputmode="decimal" aria-label="Сумма в KAS" style="width:150px">
-      <button id="w-max" class="btn btn-ghost" title="Весь баланс минус сетевая комиссия">Макс</button>
-      <button id="w-send" class="btn btn-kaspa">Отправить</button>
-      <!-- Депозит в сейф — НЕ перевод на vault-адрес (ковенант так не создаётся, create.html об
-           этом предупреждает): кошелёк → funding-адрес сейфа → build_fund тем же кликом. -->
-      <button id="w-tosafe" class="btn btn-ghost" title="Внести введённую сумму в сейф — через его funding-адрес, тем же кликом закладывается в ковенант">В сейф</button>
-    </div>
-    <div id="w-swap" style="margin-top:14px"></div>
-    <div id="w-myswaps" style="margin-top:12px"></div>
-    <div id="w-mytxs" style="margin-top:12px"></div>
-  </section>
-  <div id="tab-bar" class="row wrap" role="tablist" aria-label="Разделы деска">
-    <button id="tab-btn-vaults" class="btn btn-ghost" role="tab" aria-selected="true">Сейфы</button>
-    <!-- подписи Эскроу/Маркет (Майк 10.07) — по именам продуктов; id и #deals/#listings в hash
-         не трогаем: ссылки наружу уже ходят -->
-    <button id="tab-btn-deals" class="btn btn-ghost" role="tab" aria-selected="false">Эскроу <span id="deals-badge" class="ch-unread" style="display:none"></span></button>
-    <button id="tab-btn-listings" class="btn btn-ghost" role="tab" aria-selected="false">Маркет</button>
-    <button id="tab-btn-chats" class="btn btn-ghost" role="tab" aria-selected="false">Чаты <span id="chats-badge" class="ch-unread" style="display:none"></span></button>
-  </div>
-  <div id="tab-vaults" role="tabpanel"></div>
-  <div id="tab-deals" role="tabpanel" style="display:none"></div>
-  <div id="tab-listings" role="tabpanel" style="display:none"></div>
-  <div id="tab-chats" role="tabpanel" style="display:none"></div>
-</main>
+    <section id="view-overview" aria-label="Обзор">
+      <div class="ov-grid">
+        <div class="plate ov-hero">
+          <h3>Баланс кошелька</h3>
+          <div class="oh-bal"><span id="ov-bal" aria-live="polite">…</span><span class="hint" id="ov-bal-usd"></span></div>
+          <div class="addr"><code id="ov-addr"></code><button id="ov-copy">копировать</button></div>
+          <div class="hint" id="ov-upd" style="margin-top:4px"></div>
+          <div class="row wrap ov-actions">
+            <button id="ov-send" class="btn btn-kaspa">↗ Отправить</button>
+            <button id="ov-receive" class="btn btn-ghost">↓ Получить</button>
+            <button id="ov-tosafe" class="btn btn-ghost">⛨ В сейф</button>
+          </div>
+        </div>
+        <div class="plate" id="sec-health" aria-live="polite"><h3>Безопасность</h3></div>
+      </div>
+      <div class="ov-cards">
+        <div class="plate ov-card" id="ov-card-safes">
+          <a class="oc-head" data-nav="safes" href="#safes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><b>Сейфы</b><span class="oc-n" data-slot="n">…</span></a>
+          <div class="oc-sum hint" data-slot="sum"></div>
+          <div class="oc-empty" data-slot="empty"><p>Храни средства в изолированных ончейн-сейфах под своим контролем.</p><a href="/ru/create.html">＋ Создать первый сейф</a></div>
+          <a class="oc-next" data-slot="next" style="display:none"></a>
+        </div>
+        <div class="plate ov-card" id="ov-card-escrow">
+          <a class="oc-head" data-nav="escrow" href="#escrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><b>Эскроу</b><span class="oc-n" data-slot="n">…</span></a>
+          <div class="oc-sum hint" data-slot="sum"></div>
+          <div class="oc-empty" data-slot="empty"><p>Создавай защищённые сделки со встроенным разрешением споров.</p><a href="/ru/escrow.html">＋ Создать первое эскроу</a></div>
+          <a class="oc-next" data-slot="next" style="display:none"></a>
+        </div>
+        <div class="plate ov-card" id="ov-card-market">
+          <a class="oc-head" data-nav="market" href="#market"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg><b>Мои объявления</b><span class="oc-n" data-slot="n">…</span></a>
+          <div class="oc-sum hint" data-slot="sum"></div>
+          <div class="oc-empty" data-slot="empty"><p>Покупай и продавай через non-custodial эскроу в каждой сделке.</p><a href="/ru/market.html">Открыть маркет</a></div>
+          <a class="oc-next" data-slot="next" style="display:none"></a>
+        </div>
+      </div>
+      <section class="plate" id="ov-activity">
+        <div class="activity-head"><h3>Последние операции</h3><div class="activity-filters" role="group" aria-label="Фильтр операций">
+          <button class="active" data-tx-filter="all">Все</button><button data-tx-filter="in">Входящие</button><button data-tx-filter="out">Исходящие</button><button data-tx-filter="pending">Ожидают</button>
+        </div></div>
+        <div id="w-mytxs"></div>
+        <a class="activity-more" data-nav="wallet" href="#wallet">Все операции →</a>
+      </section>
+    </section>
+    <section id="view-wallet" style="display:none">
+      <section class="plate" id="wallet-box">
+        <h3>Мой кошелёк</h3>
+        <div class="addr"><code id="w-addr"></code><button id="w-copy">копировать</button><button id="w-qrbtn" aria-expanded="false">QR</button><button id="w-newaddr" title="Новый адрес приёма — выводится из мастер-seed, покрыт существующим бэкапом">Новый адрес</button></div>
+        <!-- QR behind a toggle: an always-open one used to eat the first screen on phones (review 2026-07-09) -->
+        <div id="w-qr" role="img" aria-label="QR-код адреса кошелька" style="display:none;margin:10px 0"></div>
+        <div class="row wrap" style="gap:10px;align-items:center">
+          <span aria-live="polite">Баланс: <b id="w-bal">…</b> <span id="w-bal-usd" class="hint"></span></span>
+          <button id="w-refresh" class="btn btn-ghost" style="padding:9px 14px" title="Обновить баланс и свопы" aria-label="Обновить баланс и свопы">↻</button>
+          <button id="w-rescan" class="btn btn-ghost" style="padding:9px 14px" title="Принудительно пересканировать адреса кошелька и записи, производные от мастер-seed">⟲ Рескан</button>
+          <a id="w-addr-ex" class="hint" target="_blank" rel="noopener" style="display:none">эксплорер ↗</a>
+        </div>
+      </section>
+      <section class="plate" id="wallet-actions">
+        <h3>Действия</h3>
+        <div class="row wrap" id="w-send-row" style="gap:8px;margin-top:10px">
+          <input id="w-to" list="w-contacts" placeholder="kaspa:… адрес получателя" aria-label="Адрес получателя" style="flex:1;min-width:min(260px,100%)">
+          <!-- autocomplete from the profile's address book (contacts): picking by name fills in the address -->
+          <datalist id="w-contacts"></datalist>
+          <input id="w-amt" placeholder="KAS" inputmode="decimal" aria-label="Сумма в KAS" style="width:150px">
+          <button id="w-max" class="btn btn-ghost" title="Весь баланс минус сетевая комиссия">Макс</button>
+          <button id="w-send" class="btn btn-kaspa">Отправить</button>
+          <!-- Deposit to safe is NOT a transfer to the vault address (that doesn't create the covenant,
+               create.html warns about this): wallet → safe's funding address → build_fund, same click. -->
+          <button id="w-tosafe" class="btn btn-ghost" title="Внести введённую сумму в сейф — через его funding-адрес, тем же кликом закладывается в ковенант">В сейф</button>
+          <select id="w-safe-target" aria-label="Выбери сейф" style="display:none;width:auto;max-width:260px;min-width:170px"></select>
+        </div>
+      </section>
+      <section class="plate" id="wallet-previous" style="display:none">
+        <h3>Прошлые адреса</h3>
+        <div id="w-oldaddrs"></div>
+      </section>
+      <section class="plate" id="wallet-swap-card">
+        <h3>Обмен через SimpleSwap</h3>
+        <div id="w-swap" style="margin-top:14px"></div>
+        <div id="w-myswaps" style="margin-top:12px"></div>
+      </section>
+      <section class="plate" id="wallet-activity">
+        <div class="activity-head"><div><h3>Операции</h3><p class="hint">Ончейн-история по текущему и предыдущим адресам кошелька.</p></div><div class="activity-filters" role="group" aria-label="Фильтр операций">
+          <button class="active" data-tx-filter="all">Все</button><button data-tx-filter="in">Входящие</button><button data-tx-filter="out">Исходящие</button><button data-tx-filter="pending">Ожидают</button>
+        </div></div>
+        <div id="w-mytxs-all"></div>
+      </section>
+    </section>
+    <section id="view-safes" style="display:none"><div id="tab-vaults"></div></section>
+    <section id="view-escrow" style="display:none"><div id="tab-deals"></div></section>
+    <section id="view-market" style="display:none"><div id="tab-listings"></div></section>
+    <section id="view-chats" style="display:none"><div id="tab-chats"></div></section>
+    <section id="view-settings" style="display:none">
+      <section class="plate">
+        <h3>Профиль и бэкап</h3>
+        <p class="hint">Один зашифрованный файл ключей (.age) покрывает твой кошелёк, сейфы, сделки, объявления и чаты — включая те, что создашь позже (они выводятся из того же мастер-seed).</p>
+        <p class="hint" id="st-backup-info"></p>
+        <div class="desk-utils">
+          <button id="d-export" class="btn btn-kaspa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Экспорт файла ключей</button>
+          <button id="d-import-btn" class="btn btn-ghost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Импорт / слияние</button>
+          <input type="file" id="d-import" accept=".json,.age,application/json,text/plain" hidden>
+        </div>
+      </section>
+      <section class="plate">
+        <h3>Forge Sync <span class="tb-chip">Beta</span></h3>
+        <p class="hint">E2E-зашифрованное зеркало для устройств с копиями одного профиля — даже если они были сделаны до появления Forge Sync. Сервер не может его прочитать. Alarm, heir и arbiter keys остаются локально и исключаются автоматически.</p>
+        <p class="hint"><b id="st-sync-status">Выкл.</b> · Пока только ручная синхронизация. Офлайн-бэкап всё равно обязателен.</p>
+        <button id="st-sync-btn" class="btn btn-ghost">Включить синхронизацию</button>
+      </section>
+      <section class="plate">
+        <h3>Безопасность</h3>
+        <p class="hint">Профиль в открытом виде не покидает этот браузер. Если включить Forge Sync, сервер получит только дополнительную зашифрованную копию. Деск автоматически замыкается после 15 минут простоя; каждая денежная операция заново спрашивает пароль.</p>
+        <button id="st-lock" class="btn btn-ghost">Замкнуть сейчас</button>
+      </section>
+      <section class="plate">
+        <h3>Предпочтения</h3>
+        <p class="hint">Язык: русский · <a href="/desk.html" hreflang="en" lang="en">English version</a></p>
+      </section>
+      <section class="plate dz">
+        <h3>Опасная зона</h3>
+        <p class="hint">Убирает локальный доступ только с ЭТОГО устройства — средства остаются в сети и восстанавливаются из экспортированного .age-файла ключей на любом устройстве.</p>
+        <button id="d-wipe" class="btn btn-wipe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>Стереть с этого устройства</button>
+      </section>
+    </section>
+  </main>
 
+  <nav id="bottom-nav" aria-label="Разделы деска"></nav>
+  <div id="bn-sheet" hidden></div>
 </div>
 <script type="module">
-import { boot, net, kas, $, setActiveAddr, removeVault, utxosRaw, utxosSum, submitTx, daaToHuman, qrInto, genToken } from '/assets/app.js?v=15';
-import { mountSwapWidget } from '/assets/swap-widget.js?v=3';
+import { boot, net, kas, $, setActiveAddr, removeVault, utxosRaw, utxosSum, submitTx, daaToHuman, qrInto, genToken } from '/assets/app.js?v=18';
+import { mountSwapWidget } from '/assets/swap-widget.js?v=5';
 import { requireUnlock, confirmPassword } from '/assets/lock-ui.js';
 import * as session from '/assets/session.js';
-import { getVaults, setVaults, getDeals, setDeals, getListings, setListings, getSwaps, getChats, setChats, loadProfile, saveProfile, parseProfileFile, mergeProfile, isEncryptedProfile } from '/assets/identity.js';
-// getTxs/setTxs — через namespace, НЕ деструктуризацией: identity.js кэшируется без ?v, и свежая
-// страница со старым модулем в кэше падала бы всем импортом («does not provide an export»).
-// Namespace-импорт того же URL = тот же инстанс модуля, но отсутствие экспорта не фатально.
+import { getVaults, setVaults, getDeals, setDeals, getListings, setListings, getSwaps, getChats, setChats, loadProfile, saveProfile, parseProfileFile, mergeProfile, reviveProfileRecords, isEncryptedProfile } from '/assets/identity.js';
+// getTxs/setTxs — via namespace, NOT destructuring: identity.js is cached without ?v, and a fresh
+// page with the old module still in cache would fail the whole import ("does not provide an export").
+// A namespace import of the same URL = the same module instance, but a missing export isn't fatal.
 import * as identityNs from '/assets/identity.js';
 const getTxs = identityNs.getTxs || (() => []);
 const setTxs = identityNs.setTxs || (() => {});
-// адресная книга — тот же паттерн защиты от старого identity.js в кэше
+// address book — same guard pattern against a stale identity.js in cache
 const getContacts = identityNs.getContacts || (() => []);
 const setContacts = identityNs.setContacts || (() => {});
 import { ensureChatReady, chatSupported, chatAddress, genChatKeys, startThread, myThreads, fetchThread, chatKeyFunded, sendThreadMsg, decryptMsgs } from '/assets/listing-chat.js?v=1';
-import { core, ready as coreReady } from '/assets/core6.js';
-import { walletBalance, sendFromWallet, sendPlan } from '/assets/wallet.js';
-// api — из escrow.js (не app.js): относительный fetch на location.origin, без cross-origin
-// API_ORIGIN app.js (см. Task 5). kas НЕ импортируем отсюда — app.js уже даёт биндинг с этим
-// именем (иначе дубль-декларация 'kas' в модуле — SyntaxError); используем тот же kas для обеих
-// вкладок.
-import { api, forgottenDealIds, unforgetDeal } from '/assets/escrow.js?v=31';
+import { core, ready as coreReady } from '/assets/core7.js';
+import { walletBalance, walletPortfolioBalance, walletPlan, syncWalletAddresses, sendFromWallet, fundTargetFromWallet } from '/assets/wallet.js?v=2';
+// api — from escrow.js (not app.js): a relative fetch against location.origin, without app.js's
+// cross-origin API_ORIGIN (see Task 5). We do NOT import kas from here — app.js already provides
+// a binding with this name (otherwise a duplicate 'kas' declaration in the module — SyntaxError);
+// we use the same kas for both tabs.
+import { api, forgottenDealIds, unforgetDeal } from '/assets/escrow.js?v=40';
 import { alertBox, confirmBox, promptPassword } from '/assets/dialog.js';
-// promptText — новый экспорт dialog.js: namespace-гард на случай старого модуля в кэше
+// promptText — a new dialog.js export: namespace guard in case of a stale module in cache
 import * as dialogNs from '/assets/dialog.js';
 const promptText = dialogNs.promptText || (async () => null);
 import { restoreFromSeeds } from '/assets/restore.js';
-// тур новичка: авто-старт по метке онбординга (lock-ui), скипается, показывается один раз
-import { maybeStartDeskTour } from '/assets/desk-tour.js';
+import { VIEWS, resolveRoute } from '/assets/desk-routes.js?v=1';
+import { safesCard, escrowCard, marketCard } from '/assets/desk-overview.js?v=1';
+import { maybeStartDeskTour } from '/assets/desk-tour.js?v=4';
+import { mountProfileMirror } from '/assets/profile-mirror-ui.js?v=2';
+import { mirrorProjection, profileHash } from '/assets/profile-mirror.js';
+import { createSubscriptionStatusLoader, subscriptionView } from '/assets/safe-subscription.js?v=2';
+
+const loadSubscriptionStatus = createSubscriptionStatusLoader((v) => api(
+  `/api/safe/sub-status?vault_addr=${encodeURIComponent(v.vault_addr)}&token=${encodeURIComponent(v.token)}`
+));
+
+// ── cockpit-nav: a single LINKS source builds the sidebar + bottom-nav + the More sheet.
+// The RU mirror overrides only L (labels); markup/logic are byte-for-byte with EN.
+const L = { overview: 'Обзор', wallet: 'Кошелёк', safes: 'Сейфы', escrow: 'Эскроу',
+  market: 'Маркет', chats: 'Чаты', settings: 'Настройки', help: 'Помощь', more: 'Ещё',
+  nonCustodial: 'Non-custodial по построению. Ключи и данные в открытом виде существуют только в разблокированном браузере.' };
+const ICONS = {
+  overview: '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>',
+  wallet: '<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>',
+  safes: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+  escrow: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
+  market: '<path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/>',
+  chats: '<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>',
+  settings: '<circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>',
+  help: '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+  more: '<circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>',
+};
+const ic = (k) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k]}</svg>`;
+const navItem = (v, cls) =>
+  `<a class="${cls}" data-nav="${v}" href="#${v}">${ic(v)}<span>${L[v]}</span>` +
+  (v === 'escrow' || v === 'chats' ? `<span class="ch-unread${cls === 'bn-item' ? ' bn-bdg' : ''}" data-badge="${v}" style="display:none"></span>` : '') + '</a>';
+function buildNav() {
+  document.getElementById('side-nav').innerHTML =
+    `<a class="sn-brand" href="/" aria-label="Kaspa Forge"><img src="/assets/brand/lockup-h-flat-header.png" alt="KaspaForge"></a>` +
+    ['overview', 'wallet', 'safes', 'escrow', 'market', 'chats'].map((v) => navItem(v, 'sn-item')).join('') +
+    `<div class="sn-foot">${navItem('settings', 'sn-item')}` +
+    `<a class="sn-item" href="/ru/docs/desk.html">${ic('help')}<span>${L.help}</span></a>` +
+    `<div class="sn-note">🛡 ${L.nonCustodial}</div></div>`;
+  document.getElementById('bottom-nav').innerHTML =
+    ['overview', 'wallet', 'safes', 'chats'].map((v) => navItem(v, 'bn-item')).join('') +
+    `<button class="bn-item" id="bn-more">${ic('more')}<span>${L.more}</span><span class="ch-unread bn-bdg" data-badge="more" style="display:none"></span></button>`;
+  document.getElementById('bn-sheet').innerHTML =
+    ['escrow', 'market', 'settings'].map((v) => navItem(v, 'sn-item')).join('') +
+    `<a class="sn-item" href="/ru/docs/desk.html">${ic('help')}<span>${L.help}</span></a>`;
+}
+buildNav();
 
 const info = await boot();
-// Вход по ?chat= (покупатель с маркета) — пароль-стена с контекстом, зачем ей быть:
-// та же opts.context, что у join-флоу маркета (критика 09.07: новичок получал стену без объяснения)
+$('tb-lang').onclick = (e) => { e.preventDefault(); location.href = '/desk.html' + location.search + location.hash; };
+// Entry via ?chat= (a buyer from the market) — the password wall gets context for why it's there:
+// the same opts.context as the market's join flow (review 2026-07-09: newcomers got a wall with no explanation)
 const chatParamId = Number(new URLSearchParams(location.search).get('chat'));
-// USD-эквивалент и explorer — по kas_usd из /api/safe/info и net() app.js; explorerAddr/explorerTx
-// из escrow.js не берём: их network инициализирует только escrow.js:boot(), который деск не зовёт.
+// USD equivalent and explorer — from kas_usd in /api/safe/info and app.js's net(); we don't take
+// explorerAddr/explorerTx from escrow.js: their network is only initialized by escrow.js:boot(),
+// which the desk never calls.
 const usd = (sompi) => info.kas_usd > 0 && sompi > 0
   ? ' (≈ $' + ((sompi / 1e8) * info.kas_usd).toLocaleString('en-US', { maximumFractionDigits: 2 }) + ')' : '';
+const usdBalance = (sompi) => info.kas_usd > 0
+  ? '≈ $' + ((sompi / 1e8) * info.kas_usd).toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' USD'
+  : '';
 const exTx = (txid) => net() === 'mainnet' && txid ? `https://kaspa.stream/transactions/${encodeURIComponent(txid)}` : null;
 const exAddr = (a) => net() === 'mainnet' && a ? `https://kaspa.stream/addresses/${a}` : null;
 const escHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 await requireUnlock(info.network, chatParamId ? {
   context: `Ты открываешь защищённый чат по объявлению #${chatParamId} — его чат-ключ сохранится в твой шифрованный профиль.` } : {});
-$('app').style.display = 'block';
-// ДО первого renderWallet() (функция хойстится, let — нет): виджет монтируется один раз
+$('app').style.display = '';
+// A remote merge replaces the in-memory profile, but these views are hand-rendered DOM.
+// Redraw every profile-backed surface so records from another device appear without F5.
+function refreshProfileViewsAfterSync() {
+  renderWallet(); renderSecurityHealth(); renderVaultsTab(); renderDealsTab(); renderListingsTab(); renderChatsTab();
+  renderMySwaps(true); renderTxs(); renderContactsDatalist(); refreshOldBal(); renderSettingsInfo();
+}
+mountProfileMirror({ onProfileChanged: refreshProfileViewsAfterSync });
+// BEFORE the first renderWallet() (the function is hoisted, let is not): the widget mounts once
 let walletSwapMounted = false;
-applyPrefs();   // UI-префы из key file → локальные ключи (только если их ещё нет)
-renderWallet(); renderBackupNudge(); renderVaultsTab(); renderDealsTab(); renderListingsTab();
-renderMySwaps(true); // статусы незавершённых свопов освежаются при входе
+applyPrefs();   // UI prefs from the key file → local keys (only if not already set)
+renderWallet(); renderSecurityHealth(); renderVaultsTab(); renderDealsTab(); renderListingsTab();
+renderMySwaps(true); // statuses of unfinished swaps refresh on entry
 
-// ── restore-скан по мастер-seed: самолечение записей профиля ─────────────────
-// Один раз на (устройство × seed) деск спрашивает сервер, нет ли сущностей, деривированных
-// из seed профиля, которых нет локально (импорт старого бэкапа, adopt на unlock-оверлее
-// любой страницы, потерянный localStorage). Метка — непрозрачный токен от seed (не сам seed).
-// Общий прогон (авто-скан + кнопка «⟲ Рескан»): мутирует профиль, коммитит при находках и
-// обновляет метку. ВАЖНО: rep.addresses входит в сумму — раньше скан, нашедший ТОЛЬКО монеты
-// на прошлых адресах, молча не персистился (кейс Майка 11.07: средства висели невидимыми,
-// пока не переимпортировал key file).
+// ── restore scan by master seed: self-healing of profile records ─────────────────
+// Once per (device × seed), the desk asks the server whether there are entities derived
+// from the profile's seed that aren't present locally (import of an old backup, adopt via the
+// unlock overlay on any page, lost localStorage). The mark is an opaque token from the seed
+// (not the seed itself). Shared run (auto-scan + the "⟲ Rescan" button): mutates the profile,
+// commits on findings, and updates the mark. IMPORTANT: rep.addresses is included in the sum —
+// previously a scan that found ONLY coins on past addresses silently failed to persist (owner's
+// case 2026-07-11: funds sat invisible until the key file was re-imported).
 async function runRestoreScan() {
   const p = loadProfile();
   if (!p.seed) return null;
   await coreReady;
-  // забытые здесь сделки («Удалить эту сделку из браузера») скан не воскрешает — вернут recovery-лист/импорт
+  // deals forgotten here ("Remove this deal from the browser") are not resurrected by the scan — only the recovery list/import bring them back
   const rep = await restoreFromSeeds([p.seed], p, net(), forgottenDealIds());
   if (rep.vaults + rep.deals + rep.listings + rep.chats + rep.addresses > 0) {
     session.commit(p);
-    renderWallet(); renderBackupNudge(); renderVaultsTab(); renderDealsTab(); renderListingsTab(); renderChatsTab(); renderTxs(); refreshOldBal();
+    renderWallet(); renderSecurityHealth(); renderVaultsTab(); renderDealsTab(); renderListingsTab(); renderChatsTab(); renderTxs(); refreshOldBal();
   }
-  // сеть упала бы раньше (throw) — метку ставим только после успешного прогона
+  // the network would have thrown earlier — the mark is set only after a successful run
   localStorage.setItem('kaspa-restore-scanned', core.derive_token(p.seed, 'scan-mark', 0).slice(0, 16));
   return rep;
 }
@@ -285,36 +384,36 @@ function restoreReport(rep) {
   if (rep.addresses) parts.push(`адреса с монетами: ${rep.addresses}`);
   return parts.join(', ');
 }
-maybeRestoreScan();
+maybeRestoreScan().finally(() => refreshWalletBalance());
 
 renderTxs();
 renderContactsDatalist();
 refreshDealsBadge();
-maybeStartDeskTour();
 
-// ── надж «сделай бэкап»: копия sk живёт только в этом браузере — держит напоминание, пока
-// не будет реального экспорта (localStorage) или скрытия на сессию (sessionStorage) ──
+// ── "make a backup" nudge: the sk copy lives only in this browser — keeps reminding until
+// there's either a real export (localStorage) or a session dismissal (sessionStorage) ──
 
-// Покрытие бэкапа (Майк 10.07): «экспортировал → создал ещё сейфов → старый файл их не знает».
-// На экспорте запоминаем SHA-256-подпись ключевых сущностей профиля; разошлась с текущей —
-// жёлтый надж «бэкап устарел». Плейнтекст-списки адресов в localStorage не кладём (такие
-// зеркала уже вычищали) — только хэш и счётчики для текста наджа.
+// Backup coverage (owner's note 2026-07-10): "exported → created more safes → old file doesn't
+// know about them." On export we remember a SHA-256 signature of the profile's key entities;
+// diverges from the current one — yellow "backup is stale" nudge. We don't store plaintext
+// address lists in localStorage (such mirrors have already been cleaned up) — only the hash and
+// counters for the nudge text.
 async function profileSig(p) {
   const lists = {
     v: (p.vaults || []).map((x) => x.vault_addr).sort(),
     d: (p.deals || []).map((x) => String(x.id)).sort(),
     l: (p.listings || []).map((x) => String(x.id)).sort(),
-    // адреса кошелька (активный + прошлые): смена адреса / Collect-ротация должна просить
-    // свежий экспорт — старый файл не знает walletOld, и на новом устройстве монеты на
-    // сменённых адресах невидимы (сценарий Майка 11.07). Свопы и покупательские чаты со
-    // СВОИМ ключом — тоже история/доступ, которых в старом файле нет. Журнал txs не хэшируем:
-    // скользящий кап-50 зажигал бы надж каждой отправкой, а история теперь он-чейн.
+    // wallet addresses (active + past): an address change still asks for a fresh export,
+    // to explicitly save the chosen receiving address (addresses holding coins are found
+    // automatically by another device via the seed). Swaps and buyer chats with their OWN
+    // key are also history/access that an old file doesn't have. We don't hash the txs journal:
+    // the sliding cap-50 would light up the nudge on every send, and history is now on-chain anyway.
     w: [p.wallet && p.wallet.addr, ...(p.walletOld || []).map((x) => x.addr)].filter(Boolean).sort(),
     s: (p.swaps || []).map((x) => String(x.simpleswap_id)).sort(),
     c: (p.chats || []).filter((x) => x.role === 'buyer' && x.chat_sk).map((x) => String(x.thread_id)).sort(),
-    // адресная книга: имя в хэше — переименование тоже просит свежий экспорт
+    // address book: name is in the hash — renaming also asks for a fresh export
     b: (p.contacts || []).map((x) => `${x.addr}:${x.name}`).sort(),
-    // заметки к сейфам/сделкам: правка заметки — тоже работа, живущая только здесь
+    // notes on safes/deals: editing a note is also work that lives only here
     n: [
       ...(p.vaults || []).filter((x) => x.note).map((x) => `v:${x.vault_addr}:${x.note}`),
       ...(p.deals || []).filter((x) => x.note).map((x) => `d:${x.id}:${x.note}`),
@@ -327,71 +426,110 @@ async function profileSig(p) {
     w: lists.w.length, s: lists.s.length, c: lists.c.length, b: lists.b.length, n: lists.n.length };
 }
 async function recordBackupSig() {
-  try { localStorage.setItem('kaspa-backup-sig', JSON.stringify(await profileSig(loadProfile()))); } catch {}
+  try {
+    localStorage.setItem('kaspa-backup-sig',
+      JSON.stringify({ ...(await profileSig(loadProfile())), t: Date.now() }));
+  } catch {}
 }
 
-async function renderBackupNudge() {
-  const done = localStorage.getItem('kaspa-backup-done') === '1';
-  const hid = sessionStorage.getItem('kaspa-backup-hide') === '1';
-  const show = !done && !hid;
-  $('backup-nudge').style.display = show ? 'block' : 'none';
-  // жёлтый надж: экспорт был, но с тех пор появились новые ключи — файл их не покрывает
-  let stale = false;
-  if (done && sessionStorage.getItem('kaspa-backup-stale-hide') !== '1') {
+async function renderSecurityHealth() {
+  const box = $('sec-health'); if (!box) return;
+  let profile;
+  try { profile = loadProfile(); } catch { return; }
+  const syncEnabled = !!profile.mirror;
+  let syncCheckpoint = null, syncCurrent = false;
+  if (syncEnabled) {
     try {
-      const cur = await profileSig(loadProfile());
+      syncCheckpoint = JSON.parse(localStorage.getItem(`kaspa-forge-mirror-state:${profile.mirror.profile_id}`) || 'null');
+      syncCurrent = !!syncCheckpoint
+        && syncCheckpoint.profile_hash === await profileHash(mirrorProjection(profile));
+    } catch {}
+  }
+  const syncVersion = Number.isInteger(Number(syncCheckpoint?.version)) ? Number(syncCheckpoint.version) : null;
+  const done = localStorage.getItem('kaspa-backup-done') === '1';
+  let stale = false, detail = '';
+  if (done) {
+    try {
+      const cur = await profileSig(profile);
       const rec = JSON.parse(localStorage.getItem('kaspa-backup-sig') || 'null');
       if (!rec) {
-        // экспорт делался до появления этой проверки — что он покрывает, неизвестно.
-        // cur.w > 1 = есть ПРОШЛЫЕ адреса (активный есть всегда): такой экспорт точно
-        // старше walletOld-эры и списка адресов не содержит.
         stale = cur.v + cur.d + cur.l + cur.s + cur.c + cur.b + cur.n > 0 || cur.w > 1;
-        if (stale) $('bs-detail').textContent = 'Последний экспорт был до появления этой проверки — что он покрывает, неизвестно.';
+        if (stale) detail = "Последний экспорт был до появления отслеживания покрытия — что он покрывает, неизвестно.";
       } else if (rec.h !== cur.h) {
         stale = true;
         const parts = [];
-        if (cur.v > rec.v) parts.push(`сейфы: ${cur.v - rec.v}`);
-        if (cur.d > rec.d) parts.push(`сделки: ${cur.d - rec.d}`);
-        if (cur.l > rec.l) parts.push(`объявления: ${cur.l - rec.l}`);
-        // старые записи sig (до 11.07) без w/s/c: undefined-сравнения ложны → общий текст ниже
-        if (cur.w > rec.w) parts.push(`адреса кошелька: ${cur.w - rec.w}`);
-        if (cur.s > rec.s) parts.push(`свопы: ${cur.s - rec.s}`);
-        if (cur.c > rec.c) parts.push(`чаты: ${cur.c - rec.c}`);
-        if (cur.b > rec.b) parts.push(`контакты: ${cur.b - rec.b}`);
-        if (cur.n > rec.n) parts.push(`заметки: ${cur.n - rec.n}`);
-        $('bs-detail').textContent = parts.length
-          ? `Новое с последнего экспорта — ${parts.join(', ')}.`
-          : 'Профиль изменился с последнего экспорта.';
+        if (cur.v > rec.v) parts.push(`сейфы +${cur.v - rec.v}`);
+        if (cur.d > rec.d) parts.push(`сделки +${cur.d - rec.d}`);
+        if (cur.l > rec.l) parts.push(`объявления +${cur.l - rec.l}`);
+        if (cur.w > rec.w) parts.push(`адреса кошелька +${cur.w - rec.w}`);
+        if (cur.s > rec.s) parts.push(`свопы +${cur.s - rec.s}`);
+        if (cur.c > rec.c) parts.push(`чаты +${cur.c - rec.c}`);
+        if (cur.b > rec.b) parts.push(`контакты +${cur.b - rec.b}`);
+        if (cur.n > rec.n) parts.push(`заметки +${cur.n - rec.n}`);
+        detail = parts.length ? `Новое с бэкапа: ${parts.join(' · ')}.`
+          : 'Профиль изменился после бэкапа.';
       }
-    } catch { /* профиль заперт (авто-лок) — решим на следующем рендере */ }
+    } catch { return; }   // profile is locked (auto-lock) — we'll settle it on the next render
   }
-  $('backup-stale').style.display = stale ? 'block' : 'none';
-  // дубль-CTA (критика 09.07): пока какой-то из наджей на экране, его Экспорт — единственный
-  $('d-export').style.display = (show || stale) ? 'none' : '';
+  const backupOk = done && !stale;
+  const okN = 1 + (backupOk ? 1 : 0);
+  const item2st = backupOk ? '<span class="st ok">актуален</span>'
+    : `<span class="st warn">${done ? 'устарел' : 'отсутствует'}</span>`;
+  const item2hint = backupOk ? ''
+    : `<div class="sh-note"><b>${done ? escHtml(detail) : 'Нет офлайн-файла восстановления.'}</b><span>${done
+      ? syncEnabled
+        ? syncCurrent ? 'Sync покрывает изменения. Экспортируй .age для офлайн-восстановления.' : 'Запусти Sync или экспортируй .age.'
+        : 'Эти изменения есть только в этом браузере.'
+      : syncEnabled ? 'Экспортируй .age для независимого восстановления.' : 'Экспортируй .age и храни отдельно от пароля.'}</span></div>`;
+  const syncStatus = !syncEnabled ? 'выкл.'
+    : syncVersion !== null ? syncCurrent ? `включён · v${syncVersion}` : `v${syncVersion} · изменения`
+      : 'не запускался';
+  const syncDetails = syncEnabled
+    ? '<details class="sh-details"><summary>Подробнее о Sync и бэкапе</summary><p>Forge Sync не заменяет .age. Alarm, heir и arbiter keys остаются на этом устройстве.</p></details>'
+    : '';
+  box.innerHTML = `<h3>Безопасность</h3>
+    <div class="hint">Восстановление · ${okN} из 2</div>
+    <div class="sh-bar"><i style="width:${okN * 50}%"></i></div>
+    <div class="sh-item">✓ Профиль зашифрован <span class="st ok">готово</span></div>
+    <div class="sh-item">${syncEnabled ? '✓' : '○'} Forge Sync <span class="st ${syncEnabled ? 'ok' : ''}">${escHtml(syncStatus)}</span></div>
+    <div class="sh-item">${backupOk ? '✓' : '⚠'} Офлайн-бэкап ${item2st}</div>${item2hint}
+    <div class="desk-utils sh-actions">
+      <button id="sh-export" class="btn ${backupOk ? 'btn-ghost' : 'btn-kaspa'}">Экспорт бэкапа</button>
+      <button id="sh-sync" class="btn ${syncEnabled ? 'btn-kaspa' : 'btn-ghost'}" ${syncEnabled ? '' : 'disabled'}>Синхронизировать</button>
+    </div>
+    ${syncDetails}`;
+  box.querySelector('#sh-export').onclick = doExport;
+  if (syncEnabled) box.querySelector('#sh-sync').onclick = () => $('st-sync-btn').click();
 }
-$('bn-export').onclick = () => $('d-export').click();
-$('bn-hide').onclick = () => { sessionStorage.setItem('kaspa-backup-hide', '1'); renderBackupNudge(); };
-$('bs-export').onclick = () => $('d-export').click();
-$('bs-hide').onclick = () => { sessionStorage.setItem('kaspa-backup-stale-hide', '1'); renderBackupNudge(); };
-$('d-import-btn').onclick = () => $('d-import').click();   // настоящая кнопка: label был вне tab-order
-// ручной лок (раньше был только 15-мин авто): запереть и тут же показать unlock-оверлей на месте
+$('d-import-btn').onclick = () => $('d-import').click();   // a real button: the label was outside the tab order
+// manual lock (previously only the 15-min auto one): lock and immediately show the unlock overlay in place
 $('d-lock').onclick = () => { session.lock(); requireUnlock(info.network); };
-  // «Стереть с устройства» (кафе-сценарий): полная зачистка key file из браузера — профиль,
-  // метки бэкапа/скана, легаси-зеркала, сессия вкладки. Пароль НЕ спрашиваем: стирание ключи
-  // не раскрывает, а забытый пароль не должен запирать уборку на чужом устройстве.
-  $('d-wipe').onclick = async () => {
-    const backedUp = localStorage.getItem('kaspa-backup-done');
-    const warn = backedUp
-      ? 'Стереть файл ключей из ЭТОГО браузера?\n\nКошелёк, сейфы, сделки, объявления и чаты исчезнут с этого устройства. Всё восстановится позже из экспортированного .age-бэкапа на любом устройстве.'
-      : '⚠ Из этого браузера НЕ экспортировался бэкап!\n\nСтирание сейчас = НАВСЕГДА потерянный доступ к кошельку и сейфам этого профиля. Сначала экспортируй файл ключей (кнопка выше).';
-    if (!await confirmBox(warn, { danger: true, ok: 'Стереть', cancel: 'Отмена' })) return;
-    if (!await confirmBox('Последняя проверка: стереть профиль из этого браузера?', { danger: true, ok: 'Стереть', cancel: 'Отмена' })) return;
-    session.lock();
-    for (const store of [localStorage, sessionStorage]) {
-      for (const k of Object.keys(store)) if (k.startsWith('kaspa-')) store.removeItem(k);
-    }
-    location.reload();   // чистый деск: онбординг-оверлей, как на новом устройстве
-  };
+$('st-lock').onclick = () => $('d-lock').click();
+// "Wipe from device" (internet-café scenario) — intentionally WITHOUT a password (canon dd5d9c74):
+// a forgotten password must not block wiping a shared device; wiping doesn't expose keys.
+// Flow: backup status → what gets removed → type ERASE → final confirmation. Never say "delete the funds".
+$('d-wipe').onclick = async () => {
+  const backedUp = localStorage.getItem('kaspa-backup-done') === '1';
+  let stale = false;
+  try {
+    const rec = JSON.parse(localStorage.getItem('kaspa-backup-sig') || 'null');
+    stale = !rec || rec.h !== (await profileSig(loadProfile())).h;
+  } catch { stale = true; }   // profile is locked — can't check, we say so honestly
+  const status = backedUp
+    ? (stale ? '⚠ Твой бэкап может быть УСТАРЕВШИМ — он может не покрывать последние изменения.'
+             : '✓ Твой бэкап актуален.')
+    : '⚠ Из этого браузера НЕ экспортирован бэкап — стирание означает НАВСЕГДА потерянный доступ к кошельку и сейфам этого профиля.';
+  const what = 'Это сотрёт ТОЛЬКО из этого браузера: зашифрованный профиль (кошелёк, сейфы, сделки, объявления, чаты, контакты, заметки), метки бэкапа и сессию вкладки.\n\nСредства остаются в сети; доступ можно восстановить из экспортированного .age-файла ключей на любом устройстве.';
+  if (!await confirmBox(status + '\n\n' + what, { danger: true, ok: 'Продолжить', cancel: 'Отмена' })) return;
+  const word = await promptText('Введи ERASE, чтобы подтвердить удаление локального доступа с этого устройства:');
+  if (word == null) return;
+  if (word.trim().toUpperCase() !== 'ERASE') { await alertBox('Не стёрто — слово подтверждения не совпало.'); return; }
+  if (!await confirmBox('Последняя проверка: стереть профиль из этого браузера?', { danger: true, ok: 'Стереть', cancel: 'Отмена' })) return;
+  session.lock();
+  for (const store of [localStorage, sessionStorage])
+    for (const k of Object.keys(store)) if (k.startsWith('kaspa-')) store.removeItem(k);
+  location.reload();   // a clean desk: onboarding overlay, as on a new device
+};
 
 $('w-qrbtn').onclick = () => {
   const q = $('w-qr'); const open = q.style.display === 'none';
@@ -399,52 +537,77 @@ $('w-qrbtn').onclick = () => {
   $('w-qrbtn').setAttribute('aria-expanded', String(open));
 };
 
-// ── «Мой кошелёк»: личный P2PK-адрес профиля (не сейф) — баланс + отправка + fund-in ──
-function setBal(s) { $('w-bal').textContent = kas(s); $('w-bal-usd').textContent = usd(s); }
+// ── "My wallet": the profile's personal P2PK address (not a safe) — balance + send + fund-in ──
+var lastBalTs = 0;
+function setBal(s) {
+  $('w-bal').textContent = kas(s); $('w-bal-usd').textContent = usd(s);
+  $('ov-bal').textContent = kas(s); $('ov-bal-usd').textContent = usdBalance(s);
+  lastBalTs = Date.now(); renderBalAge();
+}
+async function refreshWalletBalance(forceDiscovery = false) {
+  let profile;
+  try {
+    profile = loadProfile();
+    // Never hide a known on-chain balance behind the slower seed gap scan after a page reload.
+    setBal(await walletPortfolioBalance(profile, net(), { discover: false }));
+    renderOldAddrs(profile.wallet);
+  } catch (e) { console.warn('[wallet-balance]', e); }
+  try {
+    if (!profile) profile = loadProfile();
+    const added = await syncWalletAddresses(profile, net(), forceDiscovery);
+    if (added) {
+      profile = loadProfile();
+      setBal(await walletPortfolioBalance(profile, net(), { discover: false }));
+      renderOldAddrs(profile.wallet);
+    }
+  } catch (e) { console.warn('[wallet-discovery]', e); }
+}
+function renderBalAge() {
+  if (!lastBalTs) return;
+  const s = Math.round((Date.now() - lastBalTs) / 1000);
+  $('ov-upd').textContent = s < 8 ? 'Обновлено только что'
+    : 'Обновлено ' + (s < 90 ? s + ' с' : Math.round(s / 60) + ' мин') + ' назад';
+}
 
-// Прошлые адреса кошелька: ПОСТОЯННАЯ кнопка-компаунд (Майк 10.07: вывод из сейфа приходит
-// на адрес, зафиксированный при инициации, — то есть возможно на УЖЕ смененный; кнопка обязана
-// жить всегда, а балансы проверяться свежим запросом в момент клика, не на момент рендера).
-
-// Баланс строки «Прошлых адресов» — единая точка освежения: при рендере, по ↻ и 30с-тиком.
-// Раньше баланс снимался один раз при рендере и после «Собрать» «на них X KAS» висел до F5
-// (баг Майка 11.07: свип ещё летел в момент перерисовки, а тик эту строку не трогал).
+// Past addresses are just receiving addresses of one HD wallet. Their UTXOs are part of the
+// overall balance and spend directly; all that's left here is the per-address breakdown.
 async function refreshOldBal() {
   if (!document.getElementById('w-old-bal')) return;
   let olds;
   try {
     const p = loadProfile();
     olds = (p.walletOld || []).filter((x) => x.addr && p.wallet && x.addr !== p.wallet.addr);
-  } catch { return; }   // профиль заперт (авто-лок)
+  } catch { return; }   // profile is locked (auto-lock)
   if (!olds.length) return;
   const bals = await Promise.all(olds.map((o) => walletBalance(o.addr)));
   const t = bals.reduce((a, b) => a + b, 0);
-  const el = document.getElementById('w-old-bal');   // DOM мог перерисоваться, пока летел фетч
-  if (el) el.innerHTML = t ? `на них <b>${kas(t)}</b>${usd(t)}` : 'сейчас пусто — сюда ещё могут прийти выводы из сейфов';
+  const el = document.getElementById('w-old-bal');   // the DOM may have re-rendered while the fetch was in flight
+  if (el) el.innerHTML = t ? `Включено в баланс кошелька: <b>${kas(t)}</b>${usd(t)}` : 'Сейчас монет нет. Сюда ещё могут прийти выводы из сейфов.';
 }
 
 async function renderOldAddrs(w) {
   const box = $('w-oldaddrs');
+  const card = $('wallet-previous');
   const olds = (loadProfile().walletOld || []).filter((x) => x.addr && x.addr !== w.addr);
-  if (!olds.length) { box.style.display = 'none'; return; }
-  box.style.display = '';
+  if (!olds.length) { card.style.display = 'none'; return; }
+  card.style.display = '';
   box.innerHTML = '';
-  // счётчик — раскрывашка: список адресов с датой смены (retired пишет ротация) и эксплорером
+  // counter — a disclosure: list of addresses with the change date (rotation writes `retired`) and an explorer link
   const head = document.createElement('button');
   head.type = 'button';
-  head.style.cssText = 'background:none;border:none;color:inherit;font:inherit;cursor:pointer;padding:0;text-decoration:underline dotted';
+  head.className = 'btn btn-ghost old-view';
   head.setAttribute('aria-expanded', 'false');
-  const setHead = (open) => { head.textContent = `Прошлых адресов: ${olds.length} ${open ? '▾' : '▸'}`; };
+  const setHead = (open) => { head.textContent = open ? 'Скрыть адреса' : `Показать адреса (${olds.length})`; };
   setHead(false);
-  const bal = document.createElement('span'); bal.id = 'w-old-bal'; bal.textContent = '…';
-  box.append(head, document.createTextNode(' · '), bal);
-  const btn = document.createElement('button');
-  btn.className = 'btn btn-ghost'; btn.style.cssText = 'padding:6px 12px;margin-left:8px';
-  const label = 'Собрать на текущий адрес';
-  btn.textContent = label;
-  box.appendChild(btn);
+  const summary = document.createElement('div'); summary.className = 'old-summary';
+  const copy = document.createElement('div'); copy.className = 'old-copy';
+  const count = document.createElement('strong'); count.textContent = `Сохранено адресов: ${olds.length}`;
+  const bal = document.createElement('span'); bal.id = 'w-old-bal'; bal.textContent = 'Проверяем балансы…';
+  copy.append(count, bal);
+  const actions = document.createElement('div'); actions.className = 'old-actions';
+  actions.append(head); summary.append(copy, actions); box.appendChild(summary);
   const listEl = document.createElement('div');
-  listEl.style.cssText = 'display:none;margin-top:4px';
+  listEl.className = 'old-list'; listEl.style.display = 'none';
   box.appendChild(listEl);
   head.onclick = () => {
     const open = listEl.style.display === 'none';
@@ -454,7 +617,7 @@ async function renderOldAddrs(w) {
     if (open && !listEl.childElementCount) {
       for (const o of olds) {
         const rowEl = document.createElement('div');
-        rowEl.style.cssText = 'font-family:var(--mono);display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:2px';
+        rowEl.className = 'old-row';
         const a = document.createElement('span'); a.textContent = shortAddr(o.addr);
         rowEl.append(a);
         if (o.retired) {
@@ -469,60 +632,21 @@ async function renderOldAddrs(w) {
       }
     }
   };
-  const freshBals = () => Promise.all(olds.map((o) => walletBalance(o.addr)));
   refreshOldBal();
-  btn.onclick = async () => {
-    btn.disabled = true; btn.textContent = 'Проверяю…';
-    const bals = await freshBals();                       // свежие балансы В МОМЕНТ клика
-    const total = bals.reduce((a, b) => a + b, 0);
-    if (!total) {
-      btn.disabled = false; btn.textContent = label;
-      await alertBox('На прошлых адресах сейчас пусто. Если туда идёт вывод из сейфа — нажми эту кнопку снова, когда он завершится.');
-      return;
-    }
-    const ok = await confirmPassword('Сбор монет с прошлых адресов на текущий.', {
-      context: `<b style="font-family:var(--mono);color:var(--kaspa)">${kas(total)}</b>${usd(total)}<br>→ <span style="font-family:var(--mono)">${escHtml(shortAddr(w.addr))}</span>` });
-    if (!ok) { btn.disabled = false; btn.textContent = label; return; }
-    btn.textContent = 'Собираю…';
-    let swept = false;
-    try {
-      await coreReady;
-      for (const [j, o] of olds.entries()) {
-        if (!bals[j]) continue;
-        const plan = await sendPlan(o.addr);   // комиссия от feerate ноды, тот же UTXO-набор в сборку
-        const built = core.build_sweep(o.sk, w.addr, plan.raw, net(), String(plan.fee));
-        await submitTx(built);
-      }
-      swept = true;
-      await alertBox('Собрано ✓ Баланс приедет на текущий адрес в течение секунд.');
-    } catch (e) { await alertBox(e.message || 'Error', { alarm: true }); }
-    // не перерисовываем по старому UTXO-set: ждём, пока свип доедет (обычно секунды),
-    // иначе «на них X KAS» воскресает на прежней цифре (баг 11.07)
-    if (swept) {
-      btn.textContent = 'Обновляю…';
-      for (let i = 0; i < 10; i++) {
-        if (!(await freshBals()).reduce((a, b) => a + b, 0)) break;
-        await new Promise((r) => setTimeout(r, 2000));
-      }
-    }
-    btn.disabled = false; btn.textContent = label;
-    renderWallet();
-    renderTxs();   // сбор — тоже транзакция: показать «internal» строку сразу
-  };
 }
 
 function renderWallet() {
   const w = loadProfile().wallet; if (!w) return;
   $('w-addr').textContent = w.addr; qrInto($('w-qr'), w.addr);
-  // «цепь — свидетель» в одном клике от денежного экрана (критика 09.07); только mainnet
+  // "the chain is the witness" one click away from the money screen (review 2026-07-09); mainnet only
   const ex = exAddr(w.addr);
   if (ex) { $('w-addr-ex').style.display = ''; $('w-addr-ex').href = ex; }
   $('w-max').onclick = async () => {
-    // баланс минус ТОЧНАЯ комиссия предстоящей отправки (wasm p2pk_fee × feerate ноды):
-    // раньше вычитался фикс 0.001 KAS < реальной комиссии, и отправка падала «сумма+комиссия больше баланса»
+    // balance minus the EXACT fee of the upcoming send (wasm p2pk_fee × node feerate):
+    // previously a fixed 0.001 KAS was subtracted, less than the real fee, and the send would fail with "amount+fee exceeds balance"
     const btn = $('w-max'); btn.disabled = true;
     try {
-      const { balance, fee } = await sendPlan(w.addr);
+      const { balance, fee } = await walletPlan(loadProfile(), net());
       const v = Math.max(0, balance - fee);
       $('w-amt').value = v > 0 ? (v / 1e8).toFixed(8).replace(/\.?0+$/, '') : '';
     } catch (e) { await alertBox(e.message || 'Error', { alarm: true }); }
@@ -532,47 +656,48 @@ function renderWallet() {
     await navigator.clipboard.writeText(w.addr);
     const b = $('w-copy'); const t = b.textContent; b.textContent = 'ок'; setTimeout(() => (b.textContent = t), 900);
   };
-  walletBalance(w.addr).then(setBal);
+  walletPortfolioBalance(loadProfile(), net(), { discover: false }).then(setBal).catch((e) => console.warn('[wallet-balance]', e));
   renderOldAddrs(w);
-  // «Новый адрес»: следующий wallet-ключ из мастер-seed — КЛЮЧ старый экспорт покрывает,
-  // но СПИСОК адресов (walletOld/активный) в нём отсутствует: на другом устройстве монеты
-  // на сменённых адресах невидимы. Поэтому после смены зажигаем жёлтый надж (profileSig
-  // хэширует адреса) и честно просим свежий экспорт. Старый адрес уезжает в walletOld:
-  // его монеты остаются в балансе, свип — кнопкой ниже.
+  renderSafeTargetPicker();
+  // "New address": the next wallet key from the master seed — the KEY is covered by an old export,
+  // but the LIST of addresses (walletOld/active) is not in it: on another device, coins on
+  // changed addresses are invisible. So after a change we light up the yellow nudge (profileSig
+  // hashes the addresses) and honestly ask for a fresh export. The old address moves to walletOld:
+  // its coins stay in the shared balance and spend directly — no sweep needed.
   $('w-newaddr').onclick = async () => {
     const p = loadProfile();
     if (!p.seed) { await alertBox('У профиля ещё нет мастер-seed — заблокируй и разблокируй деск один раз и повтори.'); return; }
-    const ok = await confirmBox('Сгенерировать новый адрес для приёма?\nТекущий адрес продолжит работать: его монеты остаются в балансе, и их можно в любой момент перегнать на новый.');
+    const ok = await confirmBox('Сгенерировать новый адрес для приёма?\nТекущий адрес продолжит работать, а его монеты останутся в общем балансе кошелька. Переводить или собирать их не нужно.');
     if (!ok) return;
     const used = new Set([p.wallet.pk, ...(p.walletOld || []).map((x) => x.pk)]);
     p.deriv = p.deriv || {};
-    if (!(p.deriv.wallet >= 1)) p.deriv.wallet = 1;   // wallet/0 занят кошельком онбординга
+    if (!(p.deriv.wallet >= 1)) p.deriv.wallet = 1;   // wallet/0 is taken by the onboarding wallet
     let k;
     do { k = JSON.parse(core.derive_keys(p.seed, 'wallet', p.deriv.wallet++)); } while (used.has(k.pk));
     p.walletOld = p.walletOld || [];
-    p.walletOld.push({ ...p.wallet, retired: Math.floor(Date.now() / 1000) });   // когда сменён — видно в списке
+    p.walletOld.push({ ...p.wallet, retired: Math.floor(Date.now() / 1000) });   // when it was changed — visible in the list
     p.wallet = { sk: k.sk, pk: k.pk, addr: core.pubkey_to_address(k.pk, net()), deriv_i: p.deriv.wallet - 1 };
     session.commit(p);
     renderWallet();
-    renderBackupNudge();   // список адресов изменился — старый экспорт неполон, надж об этом скажет
-    await alertBox('Новый адрес активен ✓\nЕго ключ выведен из мастер-seed, но сам список адресов едет в файле ключей — экспортируй свежий, чтобы другие устройства видели все твои адреса.');
+    renderSecurityHealth();   // the address list changed — the old export is incomplete, the nudge will say so
+    await alertBox('Новый адрес для приёма активен ✓\nВсе адреса, выведенные из мастер-seed, имеют единый баланс. Другие устройства автоматически находят адреса с монетами.');
   };
 
   $('w-send').onclick = async () => {
     const to = $('w-to').value.trim(); const amt = Math.round(parseFloat($('w-amt').value) * 1e8);
     if (!to || !(amt > 0)) { await alertBox('Укажи адрес и сумму'); return; }
-    // форма адреса и баланс — ДО пароля: ловим вставку не того (txid, чужая сеть) и нехватку
-    // средств человеческим сообщением, а не ошибкой ядра после ввода пароля
+    // address shape and balance — BEFORE the password: we catch a wrong paste (a txid, the wrong
+    // network) and insufficient funds with a human message, not a core error after the password
     const prefix = net() === 'mainnet' ? 'kaspa:' : 'kaspatest:';
     if (!to.startsWith(prefix) || to.length < prefix.length + 40) {
       await alertBox(`Адрес получателя должен начинаться с ${prefix}… — проверь, что вставилось.`, { alarm: true }); return;
     }
-    const bal = await walletBalance(w.addr);
+    const bal = await walletPortfolioBalance(loadProfile(), net());
     if (amt > bal) { await alertBox(`Это больше баланса кошелька (${kas(bal)}).`, { alarm: true }); return; }
-    // подтверждение НЕ слепое: сумма и получатель в самой модалке (P0 критики деска 09.07) —
-    // подтверждаешь то, что видишь, а не то, что помнишь
+    // the confirmation is NOT blind: amount and recipient are right in the modal (P0 from the
+    // desk review 2026-07-09) — you confirm what you see, not what you remember
     const ok = await confirmPassword('Отправка средств с кошелька — её не отменить.', {
-      // имя из адресной книги рядом с адресом: подтверждаешь «Вася», а не 14 символов bech32
+      // name from the address book next to the address: you confirm "Vasya", not 14 bech32 characters
       context: `<b style="font-family:var(--mono);color:var(--kaspa)">${kas(amt)}</b>${usd(amt)}<br>→ <span style="font-family:var(--mono)">${escHtml((contactName(to) ? contactName(to) + ' · ' : '') + shortAddr(to))}</span>` });
     if (!ok) return;
     const btn = $('w-send'); btn.disabled = true; btn.textContent = 'Отправляем…';
@@ -581,15 +706,15 @@ function renderWallet() {
       renderSendResult(r && r.txid);
       $('w-to').value = ''; $('w-amt').value = '';
       renderWallet(); renderTxs();
-    } catch (e) { await alertBox(e.message || 'Ошибка', { alarm: true }); }
+    } catch (e) { await alertBox(e.message || 'Error', { alarm: true }); }
     btn.disabled = false; btn.textContent = 'Отправить';
   };
-  // «В сейф»: депозит введённой суммы в сейф в один клик (адрес получателя не нужен)
+  // "To safe": deposit the entered amount into a safe in one click (no recipient address needed)
   $('w-tosafe').onclick = async () => {
     const amt = Math.round(parseFloat($('w-amt').value) * 1e8);
     const all = getVaults().filter((x) => !x.draft);
-    // депозит в клик возможен только с funding-ключом в профиле (create.html пишет его при создании)
-    const targets = all.filter((x) => x.funding_sk && x.funding_pk && x.hot_pk && (!x.network || x.network === net()));
+    // one-click deposit is only possible with a funding key in the profile (create.html writes it on creation)
+    const targets = safeDepositTargets();
     if (!targets.length) {
       await alertBox(all.length
         ? 'В профиле этого браузера нет funding-ключа сейфа — импортируй мастер-файл ключей, с которым он создавался, или пополни со страницы самого сейфа.'
@@ -597,28 +722,21 @@ function renderWallet() {
       return;
     }
     if (!(amt > 0)) { await alertBox('Введи сумму в KAS'); return; }
-    const bal = await walletBalance(w.addr);
+    const bal = await walletPortfolioBalance(loadProfile(), net());
     if (amt > bal) { await alertBox(`Это больше баланса кошелька (${kas(bal)}).`, { alarm: true }); return; }
-    if (targets.length === 1) { depositToSafe(w, targets[0], amt); return; }
-    // несколько сейфов — компактный выбор под строкой отправки
-    const pick = ensurePickBox();
-    const lbl = document.createElement('span');
-    lbl.className = 'hint'; lbl.style.margin = '0'; lbl.textContent = `Внести ${kas(amt)} в:`;
-    pick.appendChild(lbl);
-    for (const t of targets) {
-      const b = document.createElement('button');
-      b.className = 'btn btn-ghost'; b.textContent = t.label || shortAddr(t.vault_addr);
-      b.onclick = () => { pick.remove(); depositToSafe(w, t, amt); };
-      pick.appendChild(b);
+    const target = targets.length === 1
+      ? targets[0]
+      : targets.find((v) => v.vault_addr === $('w-safe-target').value);
+    if (!target) {
+      await alertBox('Выбери сейф, в который нужно внести депозит.');
+      $('w-safe-target').focus();
+      return;
     }
-    const x = document.createElement('button');
-    x.className = 'btn btn-ghost'; x.textContent = '×'; x.setAttribute('aria-label', 'Отмена');
-    x.onclick = () => pick.remove();
-    pick.appendChild(x);
+    await depositToSafe(w, target, amt);
   };
-  // SimpleSwap fund-in — тот же общий виджет, что create/deal; kind:wallet (свопы только на
-  // свой адрес, серверная проверка address_to==target). Токен пишется в профиль вместе с
-  // записью свопа (onCreated) — «Мои обмены» могут опрашивать статус и после перезагрузки.
+  // SimpleSwap fund-in — the same shared widget as create/deal; kind:wallet (swaps only to
+  // one's own address, server-side check address_to==target). The token is written to the profile
+  // along with the swap record (onCreated) — "My swaps" can poll status even after a reload.
   if (!walletSwapMounted) {
     walletSwapMounted = true;
     const swapToken = genToken();
@@ -629,10 +747,41 @@ function renderWallet() {
         renderMySwaps();
       } });
   }
+  $('ov-addr').textContent = shortAddr(w.addr);
+}
+$('ov-copy').onclick = async () => {
+  try { const w = loadProfile().wallet; await navigator.clipboard.writeText(w.addr);
+    $('ov-copy').textContent = 'скопировано ✓'; setTimeout(() => { $('ov-copy').textContent = 'копировать'; }, 1500);
+  } catch {}
+};
+$('ov-send').onclick = () => { go('wallet'); $('w-to').focus(); };
+$('ov-tosafe').onclick = () => { go('wallet'); $('w-amt').focus(); };
+$('ov-receive').onclick = showReceive;
+function showReceive() {
+  let w; try { w = loadProfile().wallet; } catch { return; }
+  if (!w) return;
+  const el = document.createElement('div');
+  el.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(8,10,14,.92);padding:20px';
+  el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true');
+  el.innerHTML = `<div class="plate" style="max-width:420px;width:100%;text-align:center">
+    <h3>Получить KAS</h3>
+    <div id="rc-qr" role="img" aria-label="QR-код адреса кошелька" style="display:flex;justify-content:center;margin:10px 0"></div>
+    <code style="word-break:break-all;font-size:12.5px">${w.addr}</code>
+    <div class="row wrap" style="gap:8px;margin-top:12px;justify-content:center">
+      <button id="rc-copy" class="btn btn-kaspa">Скопировать адрес</button>
+      <button id="rc-x" class="btn btn-ghost">Закрыть</button></div></div>`;
+  document.body.appendChild(el);
+  qrInto(el.querySelector('#rc-qr'), w.addr);
+  el.querySelector('#rc-copy').onclick = async () => {
+    try { await navigator.clipboard.writeText(w.addr); el.querySelector('#rc-copy').textContent = 'Скопировано ✓'; } catch {}
+  };
+  el.querySelector('#rc-x').onclick = () => el.remove();
+  el.addEventListener('keydown', (e) => { if (e.key === 'Escape') el.remove(); });
+  el.querySelector('#rc-x').focus();
 }
 
-// успех отправки — плашка с txid и ссылкой на эксплорер вместо alert('Отправлено'): «цепь —
-// свидетель» должна быть в одном клике от денежного действия (P0 критики 09.07)
+// send success — a panel with the txid and an explorer link instead of alert('Sent'): "the chain
+// is the witness" must be one click away from a money action (P0 from the review 2026-07-09)
 function renderSendResult(txid, label = '✓ Отправлено') {
   let box = document.getElementById('w-sent');
   if (!box) {
@@ -646,34 +795,49 @@ function renderSendResult(txid, label = '✓ Отправлено') {
     (link ? ` · <a href="${link}" target="_blank" rel="noopener">смотреть в эксплорере ↗</a>` : '');
 }
 
-// ── депозит в сейф с кошелька ──
-// Прямой перевод на vault-адрес ковенант НЕ создаёт (create.html прямо запрещает так слать) —
-// правильный маршрут: кошелёк → funding-адрес сейфа (его ключ в профиле с момента создания)
-// → build_fund → ковенант. Оба шага — за один клик; Kaspa подтверждает за секунды.
-function ensurePickBox() {
-  let box = document.getElementById('w-vault-pick');
-  if (box) box.remove();
-  box = document.createElement('div');
-  box.id = 'w-vault-pick';
-  box.className = 'row wrap';
-  box.style.cssText = 'gap:8px;margin-top:10px;align-items:center';
-  $('w-swap').before(box);
-  return box;
+// ── deposit into a safe from the wallet ──
+// A direct transfer to the vault address does NOT create the covenant (create.html explicitly
+// forbids sending that way) — the correct route: wallet → the safe's funding address (its key has
+// been in the profile since creation) → build_fund → covenant. Both steps in one click; Kaspa confirms in seconds.
+function safeDepositTargets() {
+  return getVaults().filter((v) => !v.draft && v.funding_sk && v.funding_pk && v.hot_pk && (!v.network || v.network === net()));
+}
+
+function renderSafeTargetPicker() {
+  const select = $('w-safe-target');
+  const targets = safeDepositTargets();
+  const previous = select.value;
+  select.textContent = '';
+  if (targets.length > 1) {
+    const placeholder = document.createElement('option');
+    placeholder.value = ''; placeholder.disabled = true; placeholder.textContent = 'Выбери сейф';
+    select.appendChild(placeholder);
+  }
+  for (const v of targets) {
+    const option = document.createElement('option');
+    option.value = v.vault_addr;
+    option.textContent = `${v.label || 'Сейф'} · ${shortAddr(v.vault_addr)}`;
+    select.appendChild(option);
+  }
+  if (targets.some((v) => v.vault_addr === previous)) select.value = previous;
+  else if (targets.length === 1) select.value = targets[0].vault_addr;
+  else select.value = '';
+  select.style.display = targets.length > 1 ? '' : 'none';
 }
 
 async function depositToSafe(w, v, amt) {
-  await coreReady;   // core.* ниже требуют инициализированного WASM
+  await coreReady;   // the core.* calls below require the WASM to be initialized
   const btn = $('w-tosafe');
   const name = v.label || shortAddr(v.vault_addr);
   let fundAddr;
   try {
-    // запись профиля обязана давать ТОТ ЖЕ адрес сейфа — деньги не поедут в разъехавшийся конфиг
+    // the profile record must yield the SAME safe address — money won't be sent into a diverged config
     if (core.vault_address(vaultCfg(v), net()) !== v.vault_addr) throw 0;
     fundAddr = core.pubkey_to_address(v.funding_pk, net());
   } catch { await alertBox('Запись этого сейфа в профиле разошлась с его он-чейн контрактом — пополни со страницы сейфа.', { alarm: true }); return; }
   btn.disabled = true;
   try {
-    // недокрытый прошлый депозит: монеты уже ждут на funding-адресе — сперва дозаложить их
+    // an uncovered past deposit: coins are already waiting on the funding address — lock them in first
     const parked = utxosSum(await utxosRaw(fundAddr));
     if (parked > 0) {
       if (!await confirmBox(`На funding-адресе этого сейфа уже ждёт незавершённый депозит ${kas(parked)}. Заложить его в сейф сейчас? (Поле суммы на этом шаге не используется.)`, { ok: 'Заложить в сейф' })) return;
@@ -683,8 +847,8 @@ async function depositToSafe(w, v, amt) {
       renderWallet(); renderTxs(); renderVaultsTab();
       return;
     }
-    // депозит в сейф с идущим выводом легален (отдельный ковенант), но человек должен видеть
-    // картину целиком ДО отправки — вывод продолжится своим чередом (инцидент 10.07)
+    // a deposit into a safe with an active withdrawal is legal (a separate covenant), but the
+    // person must see the whole picture BEFORE sending — the withdrawal will keep going regardless (incident 2026-07-10)
     const un = await unvaultState(v, false);
     if (!await confirmPassword('Пополнение сейфа с кошелька.', {
       context: `<b style="font-family:var(--mono);color:var(--kaspa)">${kas(amt)}</b>${usd(amt)}<br>→ сейф «${escHtml(name)}» <span style="font-family:var(--mono)">${escHtml(shortAddr(v.vault_addr))}</span><br><span style="color:var(--ash)">Первый шаг — funding-адрес сейфа, затем монеты автоматически закладываются в ковенант.</span>` +
@@ -693,7 +857,7 @@ async function depositToSafe(w, v, amt) {
     await sendFromWallet(w, fundAddr, amt, net());
     btn.textContent = 'Закладываем…';
     let arrived = false;
-    for (let i = 0; i < 40; i++) {   // до ~2 минут; обычно секунды
+    for (let i = 0; i < 40; i++) {   // up to ~2 minutes; usually seconds
       await new Promise((res) => setTimeout(res, 3000));
       try { if (utxosSum(await utxosRaw(fundAddr)) >= amt) { arrived = true; break; } } catch {}
     }
@@ -702,18 +866,18 @@ async function depositToSafe(w, v, amt) {
     $('w-amt').value = '';
     renderSendResult(r && r.txid, `✓ Внесено в сейф «${escHtml(name)}»`);
     renderWallet(); renderTxs(); renderVaultsTab();
-  } catch (e) { await alertBox(e.message || 'Ошибка', { alarm: true }); }
+  } catch (e) { await alertBox(e.message || 'Error', { alarm: true }); }
   finally { btn.disabled = false; btn.textContent = 'В сейф'; }
 }
 
-// build_fund закладывает ВСЁ, что лежит на funding-адресе, в ковенант сейфа
+// build_fund locks EVERYTHING sitting on the funding address into the safe's covenant
 async function lockIntoSafe(v, fundAddr) {
   let r;
   try {
     const built = core.build_fund(vaultCfg(v), v.funding_sk, await utxosRaw(fundAddr), net());
     r = await submitTx(built);
   } catch (e) { throw new Error(`KAS дошли до funding-адреса сейфа, но закладка не прошла: ${e.message || e}. Ничего не потеряно — нажми «В сейф» ещё раз, чтобы завершить.`); }
-  // регистрация идемпотентна (create.html делает то же) — вотчер в курсе нового ковенанта
+  // registration is idempotent (create.html does the same) — the watcher learns about the new covenant
   if (v.token) api('/api/safe/vaults', { method: 'POST', headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ vault_addr: v.vault_addr, hot_pk: v.hot_pk, alarm_pk: v.alarm_pk, delay: v.delay, token: v.token,
       heir_set: (v.inherit_delay || 0) > 0, inherit_delay: v.inherit_delay || 0, heir_pk: v.heir_pk || '',
@@ -721,7 +885,8 @@ async function lockIntoSafe(v, fundAddr) {
   return r;
 }
 
-// Стрей-платёж на адрес сейфа (plain, covenant_id=None): кнопка «свернуть в сейф» под строкой.
+// A stray payment to the safe address (plain, covenant_id=None): show a "sweep into safe" button
+// under the safe's row. build_vault_sweep via checkin turns the stray into normal safe funds.
 function injectStrayRecover(row, v, strays) {
   const sompi = strays.reduce((s, u) => s + u.amount, 0);
   const note = document.createElement('div');
@@ -734,10 +899,11 @@ function injectStrayRecover(row, v, strays) {
   btn.onclick = async () => {
     btn.disabled = true; btn.textContent = 'Забираю…';
     try {
-      for (const u of strays) await sweepStray(v, u); // по одному (single-input инвариант)
-      await alertBox(`Случайный платёж свёрнут в сейф «${escHtml(v.label || shortAddr(v.vault_addr))}».`);
+      // one stray UTXO at a time (the covenant's single-input invariant)
+      for (const u of strays) await sweepStray(v, u);
+      await alertBox(`Stray deposit recovered into safe “${escHtml(v.label || shortAddr(v.vault_addr))}”.`);
       renderVaultsTab();
-    } catch (e) { btn.disabled = false; btn.textContent = 'Забрать в сейф'; await alertBox(e.message || 'Ошибка', { alarm: true }); }
+    } catch (e) { btn.disabled = false; btn.textContent = 'Забрать в сейф'; await alertBox(e.message || 'Error', { alarm: true }); }
   };
   note.append(txt, btn);
   row.insertAdjacentElement('afterend', note);
@@ -746,6 +912,7 @@ function injectStrayRecover(row, v, strays) {
 async function sweepStray(v, stray) {
   const built = core.build_vault_sweep(vaultCfg(v), v.hot_sk, JSON.stringify([stray]), net());
   const r = await submitTx(built);
+  // registration is idempotent — the watcher learns about the swept covenant UTXO (like lockIntoSafe)
   if (v.token) api('/api/safe/vaults', { method: 'POST', headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ vault_addr: v.vault_addr, hot_pk: v.hot_pk, alarm_pk: v.alarm_pk, delay: v.delay, token: v.token,
       heir_set: (v.inherit_delay || 0) > 0, inherit_delay: v.inherit_delay || 0, heir_pk: v.heir_pk || '',
@@ -753,8 +920,8 @@ async function sweepStray(v, stray) {
   return r;
 }
 
-// ── «Мои обмены»: свопы из профиля — направление, сумма, статус, ссылка на SimpleSwap ──
-// терминальные статусы инлайном: renderMySwaps зовётся с топ-левела ДО констант модуля (TDZ)
+// ── "My swaps": swaps from the profile — direction, amount, status, link to SimpleSwap ──
+// terminal statuses inlined: renderMySwaps is called from top level BEFORE the module's constants (TDZ)
 async function renderMySwaps(refreshStatuses = false) {
   const box = $('w-myswaps');
   if (refreshStatuses) {
@@ -765,10 +932,10 @@ async function renderMySwaps(refreshStatuses = false) {
         try {
           const r = await api(`/api/safe/swap/status?id=${s.swap_id}&token=${encodeURIComponent(s.token)}`);
           if (r.status && r.status !== s.status) { s.status = r.status; changed = true; }
-        } catch { /* оффлайн/протухший токен — оставляем прежний статус */ }
+        } catch { /* offline/stale token — leave the previous status */ }
       }
       if (changed) saveProfile(p);
-    } catch { /* профиль заперт (авто-лок) */ }
+    } catch { /* profile is locked (auto-lock) */ }
   }
   const list = getSwaps().slice().reverse();
   if (!list.length) { box.innerHTML = ''; return; }
@@ -785,7 +952,7 @@ async function renderMySwaps(refreshStatuses = false) {
     st.textContent = s.status;
     if (s.status === 'finished') st.style.color = 'var(--kaspa)';
     row.append(dir, amt, st);
-    // публичная страница обмена SimpleSwap (API отдельную ссылку не отдаёт — стандартный URL по id)
+    // SimpleSwap's public exchange page (the API doesn't give a separate link — a standard URL by id)
     if (s.simpleswap_id) {
       const a = document.createElement('a');
       a.href = `https://simpleswap.io/exchange?id=${encodeURIComponent(s.simpleswap_id)}`;
@@ -796,11 +963,11 @@ async function renderMySwaps(refreshStatuses = false) {
   }
 }
 
-// ── profile.prefs: UI-мелочи, которые едут в key file (Майк 11.07) — выбранный сейф,
-// скрытие истории. localStorage остаётся живой синхронной копией (его читают и другие
-// страницы: manage/create через activeAddr); профиль — переносимый источник: на новом
-// устройстве applyPrefs() восстанавливает локальные ключи, если их ещё нет. В хэш наджа
-// prefs НЕ входят — косметика не должна просить свежий экспорт. ──
+// ── profile.prefs: small UI bits that ride along in the key file (owner's note 2026-07-11) —
+// selected safe, hiding history. localStorage stays a live synchronous copy (other pages read it
+// too: manage/create via activeAddr); the profile is the portable source: on a new device
+// applyPrefs() restores the local keys if they aren't set yet. prefs do NOT go into the nudge
+// hash — cosmetics shouldn't demand a fresh export. ──
 function setPref(k, v) {
   try { const p = loadProfile(); p.prefs = p.prefs || {}; if (p.prefs[k] !== v) { p.prefs[k] = v; saveProfile(p); } } catch {}
 }
@@ -811,8 +978,8 @@ function applyPrefs() {
   if (!localStorage.getItem('kaspa-safe-active') && prefs.activeVault) setActiveAddr(prefs.activeVault);
 }
 
-// ── Заметки к сейфам/сделкам (поле note в записи профиля — едет в key file, Майк 11.07):
-// ✎ в строке (клик не проваливается в навигацию строки), текст — hint под строкой ──
+// ── Notes on safes/deals (the note field in the profile record — rides in the key file, owner's note 2026-07-11):
+// ✎ in the row (a click doesn't fall through to the row's navigation), text is a hint below the row ──
 function injectNote(row, getNote, setNote, ph) {
   const pen = document.createElement('button');
   pen.textContent = '✎'; pen.title = 'Заметка'; pen.setAttribute('aria-label', 'Заметка');
@@ -822,19 +989,19 @@ function injectNote(row, getNote, setNote, ph) {
   noteEl.style.cssText = 'margin:2px 0 6px;font-size:12px;white-space:pre-wrap;display:none';
   const show = () => { const n = getNote(); noteEl.textContent = n ? '✎ ' + n : ''; noteEl.style.display = n ? '' : 'none'; };
   pen.onclick = async (e) => {
-    e.preventDefault(); e.stopPropagation();   // строка — ссылка (manage/deal), клик по ✎ не переход
+    e.preventDefault(); e.stopPropagation();   // the row is a link (manage/deal), clicking ✎ isn't navigation
     const t = await promptText('Заметка (пустая — убрать):', { value: getNote() || '', placeholder: ph, maxlength: 200 });
     if (t === null) return;
-    try { setNote(t.trim()); } catch { return; }   // профиль заперт (авто-лок)
-    show(); renderBackupNudge();
+    try { setNote(t.trim()); } catch { return; }   // profile is locked (auto-lock)
+    show(); renderSecurityHealth();
   };
   row.querySelector('.vb-addr').after(pen);
   row.insertAdjacentElement('afterend', noteEl);
   show();
 }
 
-// ── Адресная книга (profile.contacts, едет в key file): подписи адресатов в истории,
-// автодополнение получателя и имя в подтверждении отправки (Майк 11.07) ──
+// ── Address book (profile.contacts, rides in the key file): recipient labels in history,
+// autocomplete for the recipient, and the name in the send confirmation (owner's note 2026-07-11) ──
 function contactName(a) { try { return (getContacts().find((c) => c.addr === a) || {}).name || null; } catch { return null; } }
 function renderContactsDatalist() {
   const dl = $('w-contacts'); if (!dl) return;
@@ -842,11 +1009,11 @@ function renderContactsDatalist() {
   dl.innerHTML = '';
   for (const c of list) {
     const o = document.createElement('option');
-    o.value = c.addr; o.label = c.name;   // выбор по имени подставляет адрес
+    o.value = c.addr; o.label = c.name;   // picking by name fills in the address
     dl.appendChild(o);
   }
 }
-// подписать/переименовать адрес; пустое имя = убрать подпись
+// label/rename an address; an empty name = remove the label
 async function editContact(addr) {
   const name = await promptText(`Имя для ${shortAddr(addr)} (пустое — убрать подпись):`,
     { value: contactName(addr) || '', placeholder: 'например: биржа, Вася…', maxlength: 40 });
@@ -855,23 +1022,24 @@ async function editContact(addr) {
     const list = getContacts().filter((c) => c.addr !== addr);
     if (name.trim()) list.push({ addr, name: name.trim() });
     setContacts(list);
-  } catch { return; }   // профиль заперт (авто-лок)
-  txsLastJson = ''; renderTxs(); renderContactsDatalist(); renderBackupNudge();
+  } catch { return; }   // profile is locked (auto-lock)
+  txsLastJson = ''; renderTxs(); renderContactsDatalist(); renderSecurityHealth();
 }
 
-// ── «Транзакции»: он-чейн история кошелька — ВСЕ входящие и исходящие по всем адресам
-// профиля (текущий + прошлые), тянется автоматически при загрузке key file, на ↻ и раз в 30с
-// через /api/safe/tx-history (прокси нашего бэкенда к индексеру — адреса не утекают третьей
-// стороне вместе с IP браузера). Замечание Майка 11.07: журнал писал только отправки ЭТОГО
-// браузера — вывод из сейфа на кошелёк в истории не появлялся вовсе. Локальный журнал
-// (profile.txs, пишет wallet.js:sendFromWallet) остаётся: из него показываются pending-строки,
-// пока индексер не увидел свежую отправку, и вся история на не-mainnet сетях, где индексера нет.
-// var, не let: renderTxs зовётся с топ-левела (после restore-скана) ДО этой строки — let дал бы TDZ
-var txsBusy = false, txsLastJson = '';
+// ── "Transactions": on-chain wallet history — ALL incoming and outgoing across all profile
+// addresses (current + past), pulled automatically on key-file load, on ↻, and every 30s via
+// /api/safe/tx-history (our backend's proxy to the indexer — addresses don't leak to a third
+// party along with the browser's IP). Owner's note 2026-07-11: the journal only recorded sends
+// from THIS browser — a withdrawal from a safe to the wallet never appeared in history at all.
+// The local journal (profile.txs, written by wallet.js:sendFromWallet) stays: it shows pending
+// rows until the indexer has seen the fresh send, and it's the whole history on non-mainnet
+// networks where there's no indexer.
+// var, not let: renderTxs is called from top level (after the restore scan) BEFORE this line — let would cause a TDZ
+var txsBusy = false, txsLastJson = '', txFilter = 'all', txRowsCache = [], txJournalOnly = false, txTagsCache = new Map();
 async function renderTxs() {
-  if (txsBusy) return;   // 30с-тик поверх ручного ↻ — не гоняем два фетча разом
+  if (txsBusy) return;   // the 30s tick landing on top of a manual ↻ — don't run two fetches at once
   txsBusy = true;
-  try { await renderTxsInner(); } catch { /* профиль заперт (авто-лок) — тик пропускаем */ }
+  try { await renderTxsInner(); } catch { /* profile is locked (auto-lock) — skip this tick */ }
   txsBusy = false;
 }
 async function renderTxsInner() {
@@ -879,7 +1047,7 @@ async function renderTxsInner() {
   const w = p.wallet; if (!w) return;
   const addrs = [w.addr, ...(p.walletOld || []).map((o) => o.addr)].filter(Boolean);
   const mine = new Set(addrs);
-  // теги адресов сейфов: приход с unvault-адреса читается как «из сейфа», а не случайный kaspa:p…
+  // safe address tags: an incoming payment from an unvault address reads as "from safe", not a random kaspa:p…
   const tags = new Map();
   try {
     await coreReady;
@@ -889,7 +1057,7 @@ async function renderTxsInner() {
       if (v.unvault_addr) tags.set(v.unvault_addr, name);
       if (v.funding_pk) { try { tags.set(core.pubkey_to_address(v.funding_pk, net()), name); } catch {} }
     }
-  } catch { /* без тегов история всё равно читается */ }
+  } catch { /* without tags the history still reads fine */ }
   let chain = null;
   const per = await Promise.all(addrs.slice(0, 8).map((a) =>
     api(`/api/safe/tx-history?address=${encodeURIComponent(a)}&limit=50`).catch(() => null)));
@@ -908,19 +1076,19 @@ async function renderTxsInner() {
       const outMine = outs.reduce((s, o) => s + (o.address && mine.has(o.address) ? (o.amount || 0) : 0), 0);
       const extOut = outs.filter((o) => o.address && !mine.has(o.address));
       let r;
-      if (!inMine && outMine) {          // входящая: свои монеты не тратились — только пришли
+      if (!inMine && outMine) {          // incoming: our own coins weren't spent — only received
         const src = (ins.find((i) => i.address && !mine.has(i.address)) || {}).address || null;
         r = { dir: 'in', amount: outMine, other: src };
-      } else if (inMine && extOut.length) {   // исходящая: наши входы, есть чужие выходы
+      } else if (inMine && extOut.length) {   // outgoing: our inputs, there are foreign outputs
         r = { dir: 'out', amount: extOut.reduce((s, o) => s + (o.amount || 0), 0), other: extOut[0].address };
-      } else if (inMine) {               // все входы и выходы наши — внутренний перенос/сбор
+      } else if (inMine) {               // all inputs and outputs are ours — internal transfer/consolidation
         r = { dir: 'self', amount: outMine, other: null };
       } else continue;
       r.txid = t.txid; r.time = Math.floor((t.time || 0) / 1000); r.pending = t.accepted === false;
       rows.push(r);
     }
     rows.sort((a, b) => b.time - a.time);
-    // свежие отправки из локального журнала, которых индексер ещё не увидел, — pending-строки
+    // recent sends from the local journal that the indexer hasn't seen yet — pending rows
     const known = new Set(rows.map((r) => r.txid));
     for (const j of journal) {
       if (!j.txid || known.has(j.txid)) continue;
@@ -928,93 +1096,88 @@ async function renderTxsInner() {
       rows.unshift({ dir: 'out', amount: j.amount, other: j.to, txid: j.txid, time: j.ts, pending: true });
     }
   } else {
-    // индексер недоступен / не-mainnet — как раньше: локальный журнал отправок этого браузера
+    // indexer unavailable / non-mainnet — as before: local journal of this browser's sends
     for (const j of journal) rows.push({ dir: 'out', amount: j.amount, other: j.to, txid: j.txid, time: j.ts, local: true });
   }
   rows.length = Math.min(rows.length, 50);
   let contactsJson = '[]';
   try { contactsJson = JSON.stringify(getContacts()); } catch {}
   const stateJson = JSON.stringify(rows) + JSON.stringify([...tags]) + contactsJson + (localStorage.getItem('kaspa-txs-hide') || '');
-  if (stateJson === txsLastJson) return;   // 30с-тик без изменений — не дёргаем DOM
+  if (stateJson === txsLastJson) return;   // 30s tick with no changes — don't touch the DOM
   txsLastJson = stateJson;
   drawTxs(rows, !chain, tags);
 }
 function drawTxs(rows, journalOnly, tags) {
-  const box = $('w-mytxs');
-  if (!rows.length) { box.innerHTML = ''; return; }
+  txRowsCache = rows; txJournalOnly = journalOnly; txTagsCache = tags;
+  txFilter = txFilter || 'all';
+  const boxes = [$('w-mytxs'), $('w-mytxs-all')].filter(Boolean);
+  const more = document.querySelector('.activity-more');
+  if (more) more.style.display = rows.length ? 'flex' : 'none';
+  if (!rows.length) {
+    for (const box of boxes) box.innerHTML = '<div class="activity-empty"><span class="empty-icon">↺</span><strong>Операций пока нет</strong><p>Здесь появятся транзакции и обновления безопасности.</p></div>';
+    return;
+  }
   const hidden = localStorage.getItem('kaspa-txs-hide') === '1';
-  box.innerHTML = '';
-  const head = document.createElement('div');
-  head.className = 'row wrap';
-  head.style.cssText = 'gap:10px;align-items:baseline';
-  const ttl = document.createElement('span');
-  ttl.className = 'hint';
-  ttl.textContent = journalOnly ? `Отправленные транзакции (${rows.length})` : `Транзакции (${rows.length})`;
-  const hideBtn = document.createElement('button');
-  hideBtn.className = 'btn btn-ghost'; hideBtn.style.cssText = 'padding:4px 10px;font-size:11px';
-  hideBtn.textContent = hidden ? 'Показать' : 'Скрыть';
-  hideBtn.onclick = () => { localStorage.setItem('kaspa-txs-hide', hidden ? '0' : '1'); setPref('txsHide', !hidden); txsLastJson = ''; renderTxs(); };
-  head.append(ttl, hideBtn);
-  if (!hidden && journalOnly) {   // он-чейн список «очистить» нельзя — Очистить только у журнала
-    const clearBtn = document.createElement('button');
-    clearBtn.className = 'btn btn-ghost'; clearBtn.style.cssText = 'padding:4px 10px;font-size:11px';
-    clearBtn.textContent = 'Очистить';
-    clearBtn.onclick = async () => {
-      if (!await confirmBox('Очистить список отправленных транзакций? Это только журнал этого браузера — сами транзакции остаются в сети.', { ok: 'Очистить' })) return;
-      setTxs([]); txsLastJson = ''; renderTxs();
-    };
-    head.append(clearBtn);
+  if (hidden) {
+    for (const box of boxes) {
+      box.innerHTML = '<div class="activity-hidden">История скрыта. <button type="button">Показать</button></div>';
+      box.querySelector('button').onclick = () => { localStorage.setItem('kaspa-txs-hide', '0'); setPref('txsHide', false); drawTxs(txRowsCache, txJournalOnly, txTagsCache); };
+    }
+    return;
   }
-  box.appendChild(head);
-  if (hidden) return;
-  for (const r of rows) {
-    const row = document.createElement('div');
-    row.className = 'hint';
-    row.style.cssText = 'font-family:var(--mono);display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:4px';
-    const when = document.createElement('span');
-    when.textContent = new Date(r.time * 1000).toLocaleString();
-    const amt = document.createElement('span');
-    if (r.dir === 'in') { amt.style.color = 'var(--kaspa)'; amt.textContent = '+' + kas(r.amount); }
-    else if (r.dir === 'self') { amt.textContent = kas(r.amount); }
-    else { amt.textContent = '−' + kas(r.amount); }
-    const dest = document.createElement('span');
-    const tagOf = (a) => (a && tags.get(a)) || null;
-    if (r.dir === 'in') dest.textContent = '← ' + (tagOf(r.other) || contactName(r.other) || (r.other ? shortAddr(r.other) : 'сеть'));
-    else if (r.dir === 'self') dest.textContent = '⟳ между своими адресами';
-    else dest.textContent = '→ ' + (tagOf(r.other) || contactName(r.other) || shortAddr(r.other));
-    row.append(when, amt, dest);
-    // ✎ — подписать адресата (адресная книга); у адресов сейфов тег и так говорящий
-    if (r.other && !tagOf(r.other)) {
-      const pen = document.createElement('button');
-      pen.textContent = '✎'; pen.title = 'Подписать адрес'; pen.setAttribute('aria-label', 'Подписать адрес');
-      pen.style.cssText = 'background:none;border:none;color:var(--ash);cursor:pointer;padding:0 2px;font-size:13px;line-height:1';
-      pen.onclick = () => editContact(r.other);
-      row.append(pen);
+  const visible = rows.filter((r) => txFilter === 'all' || (txFilter === 'pending' ? r.pending : r.dir === txFilter));
+  const dayStart = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const today = dayStart(new Date());
+  const groupOf = (r) => { const age = Math.round((today - dayStart(new Date(r.time * 1000))) / 86400000); return age <= 0 ? 'Сегодня' : age === 1 ? 'Вчера' : 'Ранее'; };
+  const timeOf = (r) => { const d = new Date(r.time * 1000); return groupOf(r) === 'Ранее'
+    ? d.toLocaleString('ru-RU', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+    : d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }); };
+  const tagOf = (a) => (a && tags.get(a)) || null;
+  const renderList = (box, source) => {
+    box.innerHTML = '';
+    if (!source.length) { box.innerHTML = '<div class="activity-none">Нет операций, подходящих под этот фильтр.</div>'; return; }
+    let lastGroup = '';
+    for (const r of source) {
+      const group = groupOf(r);
+      if (group !== lastGroup) { const g = document.createElement('div'); g.className = 'tx-group'; g.textContent = group; box.appendChild(g); lastGroup = group; }
+      const peer = tagOf(r.other) || contactName(r.other) || (r.other ? shortAddr(r.other) : 'сеть Kaspa');
+      const row = document.createElement('div'); row.className = 'tx-row';
+      const icon = document.createElement('span'); icon.className = 'tx-icon'; icon.textContent = r.dir === 'in' ? '↓' : r.dir === 'self' ? '↔' : '↑';
+      const title = document.createElement('span'); title.className = 'tx-title'; title.textContent = r.dir === 'in' ? 'Получено' : r.dir === 'self' ? 'Внутренний перевод' : 'Отправлено';
+      const counter = document.createElement('span'); counter.className = 'tx-counter';
+      const counterText = document.createElement('span'); counterText.className = 'tx-counter-text';
+      counterText.textContent = r.dir === 'in' ? `От ${peer}` : r.dir === 'self' ? 'Кошелёк → свой адрес' : `Кому ${peer}`; counter.appendChild(counterText);
+      if (r.other && !tagOf(r.other)) { const edit = document.createElement('button'); edit.className = 'tx-edit'; edit.textContent = '✎'; edit.title = 'Подписать адрес'; edit.setAttribute('aria-label', 'Подписать адрес'); edit.onclick = () => editContact(r.other); counter.appendChild(edit); }
+      const amount = document.createElement('span'); amount.className = 'tx-amount' + (r.dir === 'in' ? ' in' : ''); amount.textContent = (r.dir === 'in' ? '+' : r.dir === 'out' ? '−' : '') + kas(r.amount);
+      const status = document.createElement('span'); status.className = 'tx-status' + (r.pending ? ' pending' : ''); status.textContent = r.pending ? 'Ожидает' : r.local ? 'Сохранено локально' : r.dir === 'self' ? 'Внутренний' : 'Подтверждено';
+      const when = document.createElement('time'); when.className = 'tx-time'; when.dateTime = new Date(r.time * 1000).toISOString(); when.textContent = timeOf(r);
+      const link = document.createElement('a'); link.className = 'tx-link'; const href = exTx(r.txid); if (href) { link.href = href; link.target = '_blank'; link.rel = 'noopener'; link.textContent = '↗'; link.title = 'Открыть в эксплорере'; } else { link.textContent = '·'; link.setAttribute('aria-hidden', 'true'); }
+      row.append(icon, title, counter, amount, status, when, link); box.appendChild(row);
     }
-    if (r.pending) {
-      const pnd = document.createElement('span');
-      pnd.textContent = 'ожидает…'; pnd.style.opacity = '.7';
-      row.append(pnd);
-    }
-    const link = exTx(r.txid);
-    if (link) {
-      const a = document.createElement('a');
-      a.href = link; a.target = '_blank'; a.rel = 'noopener'; a.textContent = '↗';
-      row.append(a);
-    }
-    box.appendChild(row);
-  }
+  };
+  renderList($('w-mytxs'), visible.slice(0, 5));
+  renderList($('w-mytxs-all'), visible);
+  const tools = document.createElement('div'); tools.className = 'activity-tools';
+  const hideBtn = document.createElement('button'); hideBtn.type = 'button'; hideBtn.textContent = 'Скрыть историю'; hideBtn.onclick = () => { localStorage.setItem('kaspa-txs-hide', '1'); setPref('txsHide', true); drawTxs(txRowsCache, txJournalOnly, txTagsCache); }; tools.appendChild(hideBtn);
+  if (journalOnly) { const clearBtn = document.createElement('button'); clearBtn.type = 'button'; clearBtn.textContent = 'Очистить локальный журнал'; clearBtn.onclick = async () => { if (!await confirmBox('Очистить список отправленных транзакций? Это только журнал этого браузера — сами транзакции остаются в сети.', { ok: 'Очистить' })) return; setTxs([]); txsLastJson = ''; renderTxs(); }; tools.appendChild(clearBtn); }
+  $('w-mytxs-all').appendChild(tools);
 }
 
-// ↻ — мгновенный рефреш баланса (текущего И прошлых адресов), статусов свопов и истории
-// (авто — раз в 30с ниже)
+for (const btn of document.querySelectorAll('[data-tx-filter]')) btn.onclick = () => {
+  txFilter = btn.dataset.txFilter;
+  for (const other of document.querySelectorAll('[data-tx-filter]')) other.classList.toggle('active', other.dataset.txFilter === txFilter);
+  drawTxs(txRowsCache, txJournalOnly, txTagsCache);
+};
+
+// ↻ — an instant refresh of balance (current AND past addresses), swap statuses, and history
+// (auto — every 30s below)
 $('w-refresh').onclick = () => {
-  try { const w = loadProfile().wallet; if (w) walletBalance(w.addr).then(setBal); } catch {}
+  refreshWalletBalance(true);
   renderMySwaps(true); renderTxs(); refreshOldBal();
 };
-// ⟲ Рескан — принудительный restore-скан по seed (Майк 11.07): авто-скан ходит один раз на
-// устройство, и монеты, пришедшие на прошлый деривированный адрес ПОЗЖЕ, было не увидеть
-// (лечилось только реимпортом key file). Находки падают в «Прошлые адреса» → сбор одной кнопкой.
+// ⟲ Rescan — a forced restore scan by seed (owner's note 2026-07-11): the auto-scan runs once per
+// device, and coins arriving on a past derived address LATER used to be invisible
+// (fixed only by re-importing the key file). Found addresses automatically join the shared wallet.
 $('w-rescan').onclick = async () => {
   const b = $('w-rescan');
   b.disabled = true; const orig = b.textContent; b.textContent = 'Сканирую…';
@@ -1024,30 +1187,32 @@ $('w-rescan').onclick = async () => {
       await alertBox('У этого профиля нет мастер-seed — скану не из чего деривировать. Записи с других устройств приезжают через «Импорт / объединить».');
     else if (rep.vaults + rep.deals + rep.listings + rep.chats + rep.addresses > 0)
       await alertBox(`Восстановлено с сервера по файлу ключей: ${restoreReport(rep)}.`
-        + (rep.addresses ? '\nНайденные монеты — в строке «Прошлых адресов»: собери их на текущий адрес одной кнопкой.' : ''));
+        + (rep.addresses ? '\nМонеты на найденных адресах уже включены в общий баланс кошелька.' : ''));
     else
       await alertBox('Ничего нового — всё, что выводится из файла ключей, уже на этом деске.');
   } catch (e) { await alertBox('Рескан не прошёл: ' + (e.message || e), { alarm: true }); }
   finally { b.disabled = false; b.textContent = orig; }
 };
-// приход свопа/вывода из сейфа виден без F5 (баланс + история + строка прошлых адресов;
-// бэкенд кэширует историю 30с, так что тик не долбит индексер); после авто-лока профиль
-// заперт — тик молча пропускается. renderBackupNudge — ленивый догон наджа «бэкап устарел»
-// для мутаций профиля без явного re-render (своп, чат с маркета): чистая локальная SHA-256.
+// an incoming swap/withdrawal from a safe is visible without F5 (balance + history + past-addresses
+// row; the backend caches history for 30s, so the tick doesn't hammer the indexer); after auto-lock
+// the profile is locked — the tick silently skips. renderSecurityHealth is a lazy catch-up for the
+// "backup is stale" nudge for profile mutations without an explicit re-render (a swap, a chat from
+// the market): a plain local SHA-256.
 setInterval(() => {
-  try { const w = loadProfile().wallet; if (w) walletBalance(w.addr).then(setBal); } catch {}
-  renderTxs(); refreshOldBal(); renderBackupNudge(); refreshDealsBadge();
+  refreshWalletBalance();
+  renderTxs(); refreshOldBal(); renderSecurityHealth(); refreshDealsBadge(); renderBalAge();
 }, 30000);
 
-$('d-export').onclick = async () => {
+async function doExport() {
   if (!await confirmPassword('Экспорт файла ключей')) return;
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([session.exportCurrent()], { type: 'text/plain' }));
   a.download = 'kaspa-office-profile.age'; a.click();
   localStorage.setItem('kaspa-backup-done', '1');
-  await recordBackupSig();   // свежий файл покрывает текущий профиль — жёлтый надж гаснет
-  renderBackupNudge();
-};
+  await recordBackupSig();
+  renderSecurityHealth(); renderSettingsInfo();
+}
+$('d-export').onclick = doExport;
 $('d-import').onchange = async (e) => {
   const file = e.target.files[0]; if (!file) return;
   if (!await confirmPassword('Импорт файла ключей')) { e.target.value = ''; return; }
@@ -1058,89 +1223,148 @@ $('d-import').onchange = async (e) => {
     try { imported = parseProfileFile(core.decrypt_profile(text, pw)); } catch { await alertBox('Неверный пароль или битый файл', { alarm: true }); e.target.value = ''; return; }
   } else { try { imported = parseProfileFile(text); } catch { await alertBox('Не похоже на файл ключей', { alarm: true }); e.target.value = ''; return; } }
   const local = loadProfile();
-  const merged = mergeProfile(local, imported);              // по умолчанию оставляет ТЕКУЩИЙ кошелёк
-  // конфликт кошельков: НИКОГДА не роняем чужой sk молча — спрашиваем. Проигравший теперь
-  // не «заменяется», а живёт в «Прошлых адресах» (mergeProfile кладёт его в walletOld):
-  // монеты обеих сторон остаются видимыми и собираемыми (баг Майка 11.07 — walletOld терялся).
+  const merged = reviveProfileRecords(mergeProfile(local, imported), imported); // явный импорт может восстановить удалённые записи
+  // wallet conflict: NEVER silently drop someone else's sk — we ask. The loser is no longer
+  // "replaced" but lives in "Past addresses" (mergeProfile puts it into walletOld):
+  // both sides' coins stay in the single available balance (owner's bug 2026-07-11 — walletOld used to be lost).
   if (imported.wallet && local.wallet && imported.wallet.addr !== local.wallet.addr) {
-    const switchTo = await confirmBox(`Файл содержит ДРУГОЙ кошелёк:\n${imported.wallet.addr}\n\nПереключиться на него? Текущий кошелёк ${local.wallet.addr.slice(0, 20)}… уедет в «Прошлые адреса» — его монеты остаются видимыми и собираемыми. «Оставить текущий» — наоборот: кошелёк из файла ляжет в «Прошлые адреса». Сейфы/сделки/объявления объединяются в любом случае.`,
+    const switchTo = await confirmBox(`Файл содержит ДРУГОЙ кошелёк:\n${imported.wallet.addr}\n\nПереключиться на него? Текущий кошелёк ${local.wallet.addr.slice(0, 20)}… уедет в «Прошлые адреса» — его монеты останутся в едином доступном балансе. «Оставить текущий» — наоборот: кошелёк из файла ляжет в «Прошлые адреса». Сейфы/сделки/объявления объединяются в любом случае.`,
       { danger: true, ok: 'Переключить кошелёк', cancel: 'Оставить текущий' });
     if (switchTo) {
-      // ротация вместе с walletOld: выбранный — активный (вон из «прошлых»), прежний — в «прошлые»
+      // rotation together with walletOld: the chosen one becomes active (out of "past"), the previous one goes into "past"
       merged.wallet = imported.wallet;
       merged.walletOld = (merged.walletOld || []).filter((x) => x.addr !== imported.wallet.addr);
       if (!merged.walletOld.some((x) => x.addr === local.wallet.addr)) merged.walletOld.push({ ...local.wallet, retired: Math.floor(Date.now() / 1000) });
     }
   }
   session.commit(merged);
-  // импорт .age = доказанное владение бэкап-файлом — красный надж «сделай бэкап» больше не нужен
+  // importing .age = proven ownership of the backup file — the red "make a backup" nudge is no longer needed
   if (isEncryptedProfile(text)) {
     localStorage.setItem('kaspa-backup-done', '1');
-    // подпись покрытия пишем ТОЛЬКО если файл покрывает весь объединённый профиль (чистое
-    // устройство); было локальное сверх файла — жёлтый надж попросит свежий экспорт
+    // we write the coverage signature ONLY if the file covers the entire merged profile (a clean
+    // device); if there was something local beyond the file — the yellow nudge will ask for a fresh export
     if ((await profileSig(imported)).h === (await profileSig(loadProfile())).h) await recordBackupSig();
   }
-  // Restore по seed: сущности, созданные ПОСЛЕ этого бэкапа (деривированные из его seed),
-  // восстанавливаются с сервера — ключи деск выводит сам, сервер отдаёт только публичное.
+  // Restore by seed: entities created AFTER this backup (derived from its seed) are restored
+  // from the server — the desk derives the keys itself, the server only returns public data.
   let rep = null;
   try {
-    // сделка в импортированном файле = явное «верни её»: снимаем device-tombstone «забыта»;
-    // остальные забытые скан по-прежнему пропускает
+    // a deal present in the imported file = an explicit "bring it back": we lift the "forgotten"
+    // device tombstone; the scan still skips the rest of the forgotten ones
     for (const d of imported.deals || []) unforgetDeal(d.id);
     rep = await restoreFromSeeds([imported.seed, merged.seed], merged, net(), forgottenDealIds());
-    // rep.addresses в сумме: скан, нашедший только монеты на прошлых адресах, тоже персистим
+    // rep.addresses is included in the sum: a scan that only found coins on past addresses is persisted too
     if (rep.vaults + rep.deals + rep.listings + rep.chats + rep.addresses > 0) session.commit(merged);
     if (merged.seed) localStorage.setItem('kaspa-restore-scanned', core.derive_token(merged.seed, 'scan-mark', 0).slice(0, 16));
   } catch (err) { console.warn('[restore]', err); }
-  renderWallet(); renderBackupNudge(); renderVaultsTab(); renderDealsTab(); renderListingsTab(); renderChatsTab();
-  renderTxs();   // история нового кошелька — сразу после загрузки key file, не ждать 30с-тика
-  renderContactsDatalist();   // адресная книга могла приехать в файле
+  renderWallet(); renderSecurityHealth(); renderVaultsTab(); renderDealsTab(); renderListingsTab(); renderChatsTab();
+  renderTxs();   // the new wallet's history — right after loading the key file, don't wait for the 30s tick
+  renderContactsDatalist();   // the address book may have arrived in the file
   const restoredN = rep ? rep.vaults + rep.deals + rep.listings + rep.chats + rep.addresses : 0;
   await alertBox('Импортировано ✓' + (restoredN ? `\nВосстановлено с сервера: ${restoreReport(rep)}.` : '')); e.target.value = '';
 };
 
-var curTab = null;   // активная вкладка: её бейдж не копится (см. markDealsSeen/markChatsSeen)
-function switchTab(name) {
+var curTab = null;   // the active VIEW; the semantics of the escrow/chats badges depend on it (markDealsSeen, etc.)
+const VIEW_TITLES = { overview: L.overview, wallet: L.wallet, safes: L.safes,
+  escrow: L.escrow, market: L.market, chats: L.chats, settings: L.settings };
+function showView(name) {
   curTab = name;
-  $('tab-vaults').style.display = name === 'vaults' ? 'block' : 'none';
-  $('tab-deals').style.display = name === 'deals' ? 'block' : 'none';
-  $('tab-listings').style.display = name === 'listings' ? 'block' : 'none';
-  $('tab-chats').style.display = name === 'chats' ? 'block' : 'none';
-  $('tab-btn-vaults').classList.toggle('active', name === 'vaults');
-  $('tab-btn-deals').classList.toggle('active', name === 'deals');
-  $('tab-btn-listings').classList.toggle('active', name === 'listings');
-  $('tab-btn-chats').classList.toggle('active', name === 'chats');
-  for (const t of ['vaults', 'deals', 'listings', 'chats'])
-    $('tab-btn-' + t).setAttribute('aria-selected', String(t === name));
-  // уход с вкладки чатов глушит поллинг открытого треда
+  for (const v of VIEWS) {
+    const sec = $('view-' + v);
+    if (sec) sec.style.display = v === name ? 'block' : 'none';
+  }
+  for (const el of document.querySelectorAll('[data-nav]')) {
+    const on = el.dataset.nav === name;
+    el.classList.toggle('active', on);
+    if (on) el.setAttribute('aria-current', 'page'); else el.removeAttribute('aria-current');
+  }
+  $('tb-title').textContent = VIEW_TITLES[name] || name;
+  $('topbar').classList.toggle('is-internal', name !== 'overview');
+  $('bn-sheet').hidden = true;
   if (name !== 'chats') closeChatPanel();
-  // вкладка переживает перезагрузку и шарится ссылкой (#deals|#listings|#chats) — критика 09.07;
-  // replaceState: без спама в history, Back ведёт на предыдущую СТРАНИЦУ, не предыдущую вкладку
+  // replaceState (not location.hash=): no spam in history — Back leaves the desk instead of flipping through views
   history.replaceState(null, '', '#' + name);
-  // визит = «видел»: бейдж вкладки гаснет сразу; загорится только на события новее этого момента
-  if (name === 'deals') markDealsSeen();
-  if (name === 'chats') updateChatsBadge();   // маркирует seen внутри (curTab уже 'chats')
+  if (name === 'escrow') markDealsSeen();
+  if (name === 'chats') updateChatsBadge();
+}
+const VIEW_RENDER = { overview: () => renderSecurityHealth(), safes: renderVaultsTab,
+  escrow: renderDealsTab, market: renderListingsTab, chats: renderChatsTab,
+  settings: () => renderSettingsInfo() };
+function go(name) { showView(name); (VIEW_RENDER[name] || (() => {}))(); }
+
+function ovSet(kind, m) {
+  const card = $('ov-card-' + kind); if (!card) return;
+  card.querySelector('[data-slot=n]').textContent = m.count;
+  const bits = [];
+  if (m.sumSompi != null && m.count) bits.push(kas(m.sumSompi) + (kind === 'escrow' ? ' в эскроу' : ' всего'));
+  if (m.attention) bits.push(m.attention + (m.attention % 10 === 1 && m.attention % 100 !== 11 ? ' требует' : ' требуют') + ' внимания');
+  card.querySelector('[data-slot=sum]').textContent = m.count ? (bits.join(' · ') || 'Всё спокойно') : '';
+  const empty = card.querySelector('[data-slot=empty]');
+  if (empty) empty.style.display = m.count ? 'none' : 'flex';
+  const nx = card.querySelector('[data-slot=next]');
+  // TODO(P1): m.next.label comes from desk-overview.js in EN (safesCard/escrowCard/marketCard labels) —
+  // for full RU parity the label dictionary needs to move into the module itself (see task-8 brief); in P0 this
+  // is acceptable (data, not UI chrome) — we translate only the prefix.
+  if (m.next) {
+    nx.style.display = 'flex'; nx.textContent = '→ следующий шаг: ' + m.next.label; nx.href = m.next.href;
+    nx.onclick = m.next.href.startsWith('#')
+      ? (e) => { e.preventDefault(); go(m.next.href.slice(1)); }
+      : (m.next.vault ? () => setActiveAddr(m.next.vault) : null);
+  } else nx.style.display = 'none';
+}
+var ovBal = new Map();
+function ovRefreshSafes() { try { ovSet('safes', safesCard(getVaults(), ovBal)); } catch {} }
+function ovRefreshEscrow() { dealMaps(); try { ovSet('escrow', escrowCard(getDeals(), dealStates, dealChatUnread)); } catch {} }
+function ovRefreshMarket() { try { ovSet('market', marketCard(getListings(), Date.now() / 1000)); } catch {} }
+
+var navCounts = { escrow: 0, chats: 0 };
+function setNavBadge(kind, n) {
+  // lazy init (TDZ precedent, see dealMaps()): refreshDealsBadge() is called from top level (line ~292)
+  // BEFORE the module reaches `var navCounts = {...}` further down in the source.
+  navCounts = navCounts || { escrow: 0, chats: 0 };
+  navCounts[kind] = n;
+  for (const el of document.querySelectorAll(`[data-badge="${kind}"]`)) {
+    el.style.display = n ? 'inline-flex' : 'none';
+    if (n) el.textContent = n;
+  }
+  const more = navCounts.escrow;   // Escrow is hidden under More on mobile; Chats has its own badge in the bottom nav
+  for (const el of document.querySelectorAll('[data-badge="more"]')) {
+    el.style.display = more ? 'inline-flex' : 'none';
+    if (more) el.textContent = more;
+  }
+}
+function renderSettingsInfo() {
+  const el = $('st-backup-info'); if (!el) return;
+  let rec = null; try { rec = JSON.parse(localStorage.getItem('kaspa-backup-sig') || 'null'); } catch {}
+  if (!rec) {
+    el.textContent = localStorage.getItem('kaspa-backup-done') === '1'
+      ? 'Последний экспорт: до появления отслеживания покрытия — экспортируй свежий файл, чтобы увидеть, что он покрывает.'
+      : 'Из этого браузера ещё не экспортирован файл ключей.';
+    return;
+  }
+  el.textContent = `Последний экспорт: ${rec.t ? new Date(rec.t).toLocaleString() : 'дата неизвестна'}`
+    + ` · покрывает: сейфы ${rec.v}, сделки ${rec.d}, объявления ${rec.l}, адреса кошелька ${rec.w}, чаты ${rec.c}, контакты ${rec.b}.`;
 }
 
-// ── таб «Сейфы»: список сейфов профиля + баланс каждого ──
+// ── "Safes" tab: list of the profile's safes + balance for each ──
 function shortAddr(a) { return a ? a.slice(0, 14) + '…' + a.slice(-6) : ''; }
-// та же 6-полевая cfg, что у create/manage — из неё ядро считает адреса контракта
+// the same 6-field cfg as create/manage — the core computes contract addresses from it
 const vaultCfg = (v) => JSON.stringify({ hot_pk: v.hot_pk, alarm_pk: v.alarm_pk, delay: v.delay,
   heir_pk: v.heir_pk || '', inherit_delay: v.inherit_delay || 0, auto_inherit: !!v.auto_inherit, fee_budget: v.fee_budget || 1000000 });
 const pkOk = (s) => typeof s === 'string' && /^[0-9a-f]{64}$/i.test(s);
 
-/** Активный вывод сейфа → {amount, daa, destPk} | null. Берёт unvault-адрес из профиля; если его
- * нет — восстанавливает по dest_pk или спрашивает сервер по токену (как manage.html:start), чтобы
- * вывод, запущенный с ЧУЖОГО устройства (кража!), был виден прямо из деска. */
+/** A safe's active withdrawal → {amount, daa, destPk} | null. Takes the unvault address from the
+ * profile; if there isn't one — reconstructs it from dest_pk or asks the server by token (like
+ * manage.html:start), so a withdrawal started from SOMEONE ELSE'S device (theft!) is visible right from the desk. */
 async function unvaultState(v, askServer = true) {
-  await coreReady;   // core.* ниже требуют инициализированного WASM
+  await coreReady;   // the core.* calls below require the WASM to be initialized
   let destPk = v.dest_pk || null, uAddr = v.unvault_addr || null;
   if (!uAddr && pkOk(destPk)) { try { uAddr = core.unvault_address(vaultCfg(v), destPk, net()); } catch {} }
   if (!uAddr && askServer && v.token) {
     try {
       const st = await api(`/api/safe/vault-state?vault_addr=${encodeURIComponent(v.vault_addr)}&token=${v.token}`);
       if (pkOk(st.dest_pk)) { destPk = st.dest_pk; uAddr = st.unvault_addr || core.unvault_address(vaultCfg(v), st.dest_pk, net()); }
-    } catch { /* оффлайн / нет записи на сервере — просто без подсветки */ }
+    } catch { /* offline / no record on the server — simply no highlight */ }
   }
   if (!uAddr) return null;
   try {
@@ -1150,12 +1374,12 @@ async function unvaultState(v, askServer = true) {
   } catch { return null; }
 }
 
-/** Красный баннер над кошельком: «по сейфу идёт вывод» — виден с любой вкладки. */
+/** Red banner above the wallet: "a withdrawal is in progress on this safe" — visible from any tab. */
 async function announceUnvault(v, un) {
   await coreReady;
   const ua = $('unvault-alert');
-  if (ua.querySelector(`[data-addr="${v.vault_addr}"]`)) return; // повторный рендер вкладки
-  let left = null; // окно отмены: свежий virtual_daa с сервера, а не снапшот загрузки страницы
+  if (ua.querySelector(`[data-addr="${v.vault_addr}"]`)) return; // a repeat render of the tab
+  let left = null; // cancel window: a fresh virtual_daa from the server, not a page-load snapshot
   try { const inf = await api('/api/safe/info'); left = Math.max(0, v.delay - Math.max(0, inf.virtual_daa - un.daa)); } catch {}
   const dest = un.destPk ? core.pubkey_to_address(un.destPk, net()) : null;
   const line = document.createElement('div');
@@ -1167,21 +1391,105 @@ async function announceUnvault(v, un) {
   line.querySelector('.unv-open').onclick = () => setActiveAddr(v.vault_addr);
   if (ua.childElementCount) line.style.marginTop = '8px';
   ua.appendChild(line);
+  // one main event + "N more" (canon dd5d9c74 item 13): extra withdrawal rows collapse
+  // into a single link — not a wall of red banners, and nothing is hidden forever.
+  const lines = [...ua.children].filter((el) => el.dataset && el.dataset.addr);
+  let moreEl = ua.querySelector('.unv-more');
+  if (lines.length > 1) {
+    if (!moreEl) {
+      moreEl = document.createElement('a');
+      moreEl.className = 'unv-more'; moreEl.href = '#safes';
+      moreEl.style.cssText = 'display:block;margin-top:8px;font-weight:700';
+      moreEl.onclick = (e) => { e.preventDefault(); go('safes'); };
+      ua.appendChild(moreEl);
+    }
+    for (const [i, el] of lines.entries()) el.style.display = i === 0 ? '' : 'none';
+    const moreN = lines.length - 1;
+    // Russian numeral agreement (1 withdrawal / 2-4 withdrawals / 5+ withdrawals, is/are in progress) — RU-only grammar, kept as-is for this locale's text
+    const moreNoun = moreN % 10 === 1 && moreN % 100 !== 11 ? 'вывод'
+      : moreN % 10 >= 2 && moreN % 10 <= 4 && (moreN % 100 < 10 || moreN % 100 >= 20) ? 'вывода' : 'выводов';
+    const moreVerb = moreN % 10 === 1 && moreN % 100 !== 11 ? 'идёт' : 'идут';
+    moreEl.textContent = `⚠ …и ещё ${moreN} ${moreNoun} ${moreVerb} — открыть Сейфы`;
+  }
   ua.style.display = 'block';
 }
 
+async function mountAlertsSubscription(host, v) {
+  const card = document.createElement('div');
+  card.className = 'safe-sub';
+  card.innerHTML = `<span class="safe-sub-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg></span>
+    <span class="safe-sub-copy"><strong>Подписка на алерты</strong><span class="safe-sub-status" role="status">Проверяем статус…</span></span>
+    <span class="safe-sub-actions"></span>`;
+  host.appendChild(card);
+  const status = card.querySelector('.safe-sub-status');
+  const actions = card.querySelector('.safe-sub-actions');
+  const manage = document.createElement('a');
+  manage.className = 'safe-sub-manage'; manage.href = '/ru/manage.html'; manage.textContent = 'Настроить →';
+  manage.onclick = () => { setActiveAddr(v.vault_addr); setPref('activeVault', v.vault_addr); };
+  actions.appendChild(manage);
+  if (!v.token) {
+    status.textContent = 'Недоступно — у сейфа нет сервисного токена';
+    return;
+  }
+  try {
+    const s = await loadSubscriptionStatus(v);
+    const view = subscriptionView(s, 'ru');
+    status.textContent = view.status;
+    status.classList.add(view.tone);
+    if (view.badge) {
+      const active = document.createElement('span');
+      active.className = 'safe-sub-active'; active.textContent = view.badge;
+      actions.prepend(active);
+    }
+    if (!view.showPay) return;
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-ghost btn-sm safe-sub-pay';
+    btn.textContent = view.payLabel;
+    actions.prepend(btn);
+    btn.onclick = async () => {
+      const original = btn.textContent;
+      try {
+        const wallet = session.getProfile().wallet;
+        if (!wallet) { await alertBox('В профиле нет кошелька', { alarm: true }); return; }
+        const price = Math.round(Number(s.price_kas) * 1e8);
+        const balance = await walletPortfolioBalance(loadProfile(), net());
+        if (price > balance) {
+          await alertBox(`На desk-кошельке не хватает (${kas(balance)}). Пополни в Деске — SimpleSwap или с любого кошелька.`, { alarm: true });
+          return;
+        }
+        if (!await confirmPassword('Оплата подписки на алерты с desk-кошелька.', {
+          context: `<b style="font-family:var(--mono);color:var(--kaspa)">${kas(price)}</b> → подписка на алерты, +1 год`
+        })) return;
+        btn.disabled = true; btn.textContent = 'Оплачиваем…';
+        await fundTargetFromWallet(wallet, s.sub_addr, price, net());
+        btn.remove();
+        status.textContent = 'Оплата отправлена — ждём подтверждения. Для алертов должен быть подключён Telegram или email.';
+        status.classList.remove('ok'); status.classList.add('warn');
+        renderTxs(); renderWallet();
+      } catch (e) {
+        btn.disabled = false; btn.textContent = original;
+        await alertBox((e && e.message) || 'Error', { alarm: true });
+      }
+    };
+  } catch (e) {
+    status.textContent = 'Статус подписки временно недоступен';
+  }
+}
+
 async function renderVaultsTab() {
+  ovBal = new Map(); ovRefreshSafes();
   const list = getVaults();
   const box = $('tab-vaults');
   const ua = $('unvault-alert'); ua.style.display = 'none'; ua.innerHTML = '';
   if (!list.length) {
-    box.innerHTML = '<p class="hint">Сейфов пока нет. <a href="/ru/create.html">Создать сейф</a>.</p>';
+    box.innerHTML = '<div class="section-empty"><span class="empty-icon">⛨</span><strong>Сейфов пока нет</strong><p>Создай изолированный ончейн-сейф с задержкой вывода и защитой восстановления.</p><a href="/ru/create.html" class="btn btn-kaspa">Создать первый сейф</a></div>';
+    ovRefreshSafes();
     return;
   }
   box.innerHTML = '';
   for (const v of list) {
-    // черновик (ключи выкованы, средства не заложены — create.html:b2): ведёт обратно в
-    // визард на дофинансирование (create сам предложит resume), баланс не запрашиваем
+    // draft (keys forged, funds not locked in — create.html:b2): leads back to the
+    // wizard to finish funding (create will offer to resume itself), we don't query the balance
     if (v.draft) {
       const wrap = document.createElement('div');
       wrap.className = 'row wrap'; wrap.style.gap = '8px'; wrap.style.marginTop = '8px';
@@ -1200,44 +1508,47 @@ async function renderVaultsTab() {
       wrap.appendChild(drow); wrap.appendChild(rm); box.appendChild(wrap);
       continue;
     }
+    const entry = document.createElement('section');
+    entry.className = 'safe-entry';
     const row = document.createElement('a');
     row.href = '/ru/manage.html';
     row.className = 'vb-item';
     row.innerHTML = '<span class="vb-dot"></span><span class="vb-name"></span><span class="vb-addr"></span><span class="vb-amt">…</span>';
     row.querySelector('.vb-name').textContent = v.label || shortAddr(v.vault_addr);
     row.querySelector('.vb-addr').textContent = shortAddr(v.vault_addr);
-    if (v.alarm_card) { // тревожный ключ на карточке (вне профиля) — напоминание прямо в списке
+    if (v.alarm_card) { // the alarm key lives on a physical card (outside the profile) — a reminder right in the list
       const b = document.createElement('span');
       b.textContent = 'alarm: карточка';
       b.title = 'Тревожный ключ живёт на твоей тревожной карточке, не в key-file — для отмены кражи или migrate нужна карточка';
       b.style.cssText = 'font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ingot);border:1px solid var(--bd);border-radius:4px;padding:1px 6px;margin-left:8px;flex:none';
       row.querySelector('.vb-addr').after(b);
     }
-    row.onclick = () => { setActiveAddr(v.vault_addr); setPref('activeVault', v.vault_addr); }; // синхронно, ДО перехода браузера по href
-    box.appendChild(row);
+    row.onclick = () => { setActiveAddr(v.vault_addr); setPref('activeVault', v.vault_addr); }; // synchronous, BEFORE the browser navigates via href
+    entry.appendChild(row); box.appendChild(entry);
     injectNote(row,
       () => (getVaults().find((x) => x.vault_addr === v.vault_addr) || {}).note,
       (t) => { const arr = getVaults(); const rec = arr.find((x) => x.vault_addr === v.vault_addr); if (rec) { rec.note = t; setVaults(arr); } },
       'зачем этот сейф, чьи средства…');
-    // баланс — асинхронно, как в manage.html (utxos по vault_addr, только covenant-UTXO сейфа; не блокирует рендер строк)
+    mountAlertsSubscription(entry, v);
+    // balance — asynchronous, like in manage.html (utxos by vault_addr, safe's covenant UTXO only; doesn't block row rendering)
     (async () => {
       try {
         const allU = JSON.parse(await utxosRaw(v.vault_addr));
         const sompi = allU.filter((u) => u.covenant_id).reduce((s, u) => s + u.amount, 0);
-        // стрей-платёж (covenant_id=None) случайно пришёл прямо на адрес сейфа — штатный баланс
-        // его НЕ видит; предложить свернуть в сейф (sweep)
+        // a stray payment (covenant_id=None) accidentally arrived directly at the safe's address — the
+        // regular balance does NOT see it; offer to sweep it into the safe
         const strays = allU.filter((u) => !u.covenant_id);
         if (strays.length && v.hot_sk) injectStrayRecover(row, v, strays);
         if (sompi) {
           row.querySelector('.vb-amt').textContent = kas(sompi);
           row.querySelector('.vb-dot').classList.add('vault');
         }
-        // Активный вывод проверяется ВСЕГДА, не только при пустом сейфе: депозит в сейф с идущим
-        // выводом не должен маскировать вывод (инцидент 10.07 — баннер пропал, «сейф исчез»).
-        // Серверный фолбэк по токену — только при пустом сейфе (не грузить каждый рендер).
+        // An active withdrawal is checked ALWAYS, not just for an empty safe: a deposit into a safe
+        // with an ongoing withdrawal must not mask the withdrawal (incident 2026-07-10 — the banner
+        // disappeared, "the safe vanished"). The server token fallback only fires for an empty safe (not loaded on every render).
         const un = await unvaultState(v, !sompi);
         if (un) {
-          // баланс и вывод — раздельно и разными цветами: бирюза = в сейфе, янтарь = уходит
+          // balance and withdrawal — separate, in different colors: teal = in the safe, amber = leaving
           const amtEl = row.querySelector('.vb-amt');
           amtEl.classList.add('split');
           amtEl.innerHTML =
@@ -1247,17 +1558,19 @@ async function renderVaultsTab() {
           row.querySelector('.vb-dot').classList.add('unvaulting');
           announceUnvault(v, un);
         } else if (!sompi) row.querySelector('.vb-amt').textContent = 'пусто';
-      } catch { row.querySelector('.vb-amt').textContent = '—'; }
+        ovBal.set(v.vault_addr, { sompi, withdrawing: !!un, strays: strays.length > 0 && !!v.hot_sk }); ovRefreshSafes();
+      } catch { row.querySelector('.vb-amt').textContent = '—'; ovBal.set(v.vault_addr, { sompi: 0 }); ovRefreshSafes(); }
     })();
   }
   box.insertAdjacentHTML('beforeend', '<p style="margin-top:12px"><a href="/ru/create.html" class="btn btn-ghost">+ Новый сейф</a></p>');
 }
 
-// ── таб «Сделки»: список сделок профиля + статус каждой (зеркало renderVaultsTab) ──
-// ── статус сделки человеком (Майк 11.07): кто чего ждёт + окно (dispute_window/arbiter_deadline
-// в DAA → daaToHuman). Закрытая: направление по payout-адресу СВОЕЙ стороны (pk из st.cfg) через
-// он-чейн историю — получил ли мой адрес средства (release/refund у сервера не различаются,
-// close_kind='resolved' в обе стороны). Не-mainnet: индексера нет — нейтральное «закрыта». ──
+// ── "Deals" tab: list of the profile's deals + status for each (mirrors renderVaultsTab) ──
+// ── human-readable deal status (owner's note 2026-07-11): who's waiting for what + the window
+// (dispute_window/arbiter_deadline in DAA → daaToHuman). Closed: direction by MY side's payout
+// address (pk from st.cfg) via on-chain history — did my address receive funds (the server
+// doesn't distinguish release/refund, close_kind='resolved' for either direction). Non-mainnet:
+// no indexer — a neutral "closed". ──
 async function dealStatusText(st, d) {
   const win = (daa) => { try { return daaToHuman(daa); } catch { return ''; } };
   switch (st.state) {
@@ -1279,7 +1592,7 @@ async function dealStatusText(st, d) {
         const payout = core.pubkey_to_address(myPk, net());
         const hist = await api(`/api/safe/tx-history?address=${encodeURIComponent(payout)}&limit=1`);
         got = Array.isArray(hist) && hist.length > 0;
-      } catch { return 'закрыта' + arb; }   // индексер молчит — не гадаем
+      } catch { return 'закрыта' + arb; }   // the indexer is silent — no guessing
       if (d.role === 'buyer') return (got ? 'refunded — средства возвращены тебе' : 'released — средства ушли продавцу') + arb;
       return (got ? 'released — средства выпущены тебе' : 'refunded — средства возвращены покупателю') + arb;
     }
@@ -1287,17 +1600,18 @@ async function dealStatusText(st, d) {
   }
 }
 
-// ── непрочитанное в чатах сделок (Майк 11.07): бейдж на вкладке Эскроу + счётчик в строках.
-// Считаем сообщения контрагента новее deal.chatRead (его пишет deal.html при просмотре чата,
-// с этого же захода). Закрытые/истёкшие не поллим; счётчики в памяти — профиль не дёргаем. ──
-// var + ленивый init: renderDealsTab зовётся с топ-левела ДО этих строк (TDZ-прецедент renderMySwaps)
+// ── unread in deal chats (owner's note 2026-07-11): a badge on the Escrow tab + a counter in the
+// rows. We count counterparty messages newer than deal.chatRead (written by deal.html when the
+// chat is viewed, in that same visit). We don't poll closed/expired deals; counters live in
+// memory — we don't touch the profile. ──
+// var + lazy init: renderDealsTab is called from top level BEFORE these lines (the renderMySwaps TDZ precedent)
 var dealChatUnread, dealStates, dealChatLast, dealChatNew;
 function dealMaps() { if (!dealChatUnread) { dealChatUnread = new Map(); dealStates = new Map(); dealChatLast = new Map(); dealChatNew = new Map(); } }
 
-// ── «видел вкладку» (Майк 11.07): бейдж ВКЛАДКИ гаснет при заходе на неё и загорается только
-// на события НОВЕЕ визита. Отметки device-local (kaspa-tab-seen — id последнего показанного
-// сообщения по сделке/треду); прочитанность самих чатов (chatRead/lastRead) не трогаем —
-// строки внутри вкладок помечены как раньше. ──
+// ── "tab seen" (owner's note 2026-07-11): the TAB badge turns off when you enter it and lights up
+// only for events NEWER than the visit. device-local marks (kaspa-tab-seen — the id of the last
+// shown message per deal/thread); we don't touch the chats' own read state (chatRead/lastRead) —
+// rows inside the tabs are marked as before. ──
 function tabSeen() { try { return JSON.parse(localStorage.getItem('kaspa-tab-seen')) || {}; } catch { return {}; } }
 function saveTabSeen(s) { try { localStorage.setItem('kaspa-tab-seen', JSON.stringify(s)); } catch {} }
 function markDealsSeen() {
@@ -1306,7 +1620,7 @@ function markDealsSeen() {
   for (const [id, last] of dealChatLast) s.deals[id] = Math.max(s.deals[id] || 0, last);
   saveTabSeen(s);
   dealChatNew.clear();
-  const b = $('deals-badge'); if (b) b.style.display = 'none';
+  setNavBadge('escrow', 0);
 }
 function markChatsSeen() {
   const s = tabSeen(); s.chats = s.chats || {};
@@ -1326,7 +1640,7 @@ function syncDealRowBadges() {
 }
 async function refreshDealsBadge() {
   dealMaps();
-  let deals; try { deals = getDeals(); } catch { return; }   // профиль заперт (авто-лок)
+  let deals; try { deals = getDeals(); } catch { return; }   // profile is locked (auto-lock)
   const seen = tabSeen().deals || {};
   for (const d of deals.slice(0, 20)) {
     if (!d.token || !d.role || d.id == null) continue;
@@ -1338,18 +1652,15 @@ async function refreshDealsBadge() {
       if (peer.length) dealChatUnread.set(d.id, peer.length); else dealChatUnread.delete(d.id);
       const last = peer.reduce((a, m) => Math.max(a, m.id || 0), 0);
       if (last) dealChatLast.set(d.id, Math.max(dealChatLast.get(d.id) || 0, last));
-      // бейдж ВКЛАДКИ — только сообщения новее отметки визита; строки в списке — по chatRead
+      // the TAB badge — only messages newer than the visit mark; the rows in the list follow chatRead
       const fresh = peer.filter((m) => m.id > (seen[d.id] || 0)).length;
       if (fresh) dealChatNew.set(d.id, fresh); else dealChatNew.delete(d.id);
-    } catch { /* оффлайн — держим прежние значения счётчиков */ }
+    } catch { /* offline — keep the previous counter values */ }
   }
-  if (curTab === 'deals') markDealsSeen();   // вкладка открыта: показанное = просмотрено
+  if (curTab === 'escrow') markDealsSeen();   // the tab is open: shown = seen
   const total = [...dealChatNew.values()].reduce((a, b) => a + b, 0);
-  const b = $('deals-badge');
-  if (b) {
-    b.style.display = total ? 'inline-flex' : 'none';
-    if (total) b.textContent = total;
-  }
+  setNavBadge('escrow', total);
+  ovRefreshEscrow();
   syncDealRowBadges();
 }
 
@@ -1357,7 +1668,8 @@ async function renderDealsTab() {
   const list = getDeals();
   const box = $('tab-deals');
   if (!list.length) {
-    box.innerHTML = '<p class="hint">Сделок пока нет. <a href="/ru/escrow.html">Создайте новую или откройте ссылку-приглашение</a>.</p>';
+    box.innerHTML = '<div class="section-empty"><span class="empty-icon">⌁</span><strong>Эскроу-сделок пока нет</strong><p>Создай защищённую сделку или присоединись по коду приглашения.</p><a href="/ru/escrow.html" class="btn btn-kaspa">Создать или войти в сделку</a></div>';
+    ovRefreshEscrow();
     return;
   }
   box.innerHTML = '';
@@ -1371,7 +1683,7 @@ async function renderDealsTab() {
     row.querySelector('.vb-amt').textContent = kas(d.amount);
     row.dataset.dealId = d.id;
     box.appendChild(row);
-    // статус-строка сделки (Майк 11.07): кто чего ждёт и окно — под записью
+    // deal status line (owner's note 2026-07-11): who's waiting for what and the window — below the entry
     const stEl = document.createElement('div');
     stEl.className = 'hint';
     stEl.style.cssText = 'margin:2px 0 6px;font-size:12px';
@@ -1380,43 +1692,46 @@ async function renderDealsTab() {
       () => (getDeals().find((x) => x.id === d.id) || {}).note,
       (t) => { const arr = getDeals(); const rec = arr.find((x) => x.id === d.id); if (rec) { rec.note = t; setDeals(arr); } },
       'условия сделки, контрагент…');
-    // статус — асинхронно, по существующей /escrow/state ручке (deal.token уже в записи); та же
-    // логика точек, что в deal.html:dealRow (зелёная — активна, янтарь — спор, серая — закрыта/неизвестно)
+    // status — asynchronous, via the existing /escrow/state endpoint (deal.token is already in the
+    // record); the same dot logic as deal.html:dealRow (green — active, amber — dispute, gray — closed/unknown)
     (async () => {
       try {
         const st = await api(`/api/safe/escrow/state?id=${d.id}&token=${encodeURIComponent(d.token)}`);
         dealMaps(); dealStates.set(d.id, st.state);
+        ovRefreshEscrow();
         const dot = row.querySelector('.vb-dot');
         if (st.state === 'disputed') dot.classList.add('unvaulting');
         else if (st.state && st.state !== 'closed' && st.state !== 'expired') dot.classList.add('vault');
         stEl.textContent = await dealStatusText(st, d);
-      } catch { /* оффлайн/протухший токен — строка остаётся без цветного статуса */ }
+      } catch { /* offline/stale token — the row is left without a colored status */ }
     })();
   }
   syncDealRowBadges();
   box.insertAdjacentHTML('beforeend', '<p style="margin-top:12px"><a href="/ru/escrow.html" class="btn btn-ghost">+ Новая сделка</a></p>');
+  ovRefreshEscrow();
 }
 
-// ── таб «Объявления»: список листингов профиля (owner-only, из identity.js — Task 7) ──
+// ── "Listings" tab: list of the profile's listings (owner-only, from identity.js — Task 7) ──
 async function renderListingsTab() {
   const list = getListings();
   const box = $('tab-listings');
   if (!list.length) {
-    box.innerHTML = '<p class="hint">Объявлений пока нет — в каждом уже встроен эскроу. <a href="/ru/listing-new.html">Создать объявление</a>.</p>';
+    box.innerHTML = '<div class="section-empty"><span class="empty-icon">◇</span><strong>Объявлений пока нет</strong><p>Опубликуй товар или услугу со встроенным non-custodial эскроу.</p><a href="/ru/listing-new.html" class="btn btn-kaspa">Создать первое объявление</a><a href="/ru/market.html" class="hint" style="margin-top:12px">Открыть маркет →</a></div>';
+    ovRefreshMarket();
     return;
   }
-  // статус и срок публикации меняются БЕЗ участия этого браузера (30-дневное истечение,
-  // резерв на время профинансированной сделки, авто-republish) — освежаем с сервера
+  // status and the publication deadline change WITHOUT this browser's involvement (30-day
+  // expiry, reservation while a deal is funded, auto-republish) — refresh from the server
   for (const item of list) {
     const deal = getDeals().find((d) => d.id === item.deal_id);
     if (!deal || !deal.token) continue;
     try {
-      // deal_id из ответа НЕ переносим в профиль: после авто-релистинга service сервер выдаёт
-      // объявлению НОВУЮ сделку, а токен владельца лежит в профильной записи ИСХОДНОЙ —
-      // перезапись отвязала бы Extend/Close/чаты от токена (ключ поиска — item.deal_id).
+      // we do NOT carry the deal_id from the response into the profile: after the auto-relist
+      // service, the server assigns the listing a NEW deal, but the owner token lives in the
+      // ORIGINAL profile record — overwriting it would disconnect Extend/Close/chats from the token (lookup key is item.deal_id).
       const fresh = (await api(`/api/safe/listings/mine?token=${encodeURIComponent(deal.token)}`)).find((l) => l.id === item.id);
       if (fresh) { item.status = fresh.status; item.expires_at = fresh.expires_at; item.moderation_reason = fresh.moderation_reason; }
-    } catch { /* оффлайн — показываем то, что в профиле */ }
+    } catch { /* offline — show what's in the profile */ }
   }
   setListings(list);
   box.innerHTML = '';
@@ -1426,12 +1741,12 @@ async function renderListingsTab() {
     row.href = `/ru/market.html?id=${item.id}`;
     row.className = 'vb-item';
     row.style.flex = '1';
-    // Тот же порядок узлов, что у Safes/Deals строк выше, плюс .type-tag между именем и статусом
-    // (market.html/listing-new.html, Tasks 5-6) — бейдж не "прыгает" при разной длине суммы.
+    // The same node order as the Safes/Deals rows above, plus a .type-tag between name and status
+    // (market.html/listing-new.html, Tasks 5-6) — the badge doesn't "jump" for different amount lengths.
     row.innerHTML = '<span class="vb-dot"></span><span class="vb-name"></span><span class="type-tag"></span><span class="vb-addr"></span><span class="vb-amt"></span>';
     row.querySelector('.vb-name').textContent = item.title;
     row.querySelector('.type-tag').textContent = item.listing_type === 'item' ? 'Товар' : 'Услуга';
-    // published живёт 30 дней (продлевается кнопкой ниже); истёкшее — вне витрины до продления
+    // published lives for 30 days (extendable with the button below); expired — off the marketplace until extended
     let statusText = item.status;
     if (item.status === 'published' && item.expires_at) {
       statusText = item.expires_at <= nowSec
@@ -1441,21 +1756,21 @@ async function renderListingsTab() {
     else if (item.status === 'rejected') statusText = 'отклонено модерацией';
     row.querySelector('.vb-addr').textContent = `#${item.id} · ${statusText}`;
     row.querySelector('.vb-amt').textContent = kas(item.price_sompi);
-    // Статус-цвет строки: teal только у по-настоящему живого (published/reserved) объявления —
-    // The One Accent Rule (DESIGN.md) — pending_moderation/rejected/closed/removed остаются
-    // нейтральными (var(--ash2)), не amber/red, поскольку это не предупреждение, а обычные
-    // промежуточные/конечные состояния собственного листинга (полный набор — listings.rs:23).
+    // Row status color: teal only for a truly live (published/reserved) listing —
+    // The One Accent Rule (DESIGN.md) — pending_moderation/rejected/closed/removed remain
+    // neutral (var(--ash2)), not amber/red, since these are not warnings but ordinary
+    // intermediate/terminal states of one's own listing (the full set is in listings.rs:23).
     if (item.status === 'published' || item.status === 'reserved') row.querySelector('.vb-dot').classList.add('vault');
 
-    // wrap: строка (ссылка, flex:1) + кнопка «Удалить» рядом — <button> нельзя вложить в <a>
-    // выше (невалидная вложенность интерактивных элементов), поэтому кладём рядом, оба внутри
-    // `.row.wrap` (существующий utility-класс, см. блок <style>).
+    // wrap: the row (a link, flex:1) + a "Remove" button next to it — a <button> can't be nested
+    // inside the <a> above (invalid nesting of interactive elements), so we place it alongside,
+    // both inside `.row.wrap` (an existing utility class, see the <style> block).
     const wrap = document.createElement('div');
     wrap.className = 'row wrap';
     wrap.style.gap = '8px';
     wrap.style.marginTop = '8px';
     wrap.appendChild(row);
-    // «Продлить 30 дней» — только у published (в т.ч. истёкшего: продление возвращает на витрину)
+    // "Extend 30 days" — only for published (including expired: extending brings it back to the marketplace)
     if (item.status === 'published') {
       const exBtn = document.createElement('button');
       exBtn.className = 'btn btn-ghost';
@@ -1473,16 +1788,16 @@ async function renderListingsTab() {
       };
       wrap.appendChild(exBtn);
     }
-    // «Закрыть» — только для нетерминальных статусов (removed — легаси). "reserved" (идёт
-    // профинансированная сделка) оставлена кликабельной: сервер отклонит с понятной причиной
-    // (гейт в remove_listing_logic), она всплывёт через alertBox() в catch ниже — не прячем молча.
+    // "Close" — only for non-terminal statuses (removed is legacy). "reserved" (a funded deal
+    // is in progress) is left clickable: the server will reject it with a clear reason
+    // (gated in remove_listing_logic), which surfaces via alertBox() in the catch below — we don't hide it silently.
     if (item.status !== 'removed' && item.status !== 'closed' && item.status !== 'rejected') {
       const rmBtn = document.createElement('button');
       rmBtn.className = 'btn btn-ghost';
       rmBtn.textContent = 'Закрыть';
       rmBtn.onclick = async () => {
-        // реальное необратимое действие (объявление уходит с витрины + удаляются фото) —
-        // confirmBox с danger-плашкой и явной подписью кнопки
+        // a real irreversible action (the listing leaves the marketplace + photos are deleted) —
+        // confirmBox with a danger panel and an explicit button label
         if (!await confirmBox(`Закрыть «${item.title}»? Объявление уйдёт с витрины, его фото будут удалены. Действие необратимо (недоступно, пока идёт профинансированная эскроу-сделка).`, { danger: true, ok: 'Закрыть объявление' })) return;
         const deal = getDeals().find((d) => d.id === item.deal_id);
         if (!deal || !deal.token) { await alertBox('Не удалось найти токен владельца этого объявления в профиле браузера.', { alarm: true }); return; }
@@ -1503,8 +1818,8 @@ async function renderListingsTab() {
       };
       wrap.appendChild(rmBtn);
     }
-    // Причина модератора — прямо у подавшего (замечание Майка 09.07): rejected — с текстом
-    // отказа; needs_review/pending с причиной — тоже видно. Причина по-английски (канон продукта).
+    // The moderator's reason — right by the submitter (owner's note 2026-07-09): rejected shows
+    // the rejection text; needs_review/pending with a reason is also visible. The reason is in English (product canon).
     if (item.moderation_reason && (item.status === 'rejected' || item.status === 'pending_moderation')) {
       const note = document.createElement('p');
       note.className = 'hint';
@@ -1517,14 +1832,15 @@ async function renderListingsTab() {
     box.appendChild(wrap);
   }
   box.insertAdjacentHTML('beforeend', '<p style="margin-top:12px"><a href="/ru/listing-new.html" class="btn btn-ghost">+ Новое объявление</a></p>');
+  ovRefreshMarket();
 }
 
-// ── таб «Чаты»: листинг-чаты (пред-сделочные вопросы по объявлениям, спек
-// 2026-07-09-listing-chat-design.md). Запрос = тред с непрочитанными; переписка отсюда.
-// Запись профиля: {thread_id, listing_id, title, role, token?, chat_sk?, chat_pk?, lastRead}
-// (у продавца token/ключи НЕ дублируются — берутся из deals-записи объявления).
-let chatPoll = null;      // setInterval открытой панели
-let chatPanelId = null;   // thread_id открытой панели
+// ── "Chats" tab: listing chats (pre-deal questions about listings, spec
+// 2026-07-09-listing-chat-design.md). A request = a thread with unread messages; conversation happens here.
+// Profile record: {thread_id, listing_id, title, role, token?, chat_sk?, chat_pk?, lastRead}
+// (for the seller, the token/keys are NOT duplicated — taken from the listing's deal record).
+let chatPoll = null;      // setInterval of the open panel
+let chatPanelId = null;   // thread_id of the open panel
 
 function closeChatPanel() {
   if (chatPoll) { clearInterval(chatPoll); chatPoll = null; }
@@ -1541,21 +1857,21 @@ function chatEntryUpsert(patch) {
   return arr.find((c) => c.thread_id === patch.thread_id);
 }
 
-// «непрочитано» (замечание Майка 09.07): у продавца — свежий ЗАПРОС на чат (тред, который он
-// ещё ни разу не открывал, даже без сообщений) или сообщение покупателя новее lastRead;
-// у покупателя — ответ продавца новее lastRead. Единая точка для строк списка и бейджа вкладки.
+// "unread" (owner's note 2026-07-09): for the seller — a fresh chat REQUEST (a thread they
+// haven't opened even once yet, even with no messages) or a buyer message newer than lastRead;
+// for the buyer — a seller reply newer than lastRead. A single source of truth for list rows and the tab badge.
 function chatUnread(c) {
-  if (c.hidden) return false; // удалён из деска — не светится и не считается
+  if (c.hidden) return false; // removed from the desk — doesn't light up and isn't counted
   const lastRead = c.lastRead || 0;
   const lastId = c.last_id || 0;
   if (c.role === 'seller') {
-    if (!c.opened) return true; // запрос, который продавец ещё не открывал
+    if (!c.opened) return true; // a request the seller hasn't opened yet
     return lastId > lastRead && c.last_dir === 'buyer';
   }
   return lastId > lastRead && c.last_dir === 'seller';
 }
 
-/** Ключи/токен своей стороны треда. null — в профиле нет нужного (например, после merge без сделки). */
+/** Keys/token of one's own side of the thread. null — the profile is missing what's needed (e.g. after a merge without the deal). */
 function chatIdentityOf(entry) {
   if (entry.role === 'buyer') {
     if (!entry.token || !entry.chat_sk) return null;
@@ -1567,11 +1883,11 @@ function chatIdentityOf(entry) {
   return { role: 'seller', token: deal.token, chat_sk: deal.chat_sk, chat_pk: deal.chat_pk };
 }
 
-/** Серверное освежение тредов (без DOM и без WASM — только API): запросы по своим
- * объявлениям + last_id покупательских тредов. Зовётся из renderChatsTab и 30с-интервала —
- * непрочитанное подсвечивается и когда деск просто ОТКРЫТ, не только при входе (Майк, 09.07). */
+/** Server-side thread refresh (no DOM, no WASM — API only): requests for one's own
+ * listings + last_id of buyer threads. Called from renderChatsTab and the 30s interval —
+ * unread highlights even when the desk is simply OPEN, not only on entry (owner's note, 2026-07-09). */
 async function refreshChatThreads() {
-  // продавец: подтянуть запросы по своим объявлениям (owner-токен = токен связанной сделки)
+  // seller: pull in requests for one's own listings (owner token = the linked deal's token)
   for (const l of getListings()) {
     if (l.status === 'removed' || l.status === 'rejected') continue;
     const deal = getDeals().find((d) => d.id === l.deal_id);
@@ -1580,28 +1896,28 @@ async function refreshChatThreads() {
       const r = await myThreads(l.id, deal.token);
       for (const t of r.threads || []) {
         const known = getChats().find((c) => c.thread_id === t.thread_id);
-        // «удалённый» (hidden) чат возвращается сам, если собеседник написал что-то НОВЕЕ
-        // момента удаления (hiddenAt) — иначе остаётся скрытым
+        // a "removed" (hidden) chat comes back on its own if the other party wrote something NEWER
+        // than the removal moment (hiddenAt) — otherwise it stays hidden
         const hidden = known ? (known.hidden && !(t.last_id > (known.hiddenAt || 0))) : false;
         chatEntryUpsert({ thread_id: t.thread_id, listing_id: l.id, title: l.title, role: 'seller',
           lastRead: known ? known.lastRead : 0, opened: known ? known.opened : false, hidden,
           last_id: t.last_id, last_dir: t.last_dir, updated_at: t.updated_at });
       }
-    } catch { /* оффлайн — покажем, что есть в профиле */ }
+    } catch { /* offline — show what's in the profile */ }
   }
-  // покупательские треды: освежить last_id/last_dir с сервера — ответ продавца должен зажечь
-  // бейдж при входе в деск, НЕ дожидаясь открытия треда (замечание Майка 09.07)
+  // buyer threads: refresh last_id/last_dir from the server — a seller reply must light up the
+  // badge on desk entry, WITHOUT waiting for the thread to be opened (owner's note 2026-07-09)
   for (const c of getChats()) {
     if (c.role !== 'buyer' || !c.token) continue;
     try {
       const r = await fetchThread(c.thread_id, c.token, c.last_id || 0);
       if (r.msgs && r.msgs.length) {
         const last = r.msgs[r.msgs.length - 1];
-        // новое сообщение возвращает «удалённый» чат в список
+        // a new message brings a "removed" chat back into the list
         chatEntryUpsert({ thread_id: c.thread_id, last_id: last.id, last_dir: last.dir, updated_at: last.ts,
           hidden: c.hidden && !(last.id > (c.hiddenAt || 0)) });
       }
-    } catch { /* оффлайн */ }
+    } catch { /* offline */ }
   }
 }
 
@@ -1633,8 +1949,8 @@ async function renderChatsTab() {
       row.querySelector('.vb-dot').classList.add('vault');
     }
     row.onclick = (e) => { e.preventDefault(); openChatPanel(c); };
-    // «Удалить» — скрытие из деска (замечание Майка 09.07): сам тред живёт на сервере,
-    // при новом сообщении собеседника чат возвращается в список сам (unhide выше).
+    // "Remove" — hiding from the desk (owner's note 2026-07-09): the thread itself lives on the
+    // server, on a new message from the other party the chat returns to the list on its own (unhide above).
     const wrap = document.createElement('div');
     wrap.className = 'row wrap';
     wrap.style.gap = '8px';
@@ -1655,20 +1971,18 @@ async function renderChatsTab() {
 }
 
 function updateChatsBadge() {
-  if (curTab === 'chats') markChatsSeen();   // вкладка открыта: показанное = просмотрено
-  // бейдж вкладки: непрочитанное И новее визита (?? -1 — незнакомый тред-запрос светится и при last_id 0)
+  if (curTab === 'chats') markChatsSeen();   // the tab is open: shown = seen
+  // tab badge: unread AND newer than the visit (?? -1 — an unfamiliar request thread lights up even at last_id 0)
   const seen = tabSeen().chats || {};
   let n = 0;
   try { n = getChats().filter((c) => chatUnread(c) && (c.last_id || 0) > (seen[c.thread_id] ?? -1)).length; } catch {}
-  const b = $('chats-badge');
-  b.style.display = n ? 'inline-flex' : 'none';
-  if (n) b.textContent = n;
+  setNavBadge('chats', n);
 }
 
 async function openChatPanel(entry) {
   closeChatPanel();
   chatPanelId = entry.thread_id;
-  // открытие = запрос просмотрен (гасит «нов.» у пустого треда-запроса)
+  // opening = the request has been viewed (clears "new" on an empty request thread)
   chatEntryUpsert({ thread_id: entry.thread_id, opened: true });
   updateChatsBadge();
   const box = $('tab-chats');
@@ -1706,7 +2020,7 @@ async function openChatPanel(entry) {
     return;
   }
 
-  // финансирование: он-чейн якорь шлётся с чат-ключа — без UTXO отправка упадёт
+  // funding: the on-chain anchor is sent from the chat key — without a UTXO the send will fail
   const fundBox = panel.querySelector('.ch-fund');
   async function refreshFunding() {
     const funded = await chatKeyFunded(me.chat_pk);
@@ -1724,7 +2038,7 @@ async function openChatPanel(entry) {
       await sendFromWallet(w, chatAddress(me.chat_pk), 50000000, net());
       btn.textContent = 'Отправлено — ждём подтверждения…';
       const t = setInterval(async () => { if (await refreshFunding()) { clearInterval(t); } }, 3000);
-    } catch (e) { await alertBox(e.message || 'Ошибка', { alarm: true }); btn.disabled = false; btn.textContent = 'Профинансировать чат с кошелька (0.5 KAS)'; }
+    } catch (e) { await alertBox(e.message || 'Error', { alarm: true }); btn.disabled = false; btn.textContent = 'Профинансировать чат с кошелька (0.5 KAS)'; }
   };
 
   let lastId = 0;
@@ -1735,7 +2049,7 @@ async function openChatPanel(entry) {
     try { r = await fetchThread(entry.thread_id, me.token, lastId); } catch { return; }
     peerPk = me.role === 'buyer' ? r.seller_chat_pk : r.buyer_chat_pk;
     const items = decryptMsgs(r.msgs, me.role, me.chat_sk);
-    // плейсхолдеры (Загрузка…/пустой тред) уходят при первом же реальном сообщении
+    // placeholders (Loading…/empty thread) go away on the very first real message
     if (items.length && msgsBox.querySelector('p.hint')) msgsBox.innerHTML = '';
     for (const m of items) {
       if (m.id <= lastId) continue;
@@ -1774,18 +2088,18 @@ async function openChatPanel(entry) {
   input.onkeydown = (e) => { if (e.key === 'Enter') doSend(); };
 }
 
-// вход с маркета: /ru/desk.html?chat=<listing_id> — своё объявление открывает запросы,
-// чужое — создаёт/находит покупательский тред (ключ+токен пишутся в профиль)
+// entry from the market: /ru/desk.html?chat=<listing_id> — one's own listing opens requests,
+// someone else's — creates/finds a buyer thread (key+token are written to the profile)
 async function handleChatParam() {
   const listingId = Number(new URLSearchParams(location.search).get('chat'));
   if (!listingId) return;
-  switchTab('chats');
+  go('chats');
   await renderChatsTab();
   const mine = getListings().find((l) => l.id === listingId);
-  if (mine) return; // продавец: список запросов уже на экране
+  if (mine) return; // seller: the list of requests is already on screen
   const existing = getChats().find((c) => c.listing_id === listingId && c.role === 'buyer');
   if (existing) {
-    // явный заход с маркета возвращает и «удалённый» чат
+    // an explicit visit from the market brings back a "removed" chat too
     const fresh = chatEntryUpsert({ thread_id: existing.thread_id, hidden: false });
     await renderChatsTab();
     openChatPanel(fresh);
@@ -1793,8 +2107,8 @@ async function handleChatParam() {
   }
   if (!chatSupported()) return;
   try {
-    // Профиль v3: чат-ключ и токен треда деривируются из мастер-seed — тред
-    // восстановим из любого экспорта бэкапа, даже сделанного до начала чата.
+    // Profile v3: the chat key and thread token are derived from the master seed — the thread
+    // can be restored from any backup export, even one made before the chat started.
     const dc = session.takeDeriv('chat');
     const keys = (dc && core.derive_chat_keys) ? JSON.parse(core.derive_chat_keys(dc.seed, 'chat/key', dc.index)) : genChatKeys();
     const token = dc ? core.derive_token(dc.seed, 'chat', dc.index) : genToken();
@@ -1808,24 +2122,25 @@ async function handleChatParam() {
   }
 }
 
-$('tab-btn-vaults').onclick = () => { switchTab('vaults'); renderVaultsTab(); };
-$('tab-btn-deals').onclick = () => { switchTab('deals'); renderDealsTab(); };
-$('tab-btn-listings').onclick = () => { switchTab('listings'); renderListingsTab(); };
-$('tab-btn-chats').onclick = () => { switchTab('chats'); renderChatsTab(); };
-const HASH_TABS = ['vaults', 'deals', 'listings', 'chats'];
-switchTab(HASH_TABS.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'vaults');
-renderChatsTab(); // бейдж непрочитанных на кнопке — не дожидаясь клика по вкладке
+for (const a of document.querySelectorAll('[data-nav]'))
+  a.addEventListener('click', (e) => { e.preventDefault(); go(a.dataset.nav); });
+$('bn-more').onclick = () => { $('bn-sheet').hidden = !$('bn-sheet').hidden; };
+window.addEventListener('hashchange', () => go(resolveRoute(location.hash)));
+go(resolveRoute(location.hash));
+renderChatsTab(); // the unread badge on the button — without waiting for a click on the tab
 handleChatParam();
-// уведомления живут и в ОТКРЫТОМ деске: раз в 30с освежаем треды и бейдж (без WASM, только API);
-// открытая панель поллится сама (5с) — её не трогаем, список не перерисовываем поверх набора текста
+maybeStartDeskTour({ navigate: go });
+// notifications live even with the desk OPEN: every 30s we refresh threads and the badge (no
+// WASM, API only); the open panel polls itself (5s) — we leave it alone, we don't redraw the list over someone typing
 setInterval(async () => {
   if (chatPanelId) return;
   try {
     await refreshChatThreads();
-    if ($('tab-chats').style.display !== 'none') renderChatsTab(); else updateChatsBadge();
-  } catch { /* профиль заперт (авто-лок) или оффлайн — тихо пропускаем тик */ }
+    if (curTab === 'chats') renderChatsTab(); else updateChatsBadge();
+  } catch { /* profile is locked (auto-lock) or offline — silently skip this tick */ }
 }, 30000);
 </script>
-<script src="/assets/kaspa-widget.js?v=3" defer></script>
+<script>if("serviceWorker" in navigator&&/^(kaspaforge\.org|kaspa\.officeforge\.co)$/.test(location.hostname))navigator.serviceWorker.register("/sw-forge.js");</script>
+<script src="/assets/kaspa-widget.js?v=4" defer></script>
 </body>
 </html>

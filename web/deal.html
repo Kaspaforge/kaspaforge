@@ -12,7 +12,7 @@
 <meta name="theme-color" content="#0E1116">
 <link rel="manifest" href="/manifest-escrow.json">
 <link rel="apple-touch-icon" href="/assets/icons-escrow/apple-touch-icon.png">
-<script src="/assets/nav.js?v=5" defer></script>
+<script src="/assets/nav.js?v=7" defer></script>
 <link rel="stylesheet" href="/assets/safe.css?v=14">
 <link rel="stylesheet" href="/assets/escrow.css?v=7">
 <script src="/assets/qrcode.min.js"></script>
@@ -69,6 +69,13 @@
     <div class="kv"><span class="k" id="j-window-lbl">Window</span><span class="v" id="j-window"></span></div>
     <div class="kv"><span class="k" id="j-descr-lbl">Conditions</span><span class="v" id="j-descr" style="text-align:left;max-width:100%;white-space:pre-wrap;font-family:var(--body)"></span></div>
     <p class="hint" id="j-fee" style="margin-top:10px"></p>
+    <!-- OTC counter-leg (Task 7): shown only when the joiner is the buyer and the address wasn't set at create -->
+    <div id="join-otc-wrap" style="display:none;margin-top:10px">
+      <label for="join-otc-addr" id="join-otc-lbl"></label>
+      <input type="text" id="join-otc-addr" maxlength="128" autocomplete="off" spellcheck="false">
+      <p class="hint" id="join-otc-hint"></p>
+      <p class="hint" id="join-otc-err" style="color:#e05a5a;font-weight:600;display:none"></p>
+    </div>
     <div style="margin-top:16px"><button class="btn btn-kaspa" id="join-btn"></button></div>
     <p class="hint" id="join-note" style="margin-top:10px"></p>
   </div>
@@ -87,6 +94,10 @@
       <div class="kv"><span class="k" id="s-addr-lbl"></span><span class="v" id="s-addr"></span></div>
       <div class="kv"><span class="k" id="s-descr-lbl"></span><span class="v" id="s-descr" style="text-align:left;max-width:100%;white-space:pre-wrap;font-family:var(--body)"></span></div>
     </div>
+
+    <!-- Forge Contracts: evidence checklist + stages for the deal's template (hidden when the deal has no template_id) -->
+    <div class="plate" id="evidence-plate" style="display:none"><div id="evidence-checklist" data-deal-id=""></div></div>
+    <div class="plate" id="stages-plate" style="display:none"><div id="deal-stages"></div></div>
 
     <!-- disclaimer: withdrawing from the covenant is possible only after the deal closes (shown while funds are locked) -->
     <p class="hint" id="withdraw-note" style="display:none;margin:-4px 0 6px"></p>
@@ -111,7 +122,7 @@
     </div>
 
     <!-- WAIT (seller, joined) -->
-    <div class="plate" id="act-wait" style="display:none"><p class="hint" id="wait-msg"></p></div>
+    <div class="plate" id="act-wait" style="display:none"><p class="note alarm" id="wait-msg" style="margin:0"></p></div>
 
     <!-- ACTIVE actions -->
     <div class="plate" id="act-active" style="display:none">
@@ -174,6 +185,38 @@
         </div>
       </div>
       <p style="margin-top:10px"><a id="closed-explorer" target="_blank" rel="noopener" style="display:none"></a></p>
+    </div>
+
+    <!-- OTC counter-leg panel (Task 8): verification badge + "I have paid" (seller) + prefilled payto.
+         Hidden unless the deal has a server-tracked counter-leg (state.otc, Tasks 4-7). -->
+    <div class="plate" id="otc-panel" style="display:none">
+      <h2 style="font-size:20px" id="otc-panel-head"></h2>
+      <!-- SELLER SAFETY GATE: never invite the seller to pay before the buyer has locked the KAS
+           into escrow (owner-reported critical 2026-07-13). Shown until state=funded. -->
+      <p class="note alarm" id="otc-not-funded" style="display:none"></p>
+      <!-- amount and address as first-class fields: explicit, copyable, QR (owner feedback 2026-07-13) -->
+      <div id="otc-terms-wrap" style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">
+        <div style="flex:1;min-width:240px">
+          <div class="hint" id="otc-amount-lbl2"></div>
+          <div class="mono" id="otc-amount-big" style="font-size:22px;font-weight:700;margin:2px 0 10px"></div>
+          <div class="hint" id="otc-addr-lbl2"></div>
+          <div class="addr" id="otc-addr-row" style="margin-top:2px"><code id="otc-addr-code" style="user-select:all"></code><button id="otc-addr-copy" aria-label="Copy address">copy</button></div>
+          <div style="display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap">
+            <span id="otc-badge" class="badge"></span>
+            <a id="otc-explorer" target="_blank" rel="noopener" style="display:none"></a>
+          </div>
+        </div>
+        <div id="otc-qr" style="flex:0 0 auto"></div>
+      </div>
+      <p class="hint" id="otc-hint" style="display:none"></p>
+      <div id="otc-pay-form" style="display:none;margin-top:12px">
+        <button class="btn btn-kaspa" id="otc-detect-btn" style="display:none"></button>
+        <p class="hint" id="otc-detect-note" style="display:none;margin-top:6px"></p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+          <input type="text" id="otc-pay-ref" maxlength="100" autocomplete="off" spellcheck="false" style="flex:1;min-width:220px">
+          <button class="btn btn-kaspa" id="otc-pay-send"></button>
+        </div>
+      </div>
     </div>
 
     <!-- CHAT (visible after funded: funded/disputed/closed) -->
@@ -269,7 +312,28 @@
   </div>
 </div>
 
-<footer><div class="row wrap"><a class="foot-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="OfficeForge"><img src="/assets/logo.png" alt="OfficeForge"></a><span>Kaspa Escrow · non-custodial beta · <a href="https://officeforge.co">OfficeForge</a> · feedback: kaspa@officeforge.co</span></div></footer>
+<footer>
+  <div class="foot">
+    <span class="fb">
+      <img class="k" src="/assets/brand/emblem-flat-header.png" alt="" aria-hidden="true">
+      <span>© 2026 Kaspa Forge — built by the</span>
+      <a class="foot-ofs-logo" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="Visit OfficeForge"><img src="/assets/of-wordmark.png" alt="OfficeForge"></a>
+    </span>
+    <nav aria-label="Footer">
+      <a href="/safe.html">Safe</a>
+      <a href="/escrow-index.html">Escrow</a>
+      <a href="/market.html">Market</a>
+      <a href="/blog/">Blog</a>
+      <a href="/docs/">Docs</a>
+      <a href="/recover.html">Recovery</a>
+      <a href="https://github.com/Kaspaforge/kaspaforge" target="_blank" rel="noopener">GitHub</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+      <a href="/security.html">Security</a>
+      <a href="mailto:kaspa@officeforge.co">kaspa@officeforge.co</a>
+    </nav>
+  </div>
+</footer>
 </div>
 
 <script type="module">
@@ -280,12 +344,13 @@ import { boot, core, net, api, kas, usdStr, genToken, L, $, esc, copyText, qrInt
          mediaSupported, checkMediaFile, encryptMediaFile, uploadMedia, downloadMedia,
          decryptMediaVerify, sendMediaMsg, parseMediaMsg,
          CARRIERS, carrierLabel, normTrackCode, looksLikeS10, s10Valid, sendTrackMsg, parseTrackMsg,
-         PAY_METHODS, payMethodLabel, sendPayToMsg, sendPayMsg, parsePayToMsg, parsePayMsg,
+         PAY_METHODS, payMethodLabel, sendPayToMsg, sendPayMsg, parsePayToMsg, parsePayMsg, otcPay, otcDetect,
          mutualSupported, disputeState, escalateDispute, notifyWithdrawn, sendClaim, revealChat, postMutualSig, getMutualSigs,
-         parseClaim, fmtHM, splitAmounts } from '/assets/escrow.js?v=31';
-import { mountSwapWidget } from '/assets/swap-widget.js?v=4';
+         parseClaim, fmtHM, splitAmounts, otcAddrOk, otcAddrKind } from '/assets/escrow.js?v=40';
+import { mountSwapWidget } from '/assets/swap-widget.js?v=5';
+import { loadCatalog, getTemplate, evidenceState, loc } from '/assets/contracts.js';
 import { requireUnlock, confirmPassword, wireCrypto } from '/assets/lock-ui.js';
-import { fundTargetFromWallet } from '/assets/wallet.js';
+import { fundTargetFromWallet } from '/assets/wallet.js?v=2';
 import * as session from '/assets/session.js';
 
 const err = $('err');
@@ -298,6 +363,15 @@ let splitInfo = null;      // {raw, toBuyer, toSeller, ok} of the current split 
 let mutualBusy = false;    // don't run the auto-combine of a split in parallel
 let revealPokeAt = 0;      // anti-spam for the repeated reveal poke
 let claimReq = null;       // the outcome selected in the claim form
+
+// Forge Contracts: the deal's template (evidence checklist + stages), resolved once state.template_id arrives
+const LANG = document.documentElement.lang === 'ru' ? 'ru' : 'en';
+let DEAL_TEMPLATE = null;
+let dealTemplateTried = false;    // fetch contracts-catalog.json at most once per page load
+let evHasTrack = false, evHasMedia = false;  // accumulate presence of track/media chat msgs (no chatMsgs array here — see renderChatMsg)
+// OTC counter-leg (Task 8): prefill the buyer's payto-form ONCE from the server-tracked leg
+// (method + buyer_addr set at create/join) — never again, so it doesn't clobber a manual edit.
+let otcPrefillDone = false;
 
 // static labels from the dictionary
 for (const [id, key] of [
@@ -405,7 +479,7 @@ async function restoreDeal(id, sk, token, chatSk) {
            sk, cfg: s.cfg, escrow_addr: s.escrow_addr, disputed_addr: s.disputed_addr,
            chat_sk: chatSk || null, chat_pk: chatSk ? myChatPk : null,
            funding_sk: null, funding_pk: null };
-  unforgetDeal(deal.id); // the recovery sheet = an explicit return: remove the "forgotten in this browser" tombstone
+  unforgetDeal(deal.id, deal); // explicit recovery outranks an older synced tombstone
   saveDeal(deal); // also marks it active
   return deal;
 }
@@ -458,13 +532,13 @@ $('ld-open').onclick = async () => {
 };
 
 // ── JOIN ──
-// Server join errors arrive in Russian (the API canon) — on the EN page we translate the known ones
-// (owner feedback 2026-07-09: the "invite not found…" message was shown as Russian text).
+// Server errors are always English (owner rule 2026-07-13); this map only upgrades the known
+// short codes to friendlier texts with recovery advice.
 const JOIN_ERR_EN = {
-  'приглашение не найдено или уже использовано': 'This invite was not found or has already been used. If you came from a marketplace listing, it gets a fresh Buy link automatically — go back to the listing and try again in a minute.',
-  'к сделке уже присоединились': 'Someone has already joined this deal.',
-  'приглашение истекло': 'This invite has expired.',
-  'сделка не найдена': 'Deal not found.',
+  'invite not found or already used': 'This invite was not found or has already been used. If you came from a marketplace listing, it gets a fresh Buy link automatically — go back to the listing and try again in a minute.',
+  'this deal has already been joined': 'Someone has already joined this deal.',
+  'invite expired': 'This invite has expired.',
+  'deal not found': 'Deal not found.',
 };
 const joinErr = (e) => new Error(JOIN_ERR_EN[e && e.message] || (e && e.message) || 'Error');
 async function joinFlow(code) {
@@ -480,6 +554,27 @@ async function joinFlow(code) {
     if (inv.fee_resolve) $('j-fee').innerHTML = L('fee_line')(kas(inv.fee_resolve), kas(inv.fee_dispute));
     $('join-btn').textContent = L('join_btn');
     $('join-note').textContent = L('join_note');
+    // OTC counter-leg (Task 7): the joiner is the buyer and the creator (seller) didn't set the
+    // receiving address at create time — the buyer must supply it now, before joining.
+    if (inv.otc_addr_needed && inv.your_role === 'buyer') {
+      $('join-otc-wrap').style.display = 'block';
+      $('join-otc-lbl').textContent = L('otc_leg_addr_join');
+      // spell out whose address this is and what arrives to it — the join screen is where wrong addresses happen
+      const otcSum = `${inv.otc_amount || ''} ${inv.otc_currency || inv.otc_method || ''}`.trim();
+      $('join-otc-hint').textContent = L('otc_join_hint').replace('{sum}', otcSum || '—');
+      // validate the receiving address against the leg's network on entry (owner request 2026-07-13)
+      const vJoinAddr = async () => {
+        const a = $('join-otc-addr').value.trim();
+        const errEl = $('join-otc-err');
+        if (!a || inv.otc_method === 'other-crypto') { errEl.style.display = 'none'; return true; }
+        const kind = await otcAddrKind(inv.otc_method);
+        if (otcAddrOk(kind, a)) { errEl.style.display = 'none'; return true; }
+        errEl.textContent = L('otc_leg_addr_bad').replace('{net}', inv.otc_currency || inv.otc_method || '—');
+        errEl.style.display = ''; return false;
+      };
+      $('join-otc-addr').oninput = vJoinAddr;
+      window.__vJoinAddr = vJoinAddr;
+    }
     // The profile may still be locked on this screen (unlock is deferred to the Join click) — the
     // saved-deals bar is drawn only if the session is open or quietly resumes from per-tab state.
     await wireCrypto();
@@ -488,6 +583,10 @@ async function joinFlow(code) {
       try {
         hideErr(err);
         $('join-btn').disabled = true;
+        if (inv.otc_addr_needed && inv.your_role === 'buyer' && window.__vJoinAddr && !(await window.__vJoinAddr())) {
+          showErr(err, new Error(L('otc_leg_addr_bad').replace('{net}', inv.otc_currency || inv.otc_method || '')));
+          $('join-btn').disabled = false; return;
+        }
         // The profile password — only now: the deal terms are already on screen, and the overlay
         // receives the purchase context (role + amount) so the password wall isn't faceless.
         const unlocked = await requireUnlock(net(), { cancelable: true,
@@ -508,7 +607,8 @@ async function joinFlow(code) {
           : (dd && core.derive_chat_keys) ? JSON.parse(core.derive_chat_keys(dd.seed, 'deal/chat', dd.index))
           : JSON.parse(core.chat_gen_keys());
         const r = await api('/api/safe/escrow/join', { method: 'POST', headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ join_code: code, pk: keys.pk, token, chat_pk: chat ? chat.pk : '' }) });
+          body: JSON.stringify({ join_code: code, pk: keys.pk, token, chat_pk: chat ? chat.pk : '',
+            otc_buyer_addr: $('join-otc-addr') ? $('join-otc-addr').value.trim() : '' }) });
         // CROSS-CHECK of the browser-computed address against the server's — anti parameter tampering
         const localAddr = core.escrow_address(cfgStr(r.cfg), net());
         if (localAddr !== r.escrow_addr) { showErr(err, new Error(L('addr_mismatch'))); return; }
@@ -517,7 +617,7 @@ async function joinFlow(code) {
                  funding_pk: inv.your_role === 'buyer' ? keys.funding_pk : null, cfg: r.cfg,
                  escrow_addr: r.escrow_addr, disputed_addr: r.disputed_addr,
                  chat_sk: chat ? chat.sk : null, chat_pk: chat ? chat.pk : null };
-        unforgetDeal(deal.id); // re-joining a forgotten deal = an explicit return: remove the tombstone
+        unforgetDeal(deal.id, deal); // explicit re-join outranks an older synced tombstone
         saveDeal(deal);
         $('join-plate').style.display = 'none';
         history.replaceState(null, '', `?id=${r.id}`);
@@ -602,6 +702,11 @@ async function refresh() {
     $('s-state').textContent = L('st_' + st.state) || st.state;
     $('s-state').className = 'v ' + (st.state === 'disputed' ? 'warn' : st.state === 'closed' ? '' : 'ok');
     renderTimeline(st.state);
+    // Forge Contracts: resolve the template (once) + (re-)render the checklist/stages; cheap, display-only.
+    await resolveDealTemplate(st);
+    renderEvidence();
+    renderStages();
+    renderOtcPanel(st);
     // action panels are switched SYNCHRONOUSLY: hide-all and show-the-right-one in a single frame,
     // NO await in between — otherwise a panel (e.g. act-closed) collapses for the duration of await
     // refreshChat and the block "jerks" on every poll, dragging the rest of the layout with it.
@@ -657,6 +762,127 @@ function renderTimeline(state) {
   $('timeline').innerHTML = steps
     .map((s) => `<div class="tl ${order[s] <= cur ? 'on' : ''} ${s === 'disputed' ? 'warn' : ''}"><span class="tl-dot"></span><span class="tl-lbl">${esc(L('st_' + s))}</span></div>`)
     .join('<div class="tl-bar"></div>');
+}
+
+// Forge Contracts (Task 8): resolve the deal's template from the catalog, then render
+// the evidence checklist + stages. Doesn't gate any covenant action — display-only.
+async function resolveDealTemplate(state) {
+  if (dealTemplateTried || !state || !state.template_id) return;
+  dealTemplateTried = true;
+  try {
+    const cat = await loadCatalog('/assets/contracts-catalog.json');
+    DEAL_TEMPLATE = getTemplate(cat, state.template_id);
+  } catch { /* catalog unavailable — checklist/stages simply stay hidden */ }
+}
+
+/** Evidence checklist for DEAL_TEMPLATE. `tracking`/`file` kinds auto-tick from evHasTrack/evHasMedia
+ *  (accumulated in renderChatMsg — deal.html has no chatMsgs[] array to re-scan); other kinds are manual
+ *  checkboxes persisted per-deal+item in localStorage. */
+function renderEvidence() {
+  const plate = $('evidence-plate'), host = $('evidence-checklist');
+  if (!DEAL_TEMPLATE || !deal) { plate.style.display = 'none'; return; }
+  const msgs = [...(evHasTrack ? [{ t: 'track' }] : []), ...(evHasMedia ? [{ t: 'media' }] : [])];
+  const items = evidenceState(DEAL_TEMPLATE, msgs);
+  if (!items.length) { plate.style.display = 'none'; return; }
+  plate.style.display = 'block';
+  host.dataset.dealId = String(deal.id);
+  host.innerHTML = '<h3 style="font-size:15px;margin:0 0 10px">' + esc(LANG === 'ru' ? 'Доказательства по шаблону' : 'Evidence checklist') + '</h3>' +
+    items.map((e) => {
+      const manualKey = 'ev-' + deal.id + '-' + e.id;
+      const done = e.done || localStorage.getItem(manualKey) === '1';
+      const canManual = !e.done; // tracking/file auto-tick from chat; the rest are manual
+      return `<label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13.5px;color:${done ? 'var(--kaspa)' : 'var(--ash)'}">` +
+        `<input type="checkbox" ${done ? 'checked' : ''} ${canManual ? '' : 'disabled'} data-k="${esc(manualKey)}">` +
+        `${esc(loc(e.label, LANG))}${e.required ? ' *' : ''}</label>`;
+    }).join('');
+  host.querySelectorAll('input[data-k]').forEach((cb) => {
+    if (cb.disabled) return;
+    cb.onchange = () => { localStorage.setItem(cb.dataset.k, cb.checked ? '1' : '0'); renderEvidence(); };
+  });
+}
+
+/** Stage list + a deep-link to start the next-stage deal (buyer/seller pick the template again on escrow.html). */
+function renderStages() {
+  const plate = $('stages-plate'), host = $('deal-stages');
+  if (!DEAL_TEMPLATE || !DEAL_TEMPLATE.stages || !DEAL_TEMPLATE.stages.length) { plate.style.display = 'none'; return; }
+  plate.style.display = 'block';
+  host.innerHTML = '<h3 style="font-size:15px;margin:0 0 10px">' + esc(LANG === 'ru' ? 'Этапы' : 'Stages') + '</h3>' +
+    DEAL_TEMPLATE.stages.map((s) => `<div style="padding:5px 0;font-size:13.5px"><b>${esc(loc(s.label, LANG))}</b><br><span style="color:var(--ash2)">${esc(loc(s.note, LANG))}</span></div>`).join('') +
+    `<a class="btn btn-ghost" style="margin-top:10px" href="/escrow.html?template=${encodeURIComponent(DEAL_TEMPLATE.id)}">` +
+    esc(LANG === 'ru' ? 'Создать сделку следующего этапа' : 'Create next-stage deal') + '</a>';
+}
+
+/** Explorer link for an OTC txid, by the leg's method id (Task 8) — the full server matrix
+ *  (otc_verify::METHODS): Tron/EVM chains (incl. the extra L2s) + BTC/LTC. Shared between the
+ *  counter-leg panel (below) and the "paid" chat bubble (renderPayBody). null = no known explorer
+ *  (fiat/cash/other-crypto) — the UI just omits the link, it never blocks anything. */
+function buildExplorerUrl(method, ref) {
+  if (!method || !ref) return null;
+  const r = encodeURIComponent(ref);
+  if (/-trc20$|^trx$/.test(method)) return `https://tronscan.org/#/transaction/${r}`;
+  if (/-erc20$|^eth$/.test(method)) return `https://etherscan.io/tx/${r}`;
+  if (/-bep20$|^bnb$/.test(method)) return `https://bscscan.com/tx/${r}`;
+  if (/-polygon$/.test(method)) return `https://polygonscan.com/tx/${r}`;
+  if (/-arbitrum$/.test(method)) return `https://arbiscan.io/tx/${r}`;
+  if (/-base$/.test(method)) return `https://basescan.org/tx/${r}`;
+  if (/^ton$|-ton$/.test(method)) return `https://tonviewer.com/transaction/${r}`;
+  if (method === 'btc') return `https://mempool.space/tx/${r}`;
+  if (method === 'ltc') return `https://litecoinspace.org/tx/${r}`;
+  return null;
+}
+
+/** Counter-leg panel (Task 8): verification badge + "I have paid" (seller) + a verified-buyer hint.
+ *  st.otc is set only for an otc-template deal with a server-tracked counter-leg (Tasks 4-7) — null
+ *  otherwise, and the whole plate hides. Signal only: nothing here ever moves funds — release stays
+ *  the buyer's own signature (act-active above), same as every other deal. */
+function renderOtcPanel(st) {
+  const o = st.otc;
+  const on = !!(o && o.method);
+  $('otc-panel').style.display = on ? 'block' : 'none';
+  if (!on) return;
+  $('otc-panel-head').textContent = L('otc_panel_head');
+  const cur = o.currency || (o.method || '').toUpperCase();
+  // amount and address as separate copyable fields + QR (owner feedback 2026-07-13)
+  $('otc-amount-lbl2').textContent = deal.role === 'seller' ? L('otc_send_exactly') : L('otc_expect_amount');
+  $('otc-amount-big').textContent = `${o.amount || '?'} ${cur}`;
+  $('otc-addr-lbl2').textContent = deal.role === 'seller' ? L('otc_pay_to_addr') : L('otc_your_addr');
+  $('otc-addr-code').textContent = o.buyer_addr || '—';
+  if (o.buyer_addr) qrInto($('otc-qr'), o.buyer_addr);
+  // other-crypto (no matrix entry) or a degraded network (auto_verify off — missing key / kill-switch)
+  // maps to an honest "unsupported" badge — but only for NON-terminal states: a payment that already
+  // reached verified/mismatch/failed keeps its real status even if the verification key later vanished.
+  const raw = o.verify_status || 'awaiting';
+  const terminal = raw === 'verified' || raw === 'mismatch' || raw === 'failed';
+  const status = ((o.method === 'other-crypto' || o.auto_verify === false) && !terminal) ? 'unsupported' : raw;
+  const b = $('otc-badge');
+  b.textContent = L('otc_badge_' + status) || status;
+  b.className = 'badge ' + (status === 'verified' ? 'ok' : (status === 'mismatch' || status === 'failed') ? 'bad' : '');
+  const url = o.pay_ref ? buildExplorerUrl(o.method, o.pay_ref) : null;
+  $('otc-explorer').style.display = url ? '' : 'none';
+  if (url) { $('otc-explorer').href = url; $('otc-explorer').textContent = L('otc_open_explorer'); }
+  $('otc-hint').style.display = status === 'verified' && deal.role === 'buyer' ? '' : 'none';
+  $('otc-hint').textContent = L('otc_verified_hint');
+  // "I have paid" — the seller only, while there is still something left to verify
+  // SELLER SAFETY GATE (owner-reported critical 2026-07-13): the seller must NOT be prompted to
+  // pay the counter-leg until the buyer has actually locked the KAS into the covenant. Before that
+  // there is nothing in escrow — paying first means paying for nothing.
+  const funded = st.state === 'funded' || st.state === 'disputed';
+  const sellerPrePay = deal.role === 'seller' && !funded;
+  $('otc-not-funded').style.display = sellerPrePay ? '' : 'none';
+  if (sellerPrePay) $('otc-not-funded').textContent = L('otc_not_funded_warn').replace('{amt}', `${kas(deal.amount || 0)}`);
+  // hide the receiving address + QR + copy for the seller until funded (don't invite a premature payment)
+  if ($('otc-addr-row')) $('otc-addr-row').style.display = sellerPrePay ? 'none' : '';
+  if ($('otc-addr-lbl2')) $('otc-addr-lbl2').style.display = sellerPrePay ? 'none' : '';
+  if ($('otc-qr')) $('otc-qr').style.display = sellerPrePay ? 'none' : '';
+  const canPay = deal.role === 'seller' && funded && status !== 'verified' && status !== 'unsupported';
+  $('otc-pay-form').style.display = canPay ? '' : 'none';
+  // one-press flow: auto-detect scans the buyer's address and pre-fills the txid (when the
+  // network's explorer can index by address); the confirmed txid still goes through otc/pay
+  $('otc-detect-btn').style.display = (canPay && o.auto_detect) ? '' : 'none';
+  $('otc-detect-btn').textContent = L('otc_detect_btn');
+  $('otc-pay-ref').placeholder = L('otc_paid_ref_ph');
+  $('otc-pay-ref').setAttribute('aria-label', L('otc_paid_btn'));
+  $('otc-pay-send').textContent = L('otc_paid_send');
 }
 
 // FUND (buyer)
@@ -791,7 +1017,7 @@ function showActive() {
   $('refund-btn').textContent = L('refund_btn');
   $('dispute-confirm').style.display = confirming ? 'block' : 'none';
   if (confirming) {
-    $('dispute-confirm-note').textContent = L('dispute_confirm_note');
+    $('dispute-confirm-note').innerHTML = L('dispute_confirm_note'); // trusted static i18n string (contains the Arbitration Policy link)
     if ($('dispute-sign-open').textContent !== L('disp_signing')) $('dispute-sign-open').textContent = L('dispute_sign_open');
     $('dispute-cancel').textContent = L('disp_cancel');
   }
@@ -1346,6 +1572,10 @@ function renderChatMsg(m) {
   const wasBottom = nearBottom(thread);
   const media = m.text != null ? parseMediaMsg(m.text) : null;
   const track = m.text != null ? parseTrackMsg(m.text) : null;
+  // Forge Contracts: no chatMsgs[] array here — accumulate track/media presence as messages arrive,
+  // and re-tick the evidence checklist (only when a flag flips false→true, to avoid re-render spam).
+  if (track && !evHasTrack) { evHasTrack = true; renderEvidence(); }
+  if (media && !evHasMedia) { evHasMedia = true; renderEvidence(); }
   const payto = m.text != null ? parsePayToMsg(m.text) : null;
   const pay = m.text != null ? parsePayMsg(m.text) : null;
   const div = document.createElement('div');
@@ -1408,13 +1638,14 @@ function renderPayToBody(div, payto, m) {
 /** "Paid" bubble (OTC): 💸 amount + method + reference, an explorer link for crypto; a warning for the receiver. */
 function renderPayBody(div, pay, m) {
   const amt = [pay.amount, pay.currency].filter(Boolean).join(' ');
+  const txUrl = buildExplorerUrl(pay.method, pay.ref);   // Task 8: shared with the otc-panel link, covers the full method matrix
   div.innerHTML =
     `<div class="m-head"><span class="m-ico" aria-hidden="true">💸</span>` +
     `<span class="m-name">${esc(L('pay_bubble'))}${amt ? ': ' + esc(amt) : ''}</span><span class="m-size">${esc(pay.label)}</span></div>` +
     `<div class="msg-text mono" style="user-select:all;word-break:break-all">${esc(pay.ref)}</div>` +
     `<div class="m-cap">🔒 ${esc(L('track_sent_meta'))}</div>` +
     `<div class="m-act"><button class="m-btn t-copy">${esc(L('track_copy'))}</button>` +
-    (pay.txUrl ? `<a class="m-btn" href="${pay.txUrl}" target="_blank" rel="noopener">${esc(L('pay_explorer'))}</a>` : '') + `</div>` +
+    (txUrl ? `<a class="m-btn" href="${txUrl}" target="_blank" rel="noopener">${esc(L('pay_explorer'))}</a>` : '') + `</div>` +
     (m.mine ? '' : `<div class="m-cap" style="white-space:normal;line-height:1.5">${esc(L('pay_hint_receiver'))}</div>`) +
     `<div class="msg-meta">${metaHtml(m)}</div>`;
   const cb = div.querySelector('.t-copy');
@@ -1607,7 +1838,16 @@ $('track-cancel').onclick = () => { $('track-form').style.display = 'none'; };
 $('chat-payto').onclick = () => {
   const f = $('payto-form');
   f.style.display = f.style.display === 'none' ? 'block' : 'none';
-  if (f.style.display === 'block') $('payto-details').focus();
+  if (f.style.display === 'block') {
+    // OTC (Task 8): prefill from the server-tracked counter-leg (method+address set at create/join) —
+    // ONCE only (otcPrefillDone), so reopening the form after a manual edit never clobbers it.
+    if (!otcPrefillDone && st && st.otc && st.otc.method) {
+      otcPrefillDone = true;
+      if (PAY_METHODS.some((pm) => pm.id === st.otc.method)) $('payto-method').value = st.otc.method;
+      if (!$('payto-details').value.trim()) $('payto-details').value = st.otc.buyer_addr || '';
+    }
+    $('payto-details').focus();
+  }
 };
 $('payto-cancel').onclick = () => { $('payto-form').style.display = 'none'; };
 $('payto-send').onclick = async () => {
@@ -1649,6 +1889,64 @@ $('pay-send').onclick = async () => {
   } catch (e) { showErr(err, e); }
   finally { btn.disabled = false; btn.textContent = L('pay_send'); }
 };
+
+// OTC counter-leg (Task 8): "I have paid" in the panel above — ONE action = server otc/pay (starts
+// the on-chain probe) + an anchored {t:'pay'} chat message (same evidence trail as the free-form
+// claim above), using the leg's REAL method/amount from the server, not the free-text picker.
+$('otc-pay-send').onclick = async () => {
+  const ref = $('otc-pay-ref').value.trim();
+  if (!ref) return;
+  hideErr(err);
+  const btn = $('otc-pay-send');
+  btn.disabled = true;
+  try {
+    await otcPay(deal, ref);
+    const o = st.otc;
+    if (peerChatPk && deal.chat_sk) {
+      try {
+        const currency = o.currency || (o.method || '').split('-')[0].toUpperCase();
+        await sendPayMsg(deal, peerChatPk, o.method, ref, o.amount || '', currency);
+        await pollChat(deal, renderChatMsg);
+      } catch (chatErr) {
+        // otcPay already succeeded server-side — the on-chain check is running. Don't let a
+        // failed chat receipt masquerade as a failed payment declaration.
+        showErr(err, new Error(L('otc_paid_chat_fail')));
+      }
+    }
+    $('otc-pay-ref').value = '';
+    await refresh();
+  } catch (e) { showErr(err, e); }
+  finally { btn.disabled = false; }
+};
+// "I have paid" auto-detect: server-side scan of the buyer's address; a found txid is only
+// PRE-FILLED — the seller reviews and confirms, and the full verification path applies.
+$('otc-detect-btn').onclick = async () => {
+  const btn = $('otc-detect-btn'); const note = $('otc-detect-note');
+  btn.disabled = true;
+  note.style.display = 'block'; note.textContent = L('otc_detect_searching');
+  try {
+    const r = await otcDetect(deal);
+    if (r.found) {
+      $('otc-pay-ref').value = r.ref;
+      const o = (st && st.otc) || {};
+      const cur = o.currency || (o.method || '').toUpperCase();
+      const t = new Date((r.time || 0) * 1000).toLocaleTimeString();
+      note.textContent = L('otc_detect_found').replace('{sum}', `${r.amount} ${cur}`).replace('{time}', t);
+      $('otc-pay-send').focus();
+    } else {
+      note.textContent = L('otc_detect_none').replace('{min}', String(Math.round((r.window_secs || 900) / 60)));
+    }
+  } catch (e) { note.textContent = (e && e.message) || 'Error'; }
+  finally { btn.disabled = false; }
+};
+$('otc-addr-copy').onclick = async () => {
+  const o = (st && st.otc) || {};
+  if (!o.buyer_addr) return;
+  await copyText(o.buyer_addr);
+  const b = $('otc-addr-copy'); const keep = b.textContent;
+  b.textContent = '✓'; setTimeout(() => { b.textContent = keep; }, 1200);
+};
+
 
 $('track-send').onclick = async () => {
   if (!peerChatPk || !deal.chat_sk) return;
@@ -1692,6 +1990,6 @@ $('forget').onclick = () => {
 };
 </script>
 <script>if("serviceWorker" in navigator&&/(^|\.)kaspaforge\.org$|(^|\.)officeforge\.co$/.test(location.hostname))navigator.serviceWorker.register("/sw-escrow.js");</script>
-<script src="/assets/kaspa-widget.js?v=3" defer></script>
+<script src="/assets/kaspa-widget.js?v=4" defer></script>
 </body>
 </html>

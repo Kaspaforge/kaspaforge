@@ -12,7 +12,7 @@
 <meta name="theme-color" content="#0E1116">
 <link rel="manifest" href="/manifest-escrow.json">
 <link rel="apple-touch-icon" href="/assets/icons-escrow/apple-touch-icon.png">
-<script src="/assets/nav.js?v=5" defer></script>
+<script src="/assets/nav.js?v=7" defer></script>
 <link rel="stylesheet" href="/assets/safe.css?v=14">
 <link rel="stylesheet" href="/assets/escrow.css?v=7">
 <script src="/assets/qrcode.min.js"></script>
@@ -34,7 +34,7 @@
   <div id="err" class="note alarm" style="display:none" role="alert"></div>
   <div id="empty" class="plate" style="display:none"><p class="hint" id="empty-msg"></p><div style="margin-top:12px"><a class="btn btn-kaspa" href="/ru/escrow.html" id="empty-new">Новая сделка</a></div></div>
 
-  <!-- Загрузка сделки с нового устройства/браузера: recovery-лист (.txt) или ручной ввод -->
+  <!-- Loading a deal from a new device/browser: recovery sheet (.txt) or manual entry -->
   <div class="plate" id="load-plate" style="display:none">
     <h2 style="font-size:20px" id="ld-head"></h2>
     <p class="hint" id="ld-hint"></p>
@@ -52,7 +52,7 @@
     <div style="margin-top:14px"><button class="btn btn-kaspa" id="ld-open"></button></div>
   </div>
 
-  <!-- Портфель: все сделки, сохранённые в этом браузере (по аналогии с портфелем сейфов safe) -->
+  <!-- Portfolio: all deals saved in this browser (mirrors the safe portfolio pattern) -->
   <div class="plate" id="deals-bar" style="display:none;padding:16px 18px">
     <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap">
       <h2 style="font-size:17px;margin:0" id="db-title">My deals</h2>
@@ -61,7 +61,7 @@
     <div style="margin-top:12px"><a class="btn btn-ghost" id="db-add" href="/escrow.html"></a></div>
   </div>
 
-  <!-- JOIN: вторая сторона смотрит условия и присоединяется -->
+  <!-- JOIN: the second party reviews the terms and joins -->
   <div class="plate" id="join-plate" style="display:none">
     <h2 style="font-size:20px" id="join-head"></h2>
     <div class="kv"><span class="k" id="j-type-lbl">Type</span><span class="v" id="j-type"></span></div>
@@ -69,6 +69,13 @@
     <div class="kv"><span class="k" id="j-window-lbl">Window</span><span class="v" id="j-window"></span></div>
     <div class="kv"><span class="k" id="j-descr-lbl">Conditions</span><span class="v" id="j-descr" style="text-align:left;max-width:100%;white-space:pre-wrap;font-family:var(--body)"></span></div>
     <p class="hint" id="j-fee" style="margin-top:10px"></p>
+    <!-- Counter OTC leg (task 7): shown only if the joiner is the buyer and the address wasn't set at creation -->
+    <div id="join-otc-wrap" style="display:none;margin-top:10px">
+      <label for="join-otc-addr" id="join-otc-lbl"></label>
+      <input type="text" id="join-otc-addr" maxlength="128" autocomplete="off" spellcheck="false">
+      <p class="hint" id="join-otc-hint"></p>
+      <p class="hint" id="join-otc-err" style="color:#e05a5a;font-weight:600;display:none"></p>
+    </div>
     <div style="margin-top:16px"><button class="btn btn-kaspa" id="join-btn"></button></div>
     <p class="hint" id="join-note" style="margin-top:10px"></p>
   </div>
@@ -88,7 +95,7 @@
       <div class="kv"><span class="k" id="s-descr-lbl"></span><span class="v" id="s-descr" style="text-align:left;max-width:100%;white-space:pre-wrap;font-family:var(--body)"></span></div>
     </div>
 
-    <!-- дисклеймер: вывод из ковенанта доступен только после закрытия сделки (показывается когда средства заперты) -->
+    <!-- disclaimer: withdrawal from the covenant is only available after the deal closes (shown while funds are locked) -->
     <p class="hint" id="withdraw-note" style="display:none;margin:-4px 0 6px"></p>
 
     <!-- FUND (buyer, joined) -->
@@ -111,12 +118,12 @@
     </div>
 
     <!-- WAIT (seller, joined) -->
-    <div class="plate" id="act-wait" style="display:none"><p class="hint" id="wait-msg"></p></div>
+    <div class="plate" id="act-wait" style="display:none"><p class="note alarm" id="wait-msg" style="margin:0"></p></div>
 
     <!-- ACTIVE actions -->
     <div class="plate" id="act-active" style="display:none">
       <div class="kv"><span class="k" id="a-window-lbl"></span><span class="v warn" id="a-window"></span></div>
-      <!-- goods: страж окна — трек есть, получение не подтверждено, окно на исходе → открой спор ДО закрытия -->
+      <!-- goods: window guard — tracking exists, receipt not confirmed, window running out → open a dispute BEFORE it closes -->
       <div class="note alarm" id="track-win-guard" style="display:none;margin-top:10px"></div>
       <p class="hint" id="a-hint"></p>
       <div id="a-buyer" style="margin-top:8px;display:none;gap:12px;flex-wrap:wrap">
@@ -124,7 +131,7 @@
         <button class="btn btn-alarm" id="dispute-btn"></button>
       </div>
       <div id="a-seller" style="display:none;margin-top:8px"><button class="btn btn-ghost" id="refund-btn"></button></div>
-      <!-- шаг подтверждения открытия спора: подписать спор + открыть чат арбитру одним действием -->
+      <!-- dispute-opening confirmation step: sign the dispute + open the chat to the arbiter in one action -->
       <div id="dispute-confirm" style="display:none;margin-top:12px">
         <p class="hint" id="dispute-confirm-note"></p>
         <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px">
@@ -134,7 +141,7 @@
       </div>
     </div>
 
-    <!-- DISPUTED: Фаза 2 — заявления → раскрытие переписки → вердикт ИИ → подпись стороны -->
+    <!-- DISPUTED: Phase 2 — claims → chat reveal → AI verdict → party signature -->
     <div class="plate" id="act-disputed" style="display:none">
       <div class="note alarm" id="disp-alarm" style="display:none;margin-bottom:12px"></div>
       <h2 style="font-size:20px" id="disp-head"></h2>
@@ -153,11 +160,11 @@
     <div class="plate" id="act-closed" style="display:none">
       <h2 style="font-size:20px" id="closed-head"></h2>
       <p class="hint" id="closed-by"></p>
-      <!-- вердикт ИИ-медиатора участникам, если сделку закрыл спор (arbitrated) -->
+      <!-- AI mediator verdict shown to participants if the deal was closed via dispute (arbitrated) -->
       <div id="closed-verdict" style="display:none;margin-top:12px"></div>
-      <!-- выплата стороне: сколько вернулось + куда пришло + вывод на свой кошелёк (ключом сделки, некостодиально) -->
+      <!-- payout to the party: how much came back + where it landed + withdrawal to own wallet (with the deal key, non-custodial) -->
       <div id="closed-payout" style="display:none;margin-top:14px">
-        <!-- форма вывода: пока средства на payout-адресе -->
+        <!-- withdrawal form: while funds are still on the payout address -->
         <div id="cp-form">
           <div class="kv"><span class="k" id="cp-lbl"></span><span class="v ok" id="cp-amt"></span></div>
           <div class="addr" style="margin-top:8px"><code id="cp-addr"></code><button id="cp-copy" aria-label="Copy address">copy</button></div>
@@ -167,7 +174,7 @@
           <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-kaspa" id="cp-withdraw"></button><button class="btn btn-ghost" id="cp-withdraw-wallet"></button></div>
           <p style="margin-top:10px"><a id="cp-explorer" target="_blank" rel="noopener" style="display:none"></a></p>
         </div>
-        <!-- успех: средства выведены + ссылка на транзакцию вывода (персистентно, из deal.withdraw_txid) -->
+        <!-- success: funds withdrawn + link to the withdrawal transaction (persistent, from deal.withdraw_txid) -->
         <div id="cp-done" style="display:none">
           <p id="cp-done-msg" style="color:var(--kaspa);font-weight:600;font-size:16px;margin:0"></p>
           <p style="margin-top:8px"><a id="cp-done-tx" target="_blank" rel="noopener" style="display:none"></a></p>
@@ -176,13 +183,45 @@
       <p style="margin-top:10px"><a id="closed-explorer" target="_blank" rel="noopener" style="display:none"></a></p>
     </div>
 
-    <!-- CHAT (виден после funded: funded/disputed/closed) -->
+    <!-- Counter OTC leg panel (task 8): verification badge + "I paid" (seller) + payto prefill.
+         Hidden if the deal has no server-side counter leg (state.otc, tasks 4-7). -->
+    <div class="plate" id="otc-panel" style="display:none">
+      <h2 style="font-size:20px" id="otc-panel-head"></h2>
+      <!-- SELLER SAFETY GATE: never invite the seller to pay before the buyer has locked the KAS
+           into escrow (owner-reported critical 2026-07-13). Shown until state=funded. -->
+      <p class="note alarm" id="otc-not-funded" style="display:none"></p>
+      <!-- amount and address as first-class fields: explicit, copyable, QR (owner feedback 2026-07-13) -->
+      <div id="otc-terms-wrap" style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">
+        <div style="flex:1;min-width:240px">
+          <div class="hint" id="otc-amount-lbl2"></div>
+          <div class="mono" id="otc-amount-big" style="font-size:22px;font-weight:700;margin:2px 0 10px"></div>
+          <div class="hint" id="otc-addr-lbl2"></div>
+          <div class="addr" id="otc-addr-row" style="margin-top:2px"><code id="otc-addr-code" style="user-select:all"></code><button id="otc-addr-copy" aria-label="Скопировать адрес">copy</button></div>
+          <div style="display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap">
+            <span id="otc-badge" class="badge"></span>
+            <a id="otc-explorer" target="_blank" rel="noopener" style="display:none"></a>
+          </div>
+        </div>
+        <div id="otc-qr" style="flex:0 0 auto"></div>
+      </div>
+      <p class="hint" id="otc-hint" style="display:none"></p>
+      <div id="otc-pay-form" style="display:none;margin-top:12px">
+        <button class="btn btn-kaspa" id="otc-detect-btn" style="display:none"></button>
+        <p class="hint" id="otc-detect-note" style="display:none;margin-top:6px"></p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+          <input type="text" id="otc-pay-ref" maxlength="100" autocomplete="off" spellcheck="false" style="flex:1;min-width:220px">
+          <button class="btn btn-kaspa" id="otc-pay-send"></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHAT (visible after funded: funded/disputed/closed) -->
     <div class="plate" id="act-chat" style="display:none;border-color:var(--kaspa);box-shadow:0 0 0 3px rgba(0,193,175,.12)">
       <h2 style="font-size:20px" id="chat-head"></h2>
       <p class="chat-sub" id="chat-sub"></p>
       <div id="chat-funding-msg" style="display:none"></div>
       <div class="chat-note" id="chat-note" style="display:none"></div>
-      <!-- read-only closed: тумблер сворачивания переписки (отправки нет, только чтение старых сообщений/вложений) -->
+      <!-- read-only closed: toggle to collapse the thread (no sending, only reading old messages/attachments) -->
       <button class="btn btn-ghost" id="chat-toggle" type="button" style="display:none;margin:8px 0"></button>
       <div id="chat-body" style="display:none">
         <div id="chat-thread" role="log" aria-live="polite"></div>
@@ -195,7 +234,7 @@
           <textarea id="chat-input" rows="2" placeholder=""></textarea>
           <button class="btn btn-kaspa" id="chat-send-btn"></button>
         </div>
-        <!-- форма трек-номера (продавец, goods): перевозчик + номер → E2E track-сообщение -->
+        <!-- tracking-number form (seller, goods): carrier + number → E2E track message -->
         <div id="track-form" style="display:none;margin-top:10px;padding:12px;background:var(--iron);border:1px solid var(--bd-soft);border-radius:8px">
           <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
             <label style="flex:0 0 auto;margin:0"><span class="k" id="track-carrier-lbl" style="display:block;margin-bottom:4px"></span>
@@ -208,7 +247,7 @@
             <button class="btn btn-ghost" id="track-cancel"></button>
           </div>
         </div>
-        <!-- OTC: реквизиты встречного платежа (покупатель) -->
+        <!-- OTC: counter-payment details (buyer) -->
         <div id="payto-form" style="display:none;margin-top:10px;padding:12px;background:var(--iron);border:1px solid var(--bd-soft);border-radius:8px">
           <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
             <label style="flex:0 0 auto;margin:0"><span class="k" id="payto-method-lbl" style="display:block;margin-bottom:4px"></span>
@@ -221,7 +260,7 @@
             <button class="btn btn-ghost" id="payto-cancel"></button>
           </div>
         </div>
-        <!-- OTC: заявление об оплате (продавец) -->
+        <!-- OTC: payment declaration (seller) -->
         <div id="pay-form" style="display:none;margin-top:10px;padding:12px;background:var(--iron);border:1px solid var(--bd-soft);border-radius:8px">
           <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
             <label style="flex:0 0 auto;margin:0"><span class="k" id="pay-method-lbl" style="display:block;margin-bottom:4px"></span>
@@ -241,7 +280,7 @@
       </div>
     </div>
 
-    <!-- fresh device: нет ключа локально -->
+    <!-- fresh device: no key stored locally -->
     <div class="plate" id="act-key" style="display:none">
       <h2 style="font-size:20px" id="fd-head"></h2>
       <p class="hint" id="fd-hint"></p>
@@ -261,7 +300,7 @@
       <p class="hint" id="tg-out" style="display:none;margin-top:10px"></p>
     </div>
 
-    <!-- Забыть эту сделку в этом браузере: ключ уходит вместе с ней, доступ остаётся по recovery-листу -->
+    <!-- Forget this deal in this browser: the key goes with it, access remains via the recovery sheet -->
     <div id="forget-wrap" style="margin-top:18px;display:none;gap:14px;flex-wrap:wrap;align-items:center">
       <button class="btn btn-ghost" id="forget"></button>
       <span class="hint" id="forget-hint" style="display:none"></span>
@@ -269,7 +308,28 @@
   </div>
 </div>
 
-<footer><div class="row wrap"><a class="foot-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="OfficeForge"><img src="/assets/logo.png" alt="OfficeForge"></a><span>Kaspa Гарант · некостодиальная бета · <a href="https://officeforge.co">OfficeForge</a> · связь: kaspa@officeforge.co</span></div></footer>
+<footer>
+  <div class="foot">
+    <span class="fb">
+      <img class="k" src="/assets/brand/emblem-flat-header.png" alt="" aria-hidden="true">
+      <span>© 2026 Kaspa Forge — сделан ИИ-офисом</span>
+      <a class="foot-ofs-logo" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="Перейти на сайт OfficeForge"><img src="/assets/of-wordmark.png" alt="OfficeForge"></a>
+    </span>
+    <nav aria-label="Подвал">
+      <a href="/ru/safe.html">Сейф</a>
+      <a href="/ru/escrow-index.html">Гарант</a>
+      <a href="/ru/market.html">Маркет</a>
+      <a href="/ru/blog/">Блог</a>
+      <a href="/ru/docs/">Документы</a>
+      <a href="/ru/recover.html">Восстановление</a>
+      <a href="https://github.com/Kaspaforge/kaspaforge" target="_blank" rel="noopener">GitHub</a>
+      <a href="/ru/privacy.html">Приватность</a>
+      <a href="/ru/terms.html">Условия</a>
+      <a href="/ru/security.html">Безопасность</a>
+      <a href="mailto:kaspa@officeforge.co">kaspa@officeforge.co</a>
+    </nav>
+  </div>
+</footer>
 </div>
 
 <script type="module">
@@ -280,26 +340,29 @@ import { boot, core, net, api, kas, usdStr, genToken, L, $, esc, copyText, qrInt
          mediaSupported, checkMediaFile, encryptMediaFile, uploadMedia, downloadMedia,
          decryptMediaVerify, sendMediaMsg, parseMediaMsg,
          CARRIERS, carrierLabel, normTrackCode, looksLikeS10, s10Valid, sendTrackMsg, parseTrackMsg,
-         PAY_METHODS, payMethodLabel, sendPayToMsg, sendPayMsg, parsePayToMsg, parsePayMsg,
+         PAY_METHODS, payMethodLabel, sendPayToMsg, sendPayMsg, parsePayToMsg, parsePayMsg, otcPay, otcDetect,
          mutualSupported, disputeState, escalateDispute, notifyWithdrawn, sendClaim, revealChat, postMutualSig, getMutualSigs,
-         parseClaim, fmtHM, splitAmounts } from '/assets/escrow.js?v=31';
-import { mountSwapWidget } from '/assets/swap-widget.js?v=4';
+         parseClaim, fmtHM, splitAmounts, otcAddrOk, otcAddrKind } from '/assets/escrow.js?v=40';
+import { mountSwapWidget } from '/assets/swap-widget.js?v=5';
 import { requireUnlock, confirmPassword, wireCrypto } from '/assets/lock-ui.js';
-import { fundTargetFromWallet } from '/assets/wallet.js';
+import { fundTargetFromWallet } from '/assets/wallet.js?v=2';
 import * as session from '/assets/session.js';
 
 const err = $('err');
 const params = new URLSearchParams(location.search);
 let deal = null, cfg = null, timer = null, st = null;
-// состояние диспут-флоу (Фаза 2) — до роутинга: startPanel синхронно зовёт resetDispute
-let ds = null;             // последний /dispute/state
-let dispKey = '';          // ключ отрисованной стадии
-let splitInfo = null;      // {raw, toBuyer, toSeller, ok} текущего split-вердикта
-let mutualBusy = false;    // авто-combine сплита не гоняем параллельно
-let revealPokeAt = 0;      // анти-спам повторного reveal-пинка
-let claimReq = null;       // выбранный исход в форме заявления
+// dispute-flow state (Phase 2) — before routing: startPanel synchronously calls resetDispute
+let ds = null;             // last /dispute/state
+let dispKey = '';          // key of the rendered stage
+let splitInfo = null;      // {raw, toBuyer, toSeller, ok} of the current split verdict
+let mutualBusy = false;    // don't run the split auto-combine in parallel
+let revealPokeAt = 0;      // anti-spam for the repeated reveal poke
+let claimReq = null;       // chosen outcome in the claim form
+// Counter OTC leg (task 8): prefill the buyer's payto form ONCE from the server-side leg
+// (method+address from create/join) — don't touch it again, to avoid clobbering a manual edit.
+let otcPrefillDone = false;
 
-// статические подписи из словаря
+// static labels from the dictionary
 for (const [id, key] of [
   ['s-state-lbl','lbl_status'], ['s-role-lbl','lbl_you_are'], ['s-amount-lbl','lbl_amount'],
   ['s-type-lbl','lbl_type'], ['s-addr-lbl','lbl_addr'], ['s-descr-lbl','lbl_conditions'],
@@ -307,15 +370,15 @@ for (const [id, key] of [
   ['j-window-lbl','lbl_window'], ['a-window-lbl','lbl_window'],
 ]) $(id).textContent = L(key);
 
-// boot → requireUnlock (session ДОЛЖНА быть разблокирована ПЕРЕД любым доступом к профилю) → маршрутизация,
-// всё внутри одного try: loadDeals()/loadDeal() зовут session.getProfile(), который бросает Error('locked'),
-// если сессия не разблокирована — без requireUnlock ПЕРЕД роутингом это уронит всю страницу (баг manage.html).
-// ИСКЛЮЧЕНИЕ — ?join=: инвайт-превью публичное (GET /invite без токена/профиля), профиль нужен только
-// в момент клика Join (генерация ключей + запись) — там joinFlow и зовёт requireUnlock. Пароль ПОСЛЕ
-// условий сделки, не до (стена пароля без контекста покупки — главная точка отвала, критика 09.07).
+// boot → requireUnlock (session MUST be unlocked BEFORE any profile access) → routing,
+// all inside one try: loadDeals()/loadDeal() call session.getProfile(), which throws Error('locked')
+// if the session isn't unlocked — without requireUnlock BEFORE routing this crashes the whole page (manage.html bug).
+// EXCEPTION — ?join=: the invite preview is public (GET /invite without token/profile), the profile is needed only
+// at the moment of clicking Join (key generation + write) — joinFlow calls requireUnlock there. Password AFTER
+// the deal terms, not before (a password wall with no purchase context is the main drop-off point, feedback 07-09).
 try {
   await boot();
-  // маршрутизация: ?join=CODE | ?id=X | активная сделка | первая в сторе
+  // routing: ?join=CODE | ?id=X | active deal | first in the store
   if (params.get('join')) { await joinFlow(params.get('join')); }
   else {
     await requireUnlock(net());
@@ -327,7 +390,7 @@ try {
   }
 } catch (e) { showErr(err, e); }
 
-// ── портфель сделок в этом браузере: строки-переключатели (по аналогии с портфелем сейфов safe) ──
+// ── portfolio of deals in this browser: switcher rows (mirrors the safe portfolio pattern) ──
 function shortAddr(a) { return a ? a.slice(0, 14) + '…' + a.slice(-6) : ''; }
 function dealRow(d, activeId, state) {
   const row = document.createElement('button');
@@ -337,15 +400,15 @@ function dealRow(d, activeId, state) {
   row.querySelector('.vb-name').textContent = d.label || (L('deal_title')(d.id) + ' · ' + L('noun_' + d.role));
   row.querySelector('.vb-addr').textContent = shortAddr(d.escrow_addr);
   row.querySelector('.vb-amt').textContent = kas(d.amount);
-  const dot = row.querySelector('.vb-dot');   // зелёная — активна, янтарь — спор, серая — закрыта/неизвестно
+  const dot = row.querySelector('.vb-dot');   // green — active, amber — disputed, gray — closed/unknown
   if (state === 'disputed') dot.classList.add('unvaulting');
   else if (state && state !== 'closed' && state !== 'expired') dot.classList.add('vault');
   row.onclick = () => switchDeal(d.id);
   row.querySelector('.vb-edit').onclick = (e) => { e.stopPropagation(); renameDeal(d); };
   return row;
 }
-// Портфель: активные сделки видны сразу, завершённые (closed/expired) свёрнуты под кликабельным
-// заголовком «Завершённые (N)» — чтобы длинный список не разрастался. Открытая сделка всегда видна.
+// Portfolio: active deals are shown right away, completed ones (closed/expired) are collapsed under
+// a clickable "Completed (N)" header — so the list doesn't grow too long. The open deal is always visible.
 async function renderDealsBar() {
   const list = loadDeals();
   const bar = $('deals-bar');
@@ -354,7 +417,7 @@ async function renderDealsBar() {
   $('db-title').textContent = L('deals_bar_title');
   $('db-add').textContent = L('deal_new');
   const activeId = deal ? deal.id : activeDealId();
-  // состояния всех сделок (parallel), чтобы разложить на активные/завершённые; ошибка → null (покажем как активную)
+  // states of all deals (parallel), to split into active/completed; error → null (shown as active)
   const states = await Promise.all(list.map(async (d) => {
     try { return (await api(`/api/safe/escrow/state?id=${d.id}&token=${encodeURIComponent(d.token)}`)).state; }
     catch { return null; }
@@ -369,7 +432,7 @@ async function renderDealsBar() {
     hdr.type = 'button';
     hdr.style.cssText = 'display:block;width:100%;text-align:left;margin-top:12px;padding:8px 4px;background:none;border:0;color:var(--ash2);font-family:var(--mono);font-size:12px;letter-spacing:.04em;cursor:pointer';
     const box = document.createElement('div');
-    box.style.display = 'none';   // завершённые свёрнуты по умолчанию
+    box.style.display = 'none';   // completed ones are collapsed by default
     const setLbl = () => { hdr.textContent = L('deals_done_toggle')(doneIdx.length) + (box.style.display === 'none' ? '  ▸' : '  ▾'); };
     hdr.onclick = () => { box.style.display = box.style.display === 'none' ? 'block' : 'none'; setLbl(); };
     doneIdx.forEach((i) => box.appendChild(dealRow(list[i], activeId, states[i])));
@@ -381,7 +444,7 @@ async function renderDealsBar() {
 function switchDeal(id) {
   if (deal && id === deal.id) return;
   setActiveDeal(id);
-  location.href = location.pathname + '?id=' + id; // полная перезагрузка → чистая панель/чат/спор новой сделки
+  location.href = location.pathname + '?id=' + id; // full reload → a clean panel/chat/dispute for the new deal
 }
 function renameDeal(d) {
   const name = prompt(L('db_rename'), d.label || '');
@@ -392,9 +455,9 @@ function renameDeal(d) {
   renderDealsBar();
 }
 
-// ── загрузка сделки с нового устройства/браузера: recovery-лист (.txt) или ручной ввод ──
-// Восстановление по ключу+токену из серверного состояния. Funding-ключ не реконструируем
-// (в ядре нет sk→pk) — фандить можно только с исходного устройства, как во freshDevice.
+// ── loading a deal from a new device/browser: recovery sheet (.txt) or manual entry ──
+// Restore by key+token from the server-side state. The funding key isn't reconstructed
+// (the core has no sk→pk) — funding is only possible from the original device, as in freshDevice.
 async function restoreDeal(id, sk, token, chatSk) {
   const s = await api(`/api/safe/escrow/state?id=${id}&token=${encodeURIComponent(token)}`);
   const role = s.my_role || s.role;
@@ -404,8 +467,8 @@ async function restoreDeal(id, sk, token, chatSk) {
            sk, cfg: s.cfg, escrow_addr: s.escrow_addr, disputed_addr: s.disputed_addr,
            chat_sk: chatSk || null, chat_pk: chatSk ? myChatPk : null,
            funding_sk: null, funding_pk: null };
-  unforgetDeal(deal.id); // recovery-лист = явный возврат: снимаем tombstone «забыта в этом браузере»
-  saveDeal(deal); // проставит активную
+  unforgetDeal(deal.id, deal); // явное восстановление побеждает старый synced tombstone
+  saveDeal(deal); // will mark it active
   return deal;
 }
 function showLoadForm() {
@@ -431,7 +494,7 @@ $('ld-file').addEventListener('change', async () => {
     if (p.sk) $('ld-key').value = p.sk;
     if (p.token) $('ld-token').value = p.token;
     if (p.chat_sk) $('ld-chat').value = p.chat_sk;
-    if (p.id && p.sk && p.token) $('ld-open').click(); // лист полный — открываем сразу
+    if (p.id && p.sk && p.token) $('ld-open').click(); // the sheet is complete — open right away
   } catch (e) { showErr(err, e); }
 });
 $('ld-open').onclick = async () => {
@@ -457,6 +520,15 @@ $('ld-open').onclick = async () => {
 };
 
 // ── JOIN ──
+// Server errors are always English (owner rule 2026-07-13); the map below only upgrades the
+// known short codes to friendlier texts with recovery advice — errors stay English on the RU page.
+const JOIN_ERR_EN = {
+  'invite not found or already used': 'This invite was not found or has already been used. If you came from a marketplace listing, it gets a fresh Buy link automatically — go back to the listing and try again in a minute.',
+  'this deal has already been joined': 'Someone has already joined this deal.',
+  'invite expired': 'This invite has expired.',
+  'deal not found': 'Deal not found.',
+};
+const joinErr = (e) => new Error(JOIN_ERR_EN[e && e.message] || (e && e.message) || 'Error');
 async function joinFlow(code) {
   try {
     const inv = await api(`/api/safe/escrow/invite?code=${encodeURIComponent(code)}`);
@@ -470,36 +542,62 @@ async function joinFlow(code) {
     if (inv.fee_resolve) $('j-fee').innerHTML = L('fee_line')(kas(inv.fee_resolve), kas(inv.fee_dispute));
     $('join-btn').textContent = L('join_btn');
     $('join-note').textContent = L('join_note');
-    // Профиль на этом экране может быть ещё заперт (unlock отложен до клика Join) — бар
-    // сохранённых сделок рисуем, только если сессия открыта или тихо резюмится из per-tab.
+    // Counter OTC leg (task 7): the joiner is the buyer, and the creator (seller) didn't set a
+    // receiving address at creation — the buyer must supply it now, before joining.
+    if (inv.otc_addr_needed && inv.your_role === 'buyer') {
+      $('join-otc-wrap').style.display = 'block';
+      $('join-otc-lbl').textContent = L('otc_leg_addr_join');
+      // explicitly explain whose address this is and what will land on it — wrong addresses happen right at join
+      const otcSum = `${inv.otc_amount || ''} ${inv.otc_currency || inv.otc_method || ''}`.trim();
+      $('join-otc-hint').textContent = L('otc_join_hint').replace('{sum}', otcSum || '—');
+      // validate the receiving address against the leg's network on entry (owner request 2026-07-13)
+      const vJoinAddr = async () => {
+        const a = $('join-otc-addr').value.trim();
+        const errEl = $('join-otc-err');
+        if (!a || inv.otc_method === 'other-crypto') { errEl.style.display = 'none'; return true; }
+        const kind = await otcAddrKind(inv.otc_method);
+        if (otcAddrOk(kind, a)) { errEl.style.display = 'none'; return true; }
+        errEl.textContent = L('otc_leg_addr_bad').replace('{net}', inv.otc_currency || inv.otc_method || '—');
+        errEl.style.display = ''; return false;
+      };
+      $('join-otc-addr').oninput = vJoinAddr;
+      window.__vJoinAddr = vJoinAddr;
+    }
+    // The profile on this screen may still be locked (unlock is deferred until the Join click) — the
+    // saved-deals bar is only rendered if the session is open or quietly resumes from per-tab.
     await wireCrypto();
     if (session.isUnlocked() || session.tryResume()) renderDealsBar();
     $('join-btn').onclick = async () => {
       try {
         hideErr(err);
         $('join-btn').disabled = true;
-        // Пароль профиля — только теперь: условия сделки уже на экране, а в оверлей уходит
-        // контекст покупки (роль + сумма), чтобы стена пароля не была безликой.
+        if (inv.otc_addr_needed && inv.your_role === 'buyer' && window.__vJoinAddr && !(await window.__vJoinAddr())) {
+          showErr(err, new Error(L('otc_leg_addr_bad').replace('{net}', inv.otc_currency || inv.otc_method || '')));
+          $('join-btn').disabled = false; return;
+        }
+        // The profile password — only now: the deal terms are already on screen, and the purchase
+        // context (role + amount) goes into the overlay, so the password wall isn't faceless.
         const unlocked = await requireUnlock(net(), { cancelable: true,
           context: `${L('you_are')(esc(L('noun_' + inv.your_role)))}<br>${kas(inv.amount)}${usdStr(inv.amount)}` });
         if (!unlocked) { $('join-btn').disabled = false; return; }
-        renderDealsBar(); // профиль открыт — теперь можно показать сохранённые сделки
+        renderDealsBar(); // profile unlocked — now the saved deals can be shown
         $('join-btn').textContent = L('joining');
-        // Профиль v3: ключи присоединяющейся стороны деривируются из мастер-seed —
-        // сделка восстановима из любого экспорта бэкапа, даже сделанного до join.
+        // Profile v3: the joining party's keys are derived from the master seed —
+        // the deal is recoverable from any backup export, even one made before the join.
         const dd = session.takeDeriv('deal');
         const keys = dd
           ? (() => { const k = JSON.parse(core.derive_keys(dd.seed, 'deal/key', dd.index));
                      const f = JSON.parse(core.derive_keys(dd.seed, 'deal/funding', dd.index));
                      return { sk: k.sk, pk: k.pk, funding_sk: f.sk, funding_pk: f.pk }; })()
-          : JSON.parse(core.escrow_gen_keys());   // профиль до-v3 без seed — как раньше
+          : JSON.parse(core.escrow_gen_keys());   // pre-v3 profile without a seed — as before
         const token = dd ? core.derive_token(dd.seed, 'deal', dd.index) : genToken();
         const chat = !chatSupported() ? null
           : (dd && core.derive_chat_keys) ? JSON.parse(core.derive_chat_keys(dd.seed, 'deal/chat', dd.index))
           : JSON.parse(core.chat_gen_keys());
         const r = await api('/api/safe/escrow/join', { method: 'POST', headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ join_code: code, pk: keys.pk, token, chat_pk: chat ? chat.pk : '' }) });
-        // СВЕРКА адреса, посчитанного браузером, с серверным — анти-подмена параметров
+          body: JSON.stringify({ join_code: code, pk: keys.pk, token, chat_pk: chat ? chat.pk : '',
+            otc_buyer_addr: $('join-otc-addr') ? $('join-otc-addr').value.trim() : '' }) });
+        // VERIFY the address computed by the browser against the server's — anti-tampering check
         const localAddr = core.escrow_address(cfgStr(r.cfg), net());
         if (localAddr !== r.escrow_addr) { showErr(err, new Error(L('addr_mismatch'))); return; }
         deal = { id: r.id, role: inv.your_role, token, network: net(), amount: r.amount, template: r.template, descr: r.descr, deriv_i: dd ? dd.index : null,
@@ -507,21 +605,21 @@ async function joinFlow(code) {
                  funding_pk: inv.your_role === 'buyer' ? keys.funding_pk : null, cfg: r.cfg,
                  escrow_addr: r.escrow_addr, disputed_addr: r.disputed_addr,
                  chat_sk: chat ? chat.sk : null, chat_pk: chat ? chat.pk : null };
-        unforgetDeal(deal.id); // повторный join забытой сделки = явный возврат: снимаем tombstone
+        unforgetDeal(deal.id, deal); // явный повторный вход побеждает старый synced tombstone
         saveDeal(deal);
         $('join-plate').style.display = 'none';
         history.replaceState(null, '', `?id=${r.id}`);
         startPanel();
-      } catch (e) { showErr(err, e); $('join-btn').disabled = false; $('join-btn').textContent = L('join_btn'); }
+      } catch (e) { showErr(err, joinErr(e)); $('join-btn').disabled = false; $('join-btn').textContent = L('join_btn'); }
     };
-  } catch (e) { showErr(err, e); $('empty').style.display = 'block'; $('empty-msg').textContent = e.message; }
+  } catch (e) { const t = joinErr(e); showErr(err, t); $('empty').style.display = 'block'; $('empty-msg').textContent = t.message; }
 }
 
-// ── fresh device: восстановление панели по recovery-листу ──
+// ── fresh device: restoring the panel via the recovery sheet ──
 function freshDevice(id) {
   $('panel').style.display = 'block';
   $('title').textContent = L('deal_title')(id);
-  renderDealsBar(); // другие сделки этого браузера видны, пока вводим ключ
+  renderDealsBar(); // other deals in this browser stay visible while entering the key
   const plate = $('act-key');
   plate.style.display = 'block';
   $('fd-head').textContent = L('fd_head');
@@ -560,7 +658,7 @@ function startPanel() {
   $('s-type').textContent = templateLabel(deal.template);
   $('s-descr').textContent = deal.descr || '—';
   cfg = deal.cfg || null;
-  // чат: заголовки; сама плашка включается в refresh (после funded)
+  // chat: headers; the panel itself is enabled in refresh (after funded)
   $('chat-head').textContent = L('chat_title');
   $('chat-sub').textContent = L('chat_hint');
   $('chat-input').placeholder = L('chat_placeholder');
@@ -576,14 +674,14 @@ function startPanel() {
 }
 
 async function refresh() {
-  if (!deal) return;   // сделку забыли, пока тик стоял в очереди (Forget)
+  if (!deal) return;   // the deal was forgotten while the tick sat in the queue (Forget)
   try {
     st = await api(`/api/safe/escrow/state?id=${deal.id}&token=${encodeURIComponent(deal.token)}`);
-    if (!deal) return; // сделку забыли, пока ждали сеть — не воскрешаем и не рисуем
+    if (!deal) return; // the deal was forgotten while waiting on the network — don't resurrect or render it
     if (st.cfg) {
       cfg = st.cfg;
-      // персист — только при РЕАЛЬНОМ изменении: безусловный saveDeal каждый тик (6с) впустую
-      // пере-шифровывал профиль и воскрешал только что забытую сделку доехавшим тиком (upsert)
+      // persist — only on a REAL change: an unconditional saveDeal every tick (6s) would needlessly
+      // re-encrypt the profile and resurrect a just-forgotten deal via a straggler tick's upsert
       const fresh = !deal.cfg || deal.escrow_addr !== st.escrow_addr || deal.disputed_addr !== st.disputed_addr;
       deal.cfg = st.cfg; deal.escrow_addr = st.escrow_addr; deal.disputed_addr = st.disputed_addr;
       if (fresh) saveDeal(deal);
@@ -592,9 +690,10 @@ async function refresh() {
     $('s-state').textContent = L('st_' + st.state) || st.state;
     $('s-state').className = 'v ' + (st.state === 'disputed' ? 'warn' : st.state === 'closed' ? '' : 'ok');
     renderTimeline(st.state);
-    // действие-панели переключаем СИНХРОННО: hide-всех и show-нужной в одном кадре, БЕЗ await между
-    // ними — иначе панель (напр. act-closed) успевает схлопнуться на время await refreshChat и блок
-    // «дёргается» на каждом поллинге, таща за собой остальную раскладку.
+    renderOtcPanel(st);
+    // action panels are switched SYNCHRONOUSLY: hide-all and show-the-right-one in a single frame, with
+    // NO await in between — otherwise a panel (e.g. act-closed) manages to collapse during the
+    // await refreshChat and the block "jitters" on every poll, dragging the rest of the layout with it.
     for (const p of ['act-fund','act-wait','act-active','act-disputed','act-closed']) $(p).style.display = 'none';
     if (st.state === 'joined') {
       if (deal.role === 'buyer') showFund(); else { $('act-wait').style.display = 'block'; $('wait-msg').textContent = L('seller_wait'); }
@@ -615,23 +714,23 @@ async function refresh() {
       showClosedVerdict();
     }
 
-    // «Удалить сделку из браузера» активна только для завершённых (closed/expired) или ещё не
-    // профинансированных (draft/joined); активную funded/disputed забывать нельзя — ключ нужен
-    // для release/refund/спора/вывода.
+    // "Remove deal from browser" is enabled only for completed (closed/expired) deals or ones not yet
+    // funded (draft/joined); an active funded/disputed deal must not be forgotten — the key is needed
+    // for release/refund/dispute/withdrawal.
     const canForget = ['closed', 'expired', 'joined', 'draft'].includes(st.state);
     $('forget').disabled = !canForget;
     $('forget-hint').style.display = canForget ? 'none' : 'inline';
     if (!canForget) $('forget-hint').textContent = L('forget_locked');
 
-    // дисклеймер: пока средства заперты в ковенанте (funded/disputed) — вывод только после закрытия
+    // disclaimer: while funds are locked in the covenant (funded/disputed) — withdrawal only after closing
     const inCovenant = st.state === 'funded' || st.state === 'disputed';
     $('withdraw-note').style.display = inCovenant ? 'block' : 'none';
     if (inCovenant) $('withdraw-note').textContent = L('withdraw_after_close');
-    if (st.state !== 'funded') disputeConfirm = false;   // шаг подтверждения спора живёт только в active
+    if (st.state !== 'funded') disputeConfirm = false;   // the dispute-confirmation step only lives in active
 
-    // чат-плашка: после funded (funded/disputed/closed), §3 «всегда чат (после funded)»; в joined —
-    // подсказка, что чат откроется после финансирования. ПОСЛЕ переключения панелей — её сетевые
-    // await не должны оставлять действие-панель скрытой на кадр (см. коммент выше).
+    // chat panel: after funded (funded/disputed/closed), §3 "always chat (after funded)"; in joined —
+    // a hint that chat will open after funding. AFTER switching panels — its network awaits must not
+    // leave the action panel hidden for a frame (see the comment above).
     await refreshChat(st.state);
   } catch (e) { /* transient */ }
 }
@@ -641,27 +740,100 @@ function renderTimeline(state) {
   const steps = ['joined', 'funded', state === 'disputed' ? 'disputed' : 'closed'];
   const order = { draft: 0, joined: 1, funded: 2, disputed: 3, closed: 3, expired: 3 };
   const cur = order[state] ?? 0;
-  const key = steps.join(',') + '|' + cur;   // отрисовка зависит только от шагов и текущего индекса
-  if (tlKey === key) return;                 // таймлайн не изменился — не пересобирать DOM (иначе мигает на каждом поллинге)
+  const key = steps.join(',') + '|' + cur;   // the render depends only on the steps and the current index
+  if (tlKey === key) return;                 // timeline hasn't changed — don't rebuild the DOM (otherwise it flickers on every poll)
   tlKey = key;
   $('timeline').innerHTML = steps
     .map((s) => `<div class="tl ${order[s] <= cur ? 'on' : ''} ${s === 'disputed' ? 'warn' : ''}"><span class="tl-dot"></span><span class="tl-lbl">${esc(L('st_' + s))}</span></div>`)
     .join('<div class="tl-bar"></div>');
 }
 
+/** Explorer link for the counter leg's txid by its method (task 8) — the full server-side matrix
+ *  (otc_verify::METHODS): Tron/EVM networks (incl. extra L2s) + BTC/LTC. Shared between the leg panel
+ *  (below) and the "paid" bubble in chat (renderPayBody). null = no explorer available (fiat/cash/other-crypto) —
+ *  the UI simply doesn't show a link, which blocks nothing. */
+function buildExplorerUrl(method, ref) {
+  if (!method || !ref) return null;
+  const r = encodeURIComponent(ref);
+  if (/-trc20$|^trx$/.test(method)) return `https://tronscan.org/#/transaction/${r}`;
+  if (/-erc20$|^eth$/.test(method)) return `https://etherscan.io/tx/${r}`;
+  if (/-bep20$|^bnb$/.test(method)) return `https://bscscan.com/tx/${r}`;
+  if (/-polygon$/.test(method)) return `https://polygonscan.com/tx/${r}`;
+  if (/-arbitrum$/.test(method)) return `https://arbiscan.io/tx/${r}`;
+  if (/-base$/.test(method)) return `https://basescan.org/tx/${r}`;
+  if (/^ton$|-ton$/.test(method)) return `https://tonviewer.com/transaction/${r}`;
+  if (method === 'btc') return `https://mempool.space/tx/${r}`;
+  if (method === 'ltc') return `https://litecoinspace.org/tx/${r}`;
+  return null;
+}
+
+/** Counter leg panel (task 8): verification badge + "I paid" (seller) + a hint to the buyer once
+ *  verified. st.otc is only set for an otc deal with a server-side leg (tasks 4-7) — otherwise null,
+ *  and the whole panel is hidden. It's signal-only: funds NEVER move from here — release remains
+ *  the buyer's signature (act-active above), just like in any other deal. */
+function renderOtcPanel(st) {
+  const o = st.otc;
+  const on = !!(o && o.method);
+  $('otc-panel').style.display = on ? 'block' : 'none';
+  if (!on) return;
+  $('otc-panel-head').textContent = L('otc_panel_head');
+  const cur = o.currency || (o.method || '').toUpperCase();
+  // amount and address as separate copyable fields + QR (owner feedback 2026-07-13)
+  $('otc-amount-lbl2').textContent = deal.role === 'seller' ? L('otc_send_exactly') : L('otc_expect_amount');
+  $('otc-amount-big').textContent = `${o.amount || '?'} ${cur}`;
+  $('otc-addr-lbl2').textContent = deal.role === 'seller' ? L('otc_pay_to_addr') : L('otc_your_addr');
+  $('otc-addr-code').textContent = o.buyer_addr || '—';
+  if (o.buyer_addr) qrInto($('otc-qr'), o.buyer_addr);
+  // other-crypto (not in the matrix) or a degraded network (auto_verify off — no key / kill-switch)
+  // map to an honest "unsupported" badge — but only for NON-terminal statuses: a payment that already
+  // reached verified/mismatch/failed keeps its real status, even if the key later disappears.
+  const raw = o.verify_status || 'awaiting';
+  const terminal = raw === 'verified' || raw === 'mismatch' || raw === 'failed';
+  const status = ((o.method === 'other-crypto' || o.auto_verify === false) && !terminal) ? 'unsupported' : raw;
+  const b = $('otc-badge');
+  b.textContent = L('otc_badge_' + status) || status;
+  b.className = 'badge ' + (status === 'verified' ? 'ok' : (status === 'mismatch' || status === 'failed') ? 'bad' : '');
+  const url = o.pay_ref ? buildExplorerUrl(o.method, o.pay_ref) : null;
+  $('otc-explorer').style.display = url ? '' : 'none';
+  if (url) { $('otc-explorer').href = url; $('otc-explorer').textContent = L('otc_open_explorer'); }
+  $('otc-hint').style.display = status === 'verified' && deal.role === 'buyer' ? '' : 'none';
+  $('otc-hint').textContent = L('otc_verified_hint');
+  // "I paid" — only to the seller, while there's still something to verify
+  // SELLER SAFETY GATE (owner-reported critical 2026-07-13): the seller must NOT be prompted to
+  // pay the counter-leg until the buyer has actually locked the KAS into the covenant. Before that
+  // there is nothing in escrow — paying first means paying for nothing.
+  const funded = st.state === 'funded' || st.state === 'disputed';
+  const sellerPrePay = deal.role === 'seller' && !funded;
+  $('otc-not-funded').style.display = sellerPrePay ? '' : 'none';
+  if (sellerPrePay) $('otc-not-funded').textContent = L('otc_not_funded_warn').replace('{amt}', `${kas(deal.amount || 0)}`);
+  // hide the receiving address + QR + copy for the seller until funded (don't invite a premature payment)
+  if ($('otc-addr-row')) $('otc-addr-row').style.display = sellerPrePay ? 'none' : '';
+  if ($('otc-addr-lbl2')) $('otc-addr-lbl2').style.display = sellerPrePay ? 'none' : '';
+  if ($('otc-qr')) $('otc-qr').style.display = sellerPrePay ? 'none' : '';
+  const canPay = deal.role === 'seller' && funded && status !== 'verified' && status !== 'unsupported';
+  $('otc-pay-form').style.display = canPay ? '' : 'none';
+  // one-press flow: auto-detect scans the buyer's address and pre-fills the txid (when the
+  // network's explorer can index by address); the confirmed txid still goes through otc/pay
+  $('otc-detect-btn').style.display = (canPay && o.auto_detect) ? '' : 'none';
+  $('otc-detect-btn').textContent = L('otc_detect_btn');
+  $('otc-pay-ref').placeholder = L('otc_paid_ref_ph');
+  $('otc-pay-ref').setAttribute('aria-label', L('otc_paid_btn'));
+  $('otc-pay-send').textContent = L('otc_paid_send');
+}
+
 // FUND (buyer)
 let fundRaw = '[]';
-let fundLocking = false;   // идёт отправка лок-транзакции (защита от гонки/двойной отправки)
-let fundAutoDone = false;  // авто-лок уже пытались для этой сделки — повтор только вручную кнопкой
-let swapMounted = false;   // SimpleSwap fund-in виджет монтируется один раз на сделку
-// Покупатель финансирует СУММУ СДЕЛКИ + базовую комиссию (feeResolve): при release продавец получит
-// ровно сумму (комиссия сверху). При арбитраже повышенная feeDispute вычитается уже из общей суммы.
+let fundLocking = false;   // the lock transaction is being sent (guards against a race/double send)
+let fundAutoDone = false;  // auto-lock was already attempted for this deal — retry only manually via the button
+let swapMounted = false;   // the SimpleSwap fund-in widget is mounted once per deal
+// The buyer funds the DEAL AMOUNT + the base fee (feeResolve): on release the seller gets exactly
+// the amount (the fee is on top). On arbitration the higher feeDispute is deducted from the total.
 function fundTargetSompi() { return deal.amount + ((cfg && cfg.fee_resolve) || 0); }
 function showFund() {
   $('act-fund').style.display = 'block';
   $('fund-head').textContent = L('fund_head');
   if (!deal.funding_pk || !deal.funding_sk) {
-    // fresh-device без ключа закладки: адрес не восстановить (pk хранится только локально)
+    // fresh device without the funding key: the address can't be restored (pk is stored only locally)
     $('fund-body').style.display = 'none';
     $('fund-hint').textContent = '';
     $('fund-nokey').style.display = 'block';
@@ -677,13 +849,13 @@ function showFund() {
   const fundTarget = fundTargetSompi();
   $('f-send-lbl').textContent = L('fund_send_lbl');
   $('f-send').textContent = kas(fundTarget) + usdStr(fundTarget);
-  // кнопка — ручной фолбэк; пока ждём средства показываем, что лок произойдёт сам
+  // the button is a manual fallback; while waiting for funds, show that the lock will happen automatically
   if (!fundLocking && !fundAutoDone) { $('f-btn').textContent = L('lock_auto'); $('f-btn').disabled = true; }
   const fundAddr = core.pubkey_to_address(deal.funding_pk, net());
   $('f-addr').textContent = fundAddr;
   qrInto($('f-qr'), `kaspa:${fundAddr.replace(/^kaspa:/,'')}?amount=${(fundTarget/1e8)}`);
   pollFunding(fundAddr);
-  // Сумма известна из сделки — поля ввода нет (замечание Майка 09.07): шлём ровно недостающее.
+  // The amount is known from the deal — there's no input field (Mike's note, 07-09): send exactly what's missing.
   $('dfw-btn').onclick = async () => {
     const w = session.getProfile().wallet;
     if (!w) { alert('В профиле нет кошелька'); return; }
@@ -694,56 +866,56 @@ function showFund() {
       const needed = fundTargetSompi() - received;
       if (needed <= 0) { alert('На funding-адресе уже достаточно — лок пройдёт автоматически.'); return; }
       const bal = JSON.parse(await utxosRaw(w.addr)).reduce((s, u) => s + u.amount, 0);
-      // +0.2 KAS запаса: комиссия кошелька + анти-KIP9 (микро-сдача даёт запредельную storage mass)
+      // +0.2 KAS buffer: wallet fee + anti-KIP9 (a micro change output creates excessive storage mass)
       if (bal < needed + 20000000) { alert(`В кошельке недостаточно средств: нужно ${kas(needed)} (+ ~0.2 KAS на комиссию), доступно ${kas(bal)}.`); return; }
       if (!await confirmPassword('Финансирование эскроу с desk-кошелька.', {
         context: `<b style="font-family:var(--mono);color:var(--kaspa)">${kas(needed)}</b> → эскроу сделки #${esc(deal.id)}` })) return;
       await fundTargetFromWallet(w, fundAddr, needed, net());
-    } catch (e) { alert((e && e.message) || 'Ошибка'); }
+    } catch (e) { alert((e && e.message) || 'Error'); }
     $('dfw-btn').disabled = false;
   };
   if (!swapMounted) {
     swapMounted = true;
-    // minKas: обмен обязан покрыть финансирование целиком; излишек вернётся на кошелёк (скиминг ниже)
+    // minKas: the swap must cover the funding in full; the excess is returned to the wallet (skimming below)
     mountSwapWidget({ container: $('swap-widget'), api, kas, kind: 'escrow', target: String(deal.id),
       token: deal.token, fundAddr, lang: document.documentElement.lang, minKas: fundTargetSompi() / 1e8 });
   }
 }
 copyText($('f-copy'), () => $('f-addr').textContent);
-// Скиминг излишка (замечание Майка 09.07): build_escrow_fund забирает в ковенант ВЕСЬ баланс
-// funding-адреса — без скиминга переплата свопа ушла бы продавцу при release. Перед локом
-// излишек сверх цели (+буфер на комиссию скима) отправляется на кошелёк профиля; мелочь
-// (< 0.5 KAS) не скидываем — уходит в ковенант как некритичный довесок.
+// Skimming the excess (Mike's note, 07-09): build_escrow_fund pulls the ENTIRE funding-address
+// balance into the covenant — without skimming, a swap overpayment would go to the seller on release.
+// Before locking, the excess above the target (+ a buffer for the skim fee itself) is sent to the
+// profile wallet; small amounts (< 0.5 KAS) aren't skimmed — they go into the covenant as a harmless extra.
 const SKIM_MIN = 50000000;    // 0.5 KAS
-const SKIM_BUFFER = 10000000; // 0.1 KAS остаётся сверх цели — покрывает комиссию самого скима
+const SKIM_BUFFER = 10000000; // 0.1 KAS left above the target — covers the fee of the skim itself
 let skimDone = false;
 async function pollFunding(fundAddr) {
   try {
     fundRaw = await utxosRaw(fundAddr);
     const sum = JSON.parse(fundRaw).reduce((s, u) => s + u.amount, 0);
     if (sum > 0) { $('f-recv').textContent = kas(sum); $('f-recv').className = 'v ok'; }
-    if (fundLocking) return;                          // лок уже идёт — кнопку не трогаем
-    if (sum >= fundTargetSompi()) {                   // средств достаточно (сумма + базовая комиссия) → лок автоматом (один раз)
+    if (fundLocking) return;                          // a lock is already in progress — don't touch the button
+    if (sum >= fundTargetSompi()) {                   // enough funds (amount + base fee) → lock automatically (once)
       if (fundAutoDone) return;
       const excess = sum - fundTargetSompi() - SKIM_BUFFER;
       const w = (() => { try { return session.getProfile().wallet; } catch { return null; } })();
       if (!skimDone && excess > SKIM_MIN && w && deal.funding_sk) {
-        skimDone = true; // одна попытка: не вышло — фондируем как есть
+        skimDone = true; // one attempt: if it fails, fund as-is
         try {
           const built = core.build_split(deal.funding_sk, w.addr, String(excess), fundRaw, net());
           await submitTx(built);
-          return; // излишек уехал на кошелёк; следующий полл увидит ~цель на funding и залочит
-        } catch { /* скимнуть не вышло — не блокируем сделку, излишек уйдёт в ковенант */ }
+          return; // the excess went to the wallet; the next poll will see ~the target on funding and lock
+        } catch { /* the skim failed — don't block the deal, the excess goes into the covenant */ }
       }
       fundAutoDone = true;
       lockEscrow();
       return;
     }
-    $('f-btn').disabled = true;                       // ждём средства (кнопка-фолбэк неактивна)
+    $('f-btn').disabled = true;                       // waiting for funds (the fallback button stays disabled)
   } catch {}
 }
-// Заложить средства в эскроу (build_escrow_fund + submit). Вызывается АВТОМАТОМ из pollFunding при
-// достаточном балансе; кнопка f-btn — ручной фолбэк на случай сбоя авто-лока.
+// Lock funds into the escrow (build_escrow_fund + submit). Called AUTOMATICALLY from pollFunding when
+// the balance is sufficient; the f-btn button is a manual fallback in case auto-lock fails.
 async function lockEscrow() {
   if (fundLocking) return;
   fundLocking = true;
@@ -752,9 +924,9 @@ async function lockEscrow() {
   try {
     const built = core.build_escrow_fund(cfgStr(cfg), deal.funding_sk, fundRaw, net());
     await submitTx(built);
-    refresh();                                        // → funded, экран финансирования уходит
+    refresh();                                        // → funded, the funding screen goes away
   } catch (e) {
-    fundLocking = false;                              // дать повторить вручную кнопкой
+    fundLocking = false;                              // allow retrying manually via the button
     showErr(err, e);
     $('f-btn').disabled = false; $('f-btn').textContent = L('lock_btn');
   }
@@ -762,12 +934,12 @@ async function lockEscrow() {
 $('f-btn').onclick = () => lockEscrow();
 
 // ACTIVE
-let disputeConfirm = false;   // открыт ли шаг «Подписать и открыть чат для арбитра» (только покупатель)
+let disputeConfirm = false;   // whether the "Sign and open chat to the arbiter" step is open (buyer only)
 function showActive() {
   $('act-active').style.display = 'block';
   const left = Math.max(0, (st.dispute_window || 0) - escrowAgeDaa(st.funded_at));
   $('a-window').textContent = left > 0 ? L('win_left')(daaLeftHuman(left)) : L('win_over');
-  // страж окна (goods, покупатель): трек прислан, получение не подтверждено, осталось <25% окна
+  // window guard (goods, buyer): tracking sent, receipt not confirmed, less than 25% of the window left
   const guardOn = deal.role === 'buyer' && deal.template === 'goods' && hasTrackInThread
     && left > 0 && left < (st.dispute_window || 0) * 0.25;
   $('track-win-guard').style.display = guardOn ? 'block' : 'none';
@@ -781,21 +953,21 @@ function showActive() {
   $('refund-btn').textContent = L('refund_btn');
   $('dispute-confirm').style.display = confirming ? 'block' : 'none';
   if (confirming) {
-    $('dispute-confirm-note').textContent = L('dispute_confirm_note');
+    $('dispute-confirm-note').innerHTML = L('dispute_confirm_note'); // trusted static i18n string (contains the Arbitration Policy link)
     if ($('dispute-sign-open').textContent !== L('disp_signing')) $('dispute-sign-open').textContent = L('dispute_sign_open');
     $('dispute-cancel').textContent = L('disp_cancel');
   }
 }
-// ── ВЫПЛАТА СТОРОНЕ (после закрытия): сколько вернулось на СВОЙ payout-адрес + вывод на свой кошелёк ──
-// payout-адрес зрителя = pubkey_to_address(его pk). У кого на нём есть UTXO — тот и получил средства
-// (release→продавцу / refund→покупателю / арбитраж / сплит — единый механизм). Вывод = build_sweep ключом
-// сделки: приватный ключ из браузера НЕ уходит, отправку инициирует сама сторона.
+// ── PAYOUT TO THE PARTY (after closing): how much came back to YOUR payout address + withdrawal to your wallet ──
+// The viewer's payout address = pubkey_to_address(their pk). Whoever has a UTXO on it received the funds
+// (release→seller / refund→buyer / arbitration / split — a single mechanism). Withdrawal = build_sweep with the
+// deal key: the private key never leaves the browser, the party itself initiates the send.
 let withdrawBusy = false;
 async function showPayout() {
   const box = $('closed-payout');
   const myPk = deal.role === 'buyer' ? (cfg && cfg.buyer_pk) : (cfg && cfg.seller_pk);
   if (!myPk) { box.style.display = 'none'; return; }
-  // уже выведено с этого устройства — персистентный успех с ссылкой на транзакцию вывода
+  // already withdrawn from this device — a persistent success with a link to the withdrawal transaction
   if (deal.withdraw_txid) {
     box.style.display = 'block';
     $('cp-form').style.display = 'none';
@@ -810,7 +982,7 @@ async function showPayout() {
   try { payoutAddr = core.pubkey_to_address(myPk, net()); } catch { box.style.display = 'none'; return; }
   let sum = 0;
   try { sum = JSON.parse(await utxosRaw(payoutAddr)).reduce((s, u) => s + u.amount, 0); } catch { box.style.display = 'none'; return; }
-  if (sum <= 0) { box.style.display = 'none'; return; }   // на твой адрес ничего (получила др. сторона) либо уже выведено
+  if (sum <= 0) { box.style.display = 'none'; return; }   // nothing on your address (the other party got it) or already withdrawn
   box.style.display = 'block';
   $('cp-done').style.display = 'none';
   $('cp-form').style.display = 'block';
@@ -845,36 +1017,36 @@ $('cp-withdraw').onclick = async () => {
     const built = core.build_sweep(deal.sk, to, raw, net());
     const res = await submitTx(built);
     if (res && res.txid) {
-      deal.withdraw_txid = res.txid; saveDeal(deal);        // ссылка на транзакцию появится в карточке (showPayout → cp-done)
-      notifyWithdrawn(deal, res.txid).catch(() => {});      // + TG-ссылка подписчику, best-effort (не блокирует)
+      deal.withdraw_txid = res.txid; saveDeal(deal);        // the transaction link will appear in the card (showPayout → cp-done)
+      notifyWithdrawn(deal, res.txid).catch(() => {});      // + a TG link to the subscriber, best-effort (non-blocking)
     }
     refresh();
   } catch (e) { withdrawBusy = false; showErr(err, e); $('cp-withdraw').disabled = false; $('cp-withdraw').textContent = L('payout_withdraw'); }
 };
-// «На мой кошелёк деска» (Майк 11.07): подставить адрес кошелька профиля и запустить тот же
-// вывод — по аналогии с фондированием сейфа/эскроу из кошелька. Профиль заперт или без
-// кошелька — человеческая подсказка вместо тишины.
+// "To my desk wallet" (Mike, 07-11): fill in the profile wallet address and run the same
+// withdrawal — mirroring funding a safe/escrow from the wallet. Profile locked or without
+// a wallet — a human-readable hint instead of silence.
 $('cp-withdraw-wallet').onclick = () => {
   const w = (() => { try { return session.getProfile().wallet; } catch { return null; } })();
   if (!w || !w.addr) { showErr(err, new Error(L('payout_no_wallet'))); return; }
   $('cp-to').value = w.addr;
   $('cp-withdraw').click();
 };
-// Вердикт ИИ-медиатора в блоке закрытой сделки: если сделку закрыл спор (arbitrated) и вердикт был
-// вынесен — показать участникам исход + обоснование. Тянем /dispute/state один раз на сделку.
+// AI mediator verdict in the closed-deal block: if the deal was closed by a dispute (arbitrated) and a
+// verdict was issued — show participants the outcome + reasoning. Fetch /dispute/state once per deal.
 let verdictLoadedFor = null;
 async function showClosedVerdict() {
   const box = $('closed-verdict');
-  if (st.close_kind !== 'arbitrated') { box.style.display = 'none'; verdictLoadedFor = null; return; }  // не спор → вердикта нет
-  if (verdictLoadedFor === deal.id) return;                 // уже отрисован для этой сделки — не дёргать /dispute/state каждый тик
+  if (st.close_kind !== 'arbitrated') { box.style.display = 'none'; verdictLoadedFor = null; return; }  // not a dispute → no verdict
+  if (verdictLoadedFor === deal.id) return;                 // already rendered for this deal — don't hit /dispute/state every tick
   let ds;
-  try { ds = await disputeState(deal); } catch { return; }  // сеть — повторим на следующем тике
+  try { ds = await disputeState(deal); } catch { return; }  // network hiccup — retry on the next tick
   verdictLoadedFor = deal.id;
   const v = ds && ds.verdict;
-  const arb = ds && ds.arbiter;   // решение живого арбитра, если выносил: {outcome:buyer|seller|split, pct}
-  if ((!v || !v.outcome) && !arb) { box.style.display = 'none'; return; }  // закрыт мировой/таймаутом без вердикта
+  const arb = ds && ds.arbiter;   // the live arbiter's decision, if one was made: {outcome:buyer|seller|split, pct}
+  if ((!v || !v.outcome) && !arb) { box.style.display = 'none'; return; }  // closed by mutual settlement/timeout without a verdict
   let html = '';
-  if (v && v.outcome) {           // вердикт ИИ-медиатора (в т.ч. тот, что отвергла сторона перед эскалацией)
+  if (v && v.outcome) {           // AI mediator verdict (incl. one a party rejected before escalating)
     const outcome = v.outcome === 'refund' ? L('disp_out_refund')
                   : v.outcome === 'release' ? L('disp_out_release')
                   : L('disp_out_split')(Number(v.pct) || 0);
@@ -883,7 +1055,7 @@ async function showClosedVerdict() {
       `<div class="vc-outcome">${esc(outcome)}</div>` +
       `<div class="vc-reason"><span class="vc-rh">${esc(L('disp_reason_head'))}</span>${esc(v.reason || '')}</div></div>`;
   }
-  if (arb && arb.outcome) {       // главное: итоговое решение живого арбитра
+  if (arb && arb.outcome) {       // most important: the live arbiter's final decision
     const ad = arb.outcome === 'buyer' ? L('arb_done_buyer')
              : arb.outcome === 'seller' ? L('arb_done_seller')
              : L('arb_done_split')(Number(arb.pct) || 0);
@@ -894,10 +1066,10 @@ async function showClosedVerdict() {
   box.style.display = 'block';
   box.innerHTML = html;
 }
-// DISPUTED — Фаза 2: заявления → раскрытие → вердикт ИИ (Слой 2) → подпись; мировая остаётся
+// DISPUTED — Phase 2: claims → reveal → AI verdict (Layer 2) → signature; mutual settlement remains
 function showDisputed() {
   $('act-disputed').style.display = 'block';
-  // предупреждение стороне, которая спор НЕ открывала (спор открывает покупатель по ковенанту → алерт продавцу)
+  // warning to the party that did NOT open the dispute (the buyer opens it per the covenant → alert the seller)
   $('disp-alarm').style.display = deal.role === 'seller' ? 'block' : 'none';
   if (deal.role === 'seller') $('disp-alarm').textContent = L('disp_opened_warn');
   $('disp-head').textContent = L('disp_head');
@@ -905,7 +1077,7 @@ function showDisputed() {
   $('settle-note').textContent = L('settle_hint');
   $('d-release').textContent = L('release_btn');
   $('d-refund').textContent = L('refund_btn');
-  // видимость мировой-кнопок ставит refreshDispute (учитывает эскалацию)
+  // visibility of the mutual-settlement buttons is set by refreshDispute (accounts for escalation)
   refreshDispute();
 }
 
@@ -935,10 +1107,10 @@ $('refund-btn').onclick = $('d-refund').onclick = async () => {
     await submitTx(built); refresh();
   } catch (e) { showErr(err, e); }
 };
-// «Открыть спор» → показать шаг подтверждения (не подписывать сразу); отмена — вернуть кнопки
+// "Open dispute" → show the confirmation step (don't sign right away); cancel — bring back the buttons
 $('dispute-btn').onclick = () => { disputeConfirm = true; showActive(); };
 $('dispute-cancel').onclick = () => { disputeConfirm = false; showActive(); };
-// «Подписать и открыть чат для арбитра»: подпись спора (ACTIVE→DISPUTED) + раскрытие чата арбитру
+// "Sign and open chat to the arbiter": dispute signature (ACTIVE→DISPUTED) + reveal the chat to the arbiter
 $('dispute-sign-open').onclick = async () => {
   if (!await confirmPassword('Открыть спор')) return;
   const b = $('dispute-sign-open');
@@ -947,23 +1119,23 @@ $('dispute-sign-open').onclick = async () => {
     b.disabled = true; b.textContent = L('disp_signing');
     const raw = await utxosRaw(deal.escrow_addr);
     const built = core.build_escrow_dispute(cfgStr(cfg), deal.sk, raw, net());
-    await submitTx(built);                                    // ACTIVE → DISPUTED (подпись покупателя, авто-подключение ИИ)
-    if (deal.chat_sk) { try { await revealChat(deal); } catch {} }  // открыть чат арбитру/ИИ (best-effort)
+    await submitTx(built);                                    // ACTIVE → DISPUTED (buyer's signature, AI auto-connects)
+    if (deal.chat_sk) { try { await revealChat(deal); } catch {} }  // reveal the chat to the arbiter/AI (best-effort)
     disputeConfirm = false;
     refresh();
   } catch (e) { showErr(err, e); b.disabled = false; b.textContent = L('dispute_sign_open'); }
 };
-// ── ДИСПУТ-ФЛОУ (Фаза 2): стадия выводится из /dispute/state; DOM стадии перестраивается
-// ТОЛЬКО при её смене (ввод в форму не сносится поллингом), динамика обновляется каждый тик ──
+// ── DISPUTE FLOW (Phase 2): the stage is derived from /dispute/state; the stage's DOM is rebuilt
+// ONLY when it changes (form input isn't wiped by polling), the dynamic bits update every tick ──
 function resetDispute() { ds = null; dispKey = ''; splitInfo = null; mutualBusy = false; revealPokeAt = 0; claimReq = null; }
 
-let dispUtxoDaa = null;   // DAA-момент открытия спора (создание disputed-utxo) — кэш, не меняется
-/** Аварийный контур контракта: осталось до timeout (сек) по ончейн-данным. null = не посчитать. */
+let dispUtxoDaa = null;   // DAA moment the dispute was opened (disputed-utxo creation) — cached, doesn't change
+/** Emergency contract circuit: seconds left until timeout, from on-chain data. null = can't be computed. */
 async function timeoutLeftSecs() {
   try {
     if (dispUtxoDaa == null) {
       const u = JSON.parse(await utxosRaw(deal.disputed_addr)).find((x) => x.covenant_id);
-      if (!u) return null;                       // спор уже исполнен
+      if (!u) return null;                       // the dispute has already been resolved
       dispUtxoDaa = u.daa;
     }
     const info = await api('/api/safe/info');
@@ -986,7 +1158,7 @@ async function updateDispTimeout() {
 async function refreshDispute() {
   try { ds = await disputeState(deal); } catch { return; }
   updateDispTimeout();
-  // мировая (release/refund) и подсказка скрываются после эскалации — дальше решает живой арбитр
+  // the mutual-settlement (release/refund) buttons and hint are hidden after escalation — the live arbiter decides from here
   const escalated = !!ds.escalated;
   $('d-release').style.display = (!escalated && deal.role === 'buyer') ? 'inline-flex' : 'none';
   $('d-refund').style.display = (!escalated && deal.role === 'seller') ? 'inline-flex' : 'none';
@@ -998,7 +1170,7 @@ async function refreshDispute() {
   await updateStage(box, stage);
 }
 
-// стадия развязки: заявление → ожидание → раскрытие → вердикт/сплит → эскалация
+// resolution stage: claim → waiting → reveal → verdict/split → escalation
 function dispStage() {
   if (!ds) return 'none';
   if (ds.escalated) return 'escalated';
@@ -1012,8 +1184,8 @@ let dispStepsKey = null;
 function renderDispSteps(stage) {
   const idx = { claim: 0, waitclaim: 0, reveal: 1, waitverdict: 1, verdict: 2, split: 2, escalated: 3 }[stage] ?? 0;
   const esct = stage === 'escalated';
-  const key = idx + '|' + esct;              // шаги зависят только от индекса и флага эскалации
-  if (dispStepsKey === key) return;          // стадия не изменилась — не пересобирать DOM (иначе мигает на каждом поллинге)
+  const key = idx + '|' + esct;              // steps depend only on the index and the escalation flag
+  if (dispStepsKey === key) return;          // stage hasn't changed — don't rebuild the DOM (otherwise it flickers on every poll)
   dispStepsKey = key;
   const lbls = [L('disp_step_claims'), L('disp_step_reveal'), L('disp_step_verdict'), esct ? L('disp_step_human') : L('disp_step_sign')];
   $('disp-steps').innerHTML = lbls.map((s, i) =>
@@ -1087,9 +1259,9 @@ function buildStage(box, stage) {
     box.innerHTML = `<div class="note-wait">${esc(L('disp_verdict_wait'))}</div><div class="disp-status" id="disp-revst"></div>`;
   } else if (stage === 'verdict') {
     const v = ds.verdict;
-    const signer = v.outcome === 'refund' ? 'seller' : 'buyer';   // исполняет проигравшая сторона (её подпись)
+    const signer = v.outcome === 'refund' ? 'seller' : 'buyer';   // executed by the losing party (their signature)
     const iAmSigner = deal.role === signer;
-    // обе стороны видят вердикт и получают выбор: Согласен либо Эскалация к человеку-арбитру
+    // both parties see the verdict and get a choice: Agree or Escalate to a human arbiter
     box.innerHTML =
       `<div class="verdict-card"><div class="vc-eyebrow">${esc(L('disp_verdict_head'))}</div>` +
       `<div class="vc-nb">${esc(L('disp_verdict_nonbinding'))}</div>` +
@@ -1102,7 +1274,7 @@ function buildStage(box, stage) {
       `</div>` +
       `<p class="hint" id="verdict-note" style="display:none;margin-top:8px"></p>` +
       `</div>`;
-    // Согласен: проигравшая сторона подписывает исполнение вердикта; выигравшей исполнять нечего (ждёт подписи)
+    // Agree: the losing party signs to execute the verdict; the winning party has nothing to sign (waits for the signature)
     $('verdict-agree').onclick = async () => {
       const b = $('verdict-agree');
       if (iAmSigner) {
@@ -1125,7 +1297,7 @@ function buildStage(box, stage) {
         $('verdict-note').textContent = L('disp_agree_wait')(L('disp_gen_' + signer));
       }
     };
-    // Эскалация к арбитру — сразу, любая сторона; сделка тут же переходит в статус «эскалирован»
+    // Escalation to the arbiter — immediate, either party; the deal switches to "escalated" status right away
     $('verdict-escalate').onclick = async () => {
       if (!confirm(L('disp_escalate_confirm'))) return;
       const b = $('verdict-escalate');
@@ -1148,7 +1320,7 @@ function buildStage(box, stage) {
       `<div class="vc-window">⏳ <span class="vc-time"></span><span class="vc-wh">${esc(L('disp_window_hint'))}</span></div>` +
       `<div class="vc-act" id="split-act"></div>` +
       `<div class="vc-act" style="margin-top:8px"><button class="btn btn-ghost" id="split-escalate">${esc(L('disp_escalate_btn'))}</button></div></div>`;
-    // эскалация к арбитру доступна и в сплит-вердикте (любая сторона, сразу)
+    // escalation to the arbiter is also available on a split verdict (either party, immediate)
     $('split-escalate').onclick = async () => {
       if (!confirm(L('disp_escalate_confirm'))) return;
       const b = $('split-escalate');
@@ -1156,7 +1328,7 @@ function buildStage(box, stage) {
       catch (e) { showErr(err, e); b.disabled = false; b.textContent = L('disp_escalate_btn'); }
     };
   } else if (stage === 'escalated') {
-    // передано живому арбитру: сообщение + (до его решения) показываем отвергнутый вердикт ИИ; кнопок нет
+    // handed off to a live arbiter: a message + (until their decision) show the rejected AI verdict; no buttons
     const v = ds.verdict;
     box.innerHTML =
       `<div class="note alarm" style="margin:0 0 14px">⚖ ${esc(L('disp_escalated'))}</div>` +
@@ -1170,7 +1342,7 @@ function buildStage(box, stage) {
   }
 }
 
-// динамика каждого тика: каунтдаун, reveal-статус, пинок вердикта, обмен mutual-подписями
+// per-tick dynamics: countdown, reveal status, verdict poke, exchange of mutual signatures
 async function updateStage(box, stage) {
   const t = box.querySelector('.vc-time');
   if (t) {
@@ -1179,8 +1351,8 @@ async function updateStage(box, stage) {
   }
   const rs = box.querySelector('#disp-revst');
   if (rs) { const m = revMarks(); rs.textContent = L('disp_reveal_status')(m.y, m.p); }
-  // вердикт сервер выносит только ВНУТРИ reveal-запроса; если я раскрыл раньше второго
-  // заявления — повторяем раскрытие (идемпотентно, тем же ключом), когда оба заявления готовы
+  // the server only issues a verdict INSIDE a reveal request; if I revealed before the second
+  // claim was in — repeat the reveal (idempotent, same key) once both claims are ready
   if (stage === 'waitverdict' && deal.chat_sk && Date.now() - revealPokeAt > 20000) {
     revealPokeAt = Date.now();
     try { await revealChat(deal); } catch {}
@@ -1193,7 +1365,7 @@ async function updateSplit(box) {
   if (!act) return;
   if (!splitInfo) {
     try { splitInfo = await splitAmounts(deal, Number(ds.verdict.pct)); }
-    catch { return; }  // disputed-UTXO нет (сделка закрывается) — панель переключит refresh()
+    catch { return; }  // no disputed UTXO (the deal is closing) — the panel switch will be handled by refresh()
     box.querySelector('#split-amounts').innerHTML =
       `<span><i class="dot dot-b"></i>${esc(L('disp_amount_buyer'))} <b>${esc(kas(splitInfo.toBuyer))}</b></span>` +
       `<span><i class="dot dot-s"></i>${esc(L('disp_amount_seller'))} <b>${esc(kas(splitInfo.toSeller))}</b></span>`;
@@ -1221,28 +1393,28 @@ async function updateSplit(box) {
     mutualBusy = true;
     act.innerHTML = `<p class="hint">${esc(L('disp_split_closing'))}</p>`;
     try {
-      const raw = await utxosRaw(deal.disputed_addr);  // свежий UTXO: outpoint тот же, пока никто не потратил
+      const raw = await utxosRaw(deal.disputed_addr);  // fresh UTXO: the outpoint stays the same until someone spends it
       const t2 = JSON.parse(core.escrow_mutual_combine(cfgStr(cfg), raw, String(splitInfo.toBuyer), sigs.buyer_sig, sigs.seller_sig));
       await submitTx(JSON.stringify({ tx: t2.tx }));
-    } catch { /* вторая сторона могла отправить первой — закрытие увидит вотчер */ }
+    } catch { /* the other party may have sent it first — the watcher will see the closing */ }
     refresh();
   } else if (mySig && !act.querySelector('.split-waiting')) {
     act.innerHTML = `<p class="hint split-waiting">${esc(L('disp_split_wait_peer'))}</p>`;
   }
 }
 
-// ── ЧАТ ──
-const renderedMsgs = new Set();   // дедуп пузырей по msg.id (§11.3)
-let chatReadTimer = null;         // дебаунс персиста deal.chatRead (бейдж непрочитанного в деске)
-let hasTrackInThread = false;     // в треде есть трек-сообщение (для стража окна goods)
+// ── CHAT ──
+const renderedMsgs = new Set();   // dedup bubbles by msg.id (§11.3)
+let chatReadTimer = null;         // debounce persisting deal.chatRead (unread badge in the desk)
+let hasTrackInThread = false;     // there's a track message in the thread (for the goods window guard)
 let chatFunded = false;
 
-let chatCollapsed = true;   // read-only чат закрытой сделки: свёрнут; пользователь разворачивает для чтения старых сообщений/вложений
+let chatCollapsed = true;   // read-only chat of a closed deal: collapsed; the user expands it to read old messages/attachments
 $('chat-toggle').onclick = () => { chatCollapsed = !chatCollapsed; if (st) refreshChat(st.state); };
 async function refreshChat(state) {
   const plate = $('act-chat');
   if (state === 'joined') {
-    // до финансирования: показать плашку с объяснением вместо молчаливого отсутствия чата
+    // before funding: show an explanatory panel instead of the chat silently being absent
     plate.style.display = 'block';
     $('chat-note').style.display = 'block';
     $('chat-note').textContent = L('chat_after_fund');
@@ -1269,7 +1441,7 @@ async function refreshChat(state) {
     return;
   }
   $('chat-note').style.display = 'none';
-  // финансирование чат-ключа: пока на адресе нет UTXO — отправка невозможна
+  // funding the chat key: while there's no UTXO on the address — sending is impossible
   if (!chatFunded) {
     try { chatFunded = JSON.parse(await utxosRaw(chatAddress(deal.chat_pk))).length > 0; } catch {}
   }
@@ -1277,7 +1449,7 @@ async function refreshChat(state) {
   $('chat-funding-msg').style.display = (chatFunded || over) ? 'none' : 'block';
   $('chat-funding-msg').textContent = L('chat_funding');
   if (over) {
-    // сделка закрыта: чат только для чтения — отправку убираем, переписку сворачиваем (разворачивается по кнопке)
+    // deal is closed: chat becomes read-only — remove sending, collapse the thread (expands via the button)
     $('chat-compose').style.display = 'none';
     $('chat-attach').style.display = 'none';
     $('chat-track').style.display = 'none';
@@ -1289,14 +1461,14 @@ async function refreshChat(state) {
     $('chat-sub').textContent = L('chat_readonly');
     $('chat-body').style.display = chatCollapsed ? 'none' : 'block';
   } else {
-    chatCollapsed = true;                       // до закрытия — сброс, чтобы после закрытия чат стартовал свёрнутым
+    chatCollapsed = true;                       // before closing — reset, so the chat starts collapsed once closed
     $('chat-toggle').style.display = 'none';
     $('chat-body').style.display = 'block';
     $('chat-compose').style.display = chatFunded ? 'flex' : 'none';
     $('chat-attach').style.display = mediaSupported() ? 'inline-flex' : 'none';
-    // трек-номер: только продавец в goods-сделке (спека KASPA-ESCROW-TRACKING.md)
+    // tracking number: seller only, in a goods deal (spec KASPA-ESCROW-TRACKING.md)
     $('chat-track').style.display = (chatFunded && deal.role === 'seller' && deal.template === 'goods') ? 'inline-flex' : 'none';
-    // OTC (спека KASPA-ESCROW-OTC.md): реквизиты — покупатель, «я оплатил» — продавец
+    // OTC (spec KASPA-ESCROW-OTC.md): payment details — buyer, "I paid" — seller
     $('chat-payto').style.display = (chatFunded && deal.role === 'buyer' && deal.template === 'otc') ? 'inline-flex' : 'none';
     $('chat-pay').style.display = (chatFunded && deal.role === 'seller' && deal.template === 'otc') ? 'inline-flex' : 'none';
   }
@@ -1317,18 +1489,18 @@ function metaHtml(m) {
   return `${a}${t ? ' · ' + t : ''}`;
 }
 
-/** Рендер одного сообщения (текст или медиа). Вызывается ТОЛЬКО из pollChat — один раз на id. */
+/** Renders a single message (text or media). Called ONLY from pollChat — once per id. */
 function renderChatMsg(m) {
   const thread = threadEl();
   if (m.id != null) {
     if (renderedMsgs.has(m.id)) return;
     renderedMsgs.add(m.id);
-    // отметка прочитанного для бейджа деска (страница сделки открыта = чат на глазах);
-    // дебаунс: одна перезапись шифрованного профиля на пачку сообщений, не на каждое
+    // read marker for the desk badge (deal page is open = chat is visible);
+    // debounced: one encrypted-profile rewrite per batch of messages, not per message
     if (m.id > (deal.chatRead || 0)) {
       deal.chatRead = m.id;
       clearTimeout(chatReadTimer);
-      chatReadTimer = setTimeout(() => { try { saveDeal(deal); } catch { /* профиль заперт */ } }, 1500);
+      chatReadTimer = setTimeout(() => { try { saveDeal(deal); } catch { /* profile locked */ } }, 1500);
     }
   }
   const empty = thread.querySelector('.chat-empty');
@@ -1360,7 +1532,7 @@ function renderChatMsg(m) {
   autoScroll(thread, wasBottom);
 }
 
-/** Трек-пузырь: 📦 код + перевозчик, копировать / отследить; s10=false → предупреждение. */
+/** Tracking bubble: 📦 code + carrier, copy / track; s10=false → warning. */
 function renderTrackBody(div, track, m) {
   div.innerHTML =
     `<div class="m-head"><span class="m-ico" aria-hidden="true">📦</span>` +
@@ -1370,7 +1542,7 @@ function renderTrackBody(div, track, m) {
                          : `<div class="m-cap">🔒 ${esc(L('track_sent_meta'))}</div>`) +
     `<div class="m-act"><button class="m-btn t-copy">${esc(L('track_copy'))}</button>` +
     `<a class="m-btn" href="${track.url}" target="_blank" rel="noopener">${esc(L('track_open'))}</a></div>` +
-    // получателю трека (покупателю) — совет про видео вскрытия: главное доказательство при подмене
+    // to the tracking recipient (buyer) — advice on an unboxing video: the main evidence in case of a swap
     (m.mine ? '' : `<div class="m-cap" style="white-space:normal;line-height:1.5">${esc(L('track_unboxing_hint'))}</div>`) +
     `<div class="msg-meta">${metaHtml(m)}</div>`;
   const cb = div.querySelector('.t-copy');
@@ -1379,7 +1551,7 @@ function renderTrackBody(div, track, m) {
   };
 }
 
-/** Пузырь реквизитов (OTC): 🏦 метод + детали, копировать; плательщику — гигиена-подсказка. */
+/** Payment-details bubble (OTC): 🏦 method + details, copy; to the payer — a hygiene hint. */
 function renderPayToBody(div, payto, m) {
   div.innerHTML =
     `<div class="m-head"><span class="m-ico" aria-hidden="true">🏦</span>` +
@@ -1395,16 +1567,17 @@ function renderPayToBody(div, payto, m) {
   };
 }
 
-/** Пузырь «оплачено» (OTC): 💸 сумма + метод + референс, эксплорер для крипто; получателю — предупреждение. */
+/** "Paid" bubble (OTC): 💸 amount + method + reference, explorer link for crypto; to the recipient — a warning. */
 function renderPayBody(div, pay, m) {
   const amt = [pay.amount, pay.currency].filter(Boolean).join(' ');
+  const txUrl = buildExplorerUrl(pay.method, pay.ref);   // task 8: shared with the leg-panel link, the full server-side method matrix
   div.innerHTML =
     `<div class="m-head"><span class="m-ico" aria-hidden="true">💸</span>` +
     `<span class="m-name">${esc(L('pay_bubble'))}${amt ? ': ' + esc(amt) : ''}</span><span class="m-size">${esc(pay.label)}</span></div>` +
     `<div class="msg-text mono" style="user-select:all;word-break:break-all">${esc(pay.ref)}</div>` +
     `<div class="m-cap">🔒 ${esc(L('track_sent_meta'))}</div>` +
     `<div class="m-act"><button class="m-btn t-copy">${esc(L('track_copy'))}</button>` +
-    (pay.txUrl ? `<a class="m-btn" href="${pay.txUrl}" target="_blank" rel="noopener">${esc(L('pay_explorer'))}</a>` : '') + `</div>` +
+    (txUrl ? `<a class="m-btn" href="${txUrl}" target="_blank" rel="noopener">${esc(L('pay_explorer'))}</a>` : '') + `</div>` +
     (m.mine ? '' : `<div class="m-cap" style="white-space:normal;line-height:1.5">${esc(L('pay_hint_receiver'))}</div>`) +
     `<div class="msg-meta">${metaHtml(m)}</div>`;
   const cb = div.querySelector('.t-copy');
@@ -1413,7 +1586,7 @@ function renderPayBody(div, pay, m) {
   };
 }
 
-/** Медиа-пузырь: шапка (тип/имя/размер) + ленивая загрузка → расшифровка → сверка хеша → показ. */
+/** Media bubble: header (type/name/size) + lazy download → decrypt → hash check → display. */
 function renderMediaBody(div, media, m) {
   const ico = media.kind === 'img' ? '🖼️' : media.kind === 'vid' ? '🎬' : '📄';
   const kindLbl = media.kind === 'img' ? L('m_photo') : media.kind === 'vid' ? L('m_video') : L('m_doc');
@@ -1437,7 +1610,7 @@ function renderMediaBody(div, media, m) {
       loadBtn.textContent = L('m_downloading')(0);
       const blob = await downloadMedia(deal, media.media_id, (p) => { bar.style.width = p + '%'; loadBtn.textContent = L('m_downloading')(p); });
       loadBtn.textContent = L('m_decrypting');
-      await new Promise((r) => setTimeout(r, 30)); // отдать кадр на перерисовку
+      await new Promise((r) => setTimeout(r, 30)); // yield a frame for the UI to redraw
       const pt = decryptMediaVerify(media.k, media.sha, blob);
       prog.style.display = 'none';
       loadBtn.parentElement.style.display = 'none';
@@ -1464,7 +1637,7 @@ function showMedia(view, media, pt) {
     view.innerHTML = `<video controls preload="metadata" playsinline></video>`;
     view.querySelector('video').src = url;
   } else if (media.kind === 'doc') {
-    // PDF: открыть расшифрованный blob в новой вкладке (+ ниже общая кнопка «Сохранить»)
+    // PDF: open the decrypted blob in a new tab (+ the shared "Save" button below)
     view.innerHTML = `<div class="m-act"><a class="m-btn" href="${url}" target="_blank" rel="noopener">📄 ${esc(L('m_open'))}</a></div>`;
   }
   const act = document.createElement('div');
@@ -1475,10 +1648,10 @@ function showMedia(view, media, pt) {
   view.appendChild(act);
 }
 
-// начальное состояние треда
+// initial thread state
 threadEl().innerHTML = `<p class="chat-empty">${esc(L('chat_empty'))}</p>`;
 
-// отправка текста: БЕЗ оптимистичного рендера (§11.3) — тред покажет из поллинга один раз
+// sending text: NO optimistic rendering (§11.3) — the thread will show it once, from polling
 $('chat-send-btn').onclick = async () => {
   const input = $('chat-input');
   const text = input.value.trim();
@@ -1501,7 +1674,7 @@ $('chat-input').addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('chat-send-btn').click(); }
 });
 
-// ── медиа: прикрепить → зашифровать → загрузить → медиа-сообщение ──
+// ── media: attach → encrypt → upload → media message ──
 $('chat-attach').onclick = () => { if (mediaSupported()) $('chat-file').click(); };
 $('chat-file').addEventListener('change', async () => {
   const file = $('chat-file').files[0];
@@ -1512,7 +1685,7 @@ $('chat-file').addEventListener('change', async () => {
   try { const kind = checkMediaFile(file); kindLbl = kind === 'img' ? L('m_photo') : kind === 'vid' ? L('m_video') : L('m_doc'); }
   catch (e) { showErr(err, e); return; }
 
-  // временный пузырь прогресса: НЕ рендер сообщения (его покажет поллинг), только индикатор
+  // temporary progress bubble: NOT the message render (polling will show that), just an indicator
   const thread = threadEl();
   const tmp = document.createElement('div');
   tmp.className = 'msg media mine';
@@ -1552,7 +1725,7 @@ $('chat-file').addEventListener('change', async () => {
   } finally { $('chat-attach').disabled = false; }
 });
 
-// ── трек-номер (продавец, goods): форма → валидация → E2E track-сообщение ──
+// ── tracking number (seller, goods): form → validation → E2E track message ──
 {
   const sel = $('track-carrier');
   for (const c of CARRIERS) sel.insertAdjacentHTML('beforeend', `<option value="${c.id}">${esc(carrierLabel(c.id))}</option>`);
@@ -1570,7 +1743,7 @@ $('chat-track').onclick = () => {
   if (f.style.display === 'block') $('track-code').focus();
 };
 $('track-cancel').onclick = () => { $('track-form').style.display = 'none'; };
-// ── OTC: реквизиты (покупатель) и «я оплатил» (продавец) ──
+// ── OTC: payment details (buyer) and "I paid" (seller) ──
 {
   for (const sel of [$('payto-method'), $('pay-method')]) {
     for (const pm of PAY_METHODS) sel.insertAdjacentHTML('beforeend', `<option value="${pm.id}">${esc(payMethodLabel(pm.id))}</option>`);
@@ -1597,7 +1770,16 @@ $('track-cancel').onclick = () => { $('track-form').style.display = 'none'; };
 $('chat-payto').onclick = () => {
   const f = $('payto-form');
   f.style.display = f.style.display === 'none' ? 'block' : 'none';
-  if (f.style.display === 'block') $('payto-details').focus();
+  if (f.style.display === 'block') {
+    // OTC (task 8): prefill from the server-side counter leg (method+address from create/join) —
+    // ONCE (otcPrefillDone), reopening after a manual edit doesn't overwrite it.
+    if (!otcPrefillDone && st && st.otc && st.otc.method) {
+      otcPrefillDone = true;
+      if (PAY_METHODS.some((pm) => pm.id === st.otc.method)) $('payto-method').value = st.otc.method;
+      if (!$('payto-details').value.trim()) $('payto-details').value = st.otc.buyer_addr || '';
+    }
+    $('payto-details').focus();
+  }
 };
 $('payto-cancel').onclick = () => { $('payto-form').style.display = 'none'; };
 $('payto-send').onclick = async () => {
@@ -1640,12 +1822,70 @@ $('pay-send').onclick = async () => {
   finally { btn.disabled = false; btn.textContent = L('pay_send'); }
 };
 
+// Counter OTC leg (task 8): "I paid" in the panel above — ONE action = the server-side otc/pay
+// (kicks off an on-chain probe) + an anchored {t:'pay'} message in chat (the same evidence trail as
+// the claim form above), with the REAL method/amount from the server, not a free-form picker.
+$('otc-pay-send').onclick = async () => {
+  const ref = $('otc-pay-ref').value.trim();
+  if (!ref) return;
+  hideErr(err);
+  const btn = $('otc-pay-send');
+  btn.disabled = true;
+  try {
+    await otcPay(deal, ref);
+    const o = st.otc;
+    if (peerChatPk && deal.chat_sk) {
+      try {
+        const currency = o.currency || (o.method || '').split('-')[0].toUpperCase();
+        await sendPayMsg(deal, peerChatPk, o.method, ref, o.amount || '', currency);
+        await pollChat(deal, renderChatMsg);
+      } catch (chatErr) {
+        // otcPay already succeeded on the server — the on-chain check is running. A failure to send
+        // the receipt to chat shouldn't be disguised as a failed payment claim.
+        showErr(err, new Error(L('otc_paid_chat_fail')));
+      }
+    }
+    $('otc-pay-ref').value = '';
+    await refresh();
+  } catch (e) { showErr(err, e); }
+  finally { btn.disabled = false; }
+};
+// "I have paid" auto-detect: server-side scan of the buyer's address; a found txid is only
+// PRE-FILLED — the seller reviews and confirms, and the full verification path applies.
+$('otc-detect-btn').onclick = async () => {
+  const btn = $('otc-detect-btn'); const note = $('otc-detect-note');
+  btn.disabled = true;
+  note.style.display = 'block'; note.textContent = L('otc_detect_searching');
+  try {
+    const r = await otcDetect(deal);
+    if (r.found) {
+      $('otc-pay-ref').value = r.ref;
+      const o = (st && st.otc) || {};
+      const cur = o.currency || (o.method || '').toUpperCase();
+      const t = new Date((r.time || 0) * 1000).toLocaleTimeString();
+      note.textContent = L('otc_detect_found').replace('{sum}', `${r.amount} ${cur}`).replace('{time}', t);
+      $('otc-pay-send').focus();
+    } else {
+      note.textContent = L('otc_detect_none').replace('{min}', String(Math.round((r.window_secs || 900) / 60)));
+    }
+  } catch (e) { note.textContent = (e && e.message) || 'Error'; }
+  finally { btn.disabled = false; }
+};
+$('otc-addr-copy').onclick = async () => {
+  const o = (st && st.otc) || {};
+  if (!o.buyer_addr) return;
+  await copyText(o.buyer_addr);
+  const b = $('otc-addr-copy'); const keep = b.textContent;
+  b.textContent = '✓'; setTimeout(() => { b.textContent = keep; }, 1200);
+};
+
+
 $('track-send').onclick = async () => {
   if (!peerChatPk || !deal.chat_sk) return;
   hideErr(err);
   const code = normTrackCode($('track-code').value);
   if (!code) { showErr(err, new Error(L('track_bad_code'))); return; }
-  // S10-формат с битой чексуммой — предупредить (не блокируем: перевозчик-специфичные форматы легальны)
+  // S10 format with a broken checksum — warn (not blocking: carrier-specific formats are legitimate)
   if (looksLikeS10(code) && !s10Valid(code) && !confirm(L('track_s10_fail'))) return;
   const btn = $('track-send');
   try {
@@ -1667,21 +1907,21 @@ $('tg-btn').onclick = async () => {
   } catch (e) { showErr(err, e); }
 };
 
-// забыть сделку в этом браузере: ключ уходит с ней — предупреждаем про recovery-лист
+// forget the deal in this browser: the key goes with it — warn about the recovery sheet
 $('forget').onclick = () => {
   if (!deal) return;
-  if (st && (st.state === 'funded' || st.state === 'disputed')) return; // страховка: активную сделку не забываем (кнопка и так disabled)
+  if (st && (st.state === 'funded' || st.state === 'disputed')) return; // safeguard: never forget an active deal (the button is disabled anyway)
   if (!confirm(L('forget_deal_confirm'))) return;
-  // фоновые писатели — СТОП до удаления: тик refresh()/дебаунс chatRead, доехавший после
-  // removeDeal, воскрешал сделку saveDeal-upsert'ом (вторая страховка — tombstone в escrow.js)
+  // background writers — STOP before deletion: a refresh() tick / chatRead debounce landing after
+  // removeDeal used to resurrect the deal via a saveDeal upsert (second safeguard — the tombstone in escrow.js)
   if (timer) { clearInterval(timer); timer = null; }
   clearTimeout(chatReadTimer);
   removeDeal(deal.id);
   deal = null;
-  location.href = location.pathname; // перезагрузка без ?id → откроется активная/первая или пусто
+  location.href = location.pathname; // reload without ?id → the active/first deal opens, or nothing
 };
 </script>
 <script>if("serviceWorker" in navigator&&/(^|\.)kaspaforge\.org$|(^|\.)officeforge\.co$/.test(location.hostname))navigator.serviceWorker.register("/sw-escrow.js");</script>
-<script src="/assets/kaspa-widget.js?v=3" defer></script>
+<script src="/assets/kaspa-widget.js?v=4" defer></script>
 </body>
 </html>

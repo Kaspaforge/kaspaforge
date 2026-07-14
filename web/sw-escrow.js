@@ -2,18 +2,19 @@
    Strategy: network-first with cache fallback — financial app, code freshness matters more than speed;
    the cache exists only so the landing/panel open offline or during a site outage.
    /api/ and non-GET are never touched (always go to the network). The deal.html panel is cached at runtime on visit. */
-const CACHE = 'kescrow-v33';
+const CACHE = 'kescrow-v45';
 const PRECACHE = [
   '/', '/escrow-index.html', '/escrow.html', '/deal.html',
   '/ru/', '/ru/escrow-index.html', '/ru/escrow.html', '/ru/deal.html',
-  '/assets/safe.css?v=14', '/assets/netstat.js?v=1', '/assets/escrow.css?v=7', '/assets/escrow.js?v=30', '/assets/identity.js',
+  '/assets/safe.css?v=14', '/assets/netstat.js?v=1', '/assets/escrow.css?v=7', '/assets/escrow.js?v=40', '/assets/identity.js', '/assets/swap-widget.js?v=5',
   '/assets/qrcode.min.js', '/assets/favicon.svg', '/assets/of-wordmark.png', '/assets/logo.png',
   '/manifest-escrow.json',
   '/assets/icons-escrow/icon-192.png?v=2', '/assets/icons-escrow/icon-512.png?v=2',
   '/assets/vault-core-v5/kaspa_safe_core.js', '/assets/vault-core-v5/kaspa_safe_core_bg.wasm',
-  // desk encryption: session model + personal wallet; core6(v6) and app.js(v14) are pulled by deal.html via lock-ui/wallet
-  '/assets/session.js', '/assets/core6.js', '/assets/lock-ui.js', '/assets/wallet.js', '/assets/app.js?v=15',
-  '/assets/vault-core-v6/kaspa_safe_core.js', '/assets/vault-core-v6/kaspa_safe_core_bg.wasm',
+  // desk encryption: session model + unified HD wallet; core7 and app.js are pulled via lock-ui/wallet
+  '/assets/session.js', '/assets/core7.js', '/assets/lock-ui.js', '/assets/wallet.js?v=2', '/assets/app.js?v=18',
+  '/assets/vault-core-v7/kaspa_safe_core.js', '/assets/vault-core-v7/kaspa_safe_core_bg.wasm',
+  '/assets/contracts.js', '/assets/contracts-catalog.json',   // Forge Contracts catalog (escrow.html/deal.html template prefill)
 ];
 
 self.addEventListener('install', (e) => {

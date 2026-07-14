@@ -67,6 +67,27 @@ test('confirm is a presence check against in-memory password', () => {
   assert.equal(session.confirm('wrong'), false);
 });
 
+test('decryptArmoredCurrent reads a candidate without mutating local profile', () => {
+  fresh(); const local = mkStore(); const remote = mkStore();
+  session.onboard('same-password', 'mainnet', remote);
+  const rp = session.getProfile(); rp.deals.push({ id: 77 }); session.commit(rp, remote);
+  const candidate = remote.getItem('kaspa-office-profile');
+  session.lock(); session.onboard('same-password', 'mainnet', local);
+  const before = session.getProfile();
+  assert.equal(session.decryptArmoredCurrent(candidate).deals[0].id, 77);
+  assert.equal(session.getProfile(), before);
+  assert.equal(session.getProfile().deals.length, 0);
+});
+
+test('decryptArmoredCurrent fails closed for a different password', () => {
+  fresh(); const local = mkStore(); const remote = mkStore();
+  session.onboard('remote-password', 'mainnet', remote);
+  const candidate = remote.getItem('kaspa-office-profile');
+  session.lock(); session.onboard('local-password', 'mainnet', local);
+  assert.throws(() => session.decryptArmoredCurrent(candidate), /bad passphrase/);
+  assert.equal(session.getProfile().deals.length, 0);
+});
+
 test('hasEncryptedProfile / hasLegacyPlaintext detection', () => {
   fresh();
   assert.equal(session.hasEncryptedProfile(mkStore({ 'kaspa-office-profile': '-----BEGIN AGE ENCRYPTED FILE-----\n…' })), true);
@@ -139,6 +160,15 @@ test('adoptProfile persists+unlocks a given profile wholesale', () => {
 test('exportCurrent returns armored of the current profile under the session password', () => {
   fresh(); const s = mkStore(); session.onboard('pw-goodenough', 'mainnet', s);
   assert.ok(session.exportCurrent().startsWith('AGE:'));
+});
+
+test('exportProfile encrypts a projection without changing the unlocked profile', () => {
+  fresh(); const s = mkStore(); session.onboard('pw-goodenough', 'mainnet', s);
+  const local = session.getProfile(); local.vaults.push({ vault_addr: 'v', alarm_sk: 'alarm' });
+  const projected = { ...local, vaults: [{ vault_addr: 'v' }] };
+  const decoded = JSON.parse(fakeCrypto.decrypt(session.exportProfile(projected), 'pw-goodenough'));
+  assert.equal(decoded.vaults[0].alarm_sk, undefined);
+  assert.equal(session.getProfile().vaults[0].alarm_sk, 'alarm');
 });
 
 test('tryResume unlocks silently from the tab session store', () => {

@@ -56,6 +56,23 @@
   </url>
 
   <url>
+    <loc>https://kaspaforge.org/contracts.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/contracts.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/contracts.html"/>
+    <lastmod>2026-07-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/ru/contracts.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/contracts.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/contracts.html"/>
+    <lastmod>2026-07-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
     <loc>https://kaspaforge.org/market.html</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/market.html"/>
     <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/market.html"/>
@@ -116,6 +133,34 @@
     <priority>0.3</priority>
   </url>
   <url>
+    <loc>https://kaspaforge.org/terms.html</loc>
+    <lastmod>2026-07-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/terms.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/terms.html"/>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/ru/terms.html</loc>
+    <lastmod>2026-07-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/terms.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/terms.html"/>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/security.html</loc>
+    <lastmod>2026-07-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/security.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/security.html"/>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/ru/security.html</loc>
+    <lastmod>2026-07-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/security.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/security.html"/>
+    <priority>0.3</priority>
+  </url>
+  <url>
     <loc>https://kaspaforge.org/privacy-escrow.html</loc>
     <lastmod>2026-07-11</lastmod>
     <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/privacy-escrow.html"/>
@@ -162,6 +207,22 @@
     <lastmod>2026-07-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/docs/security.html</loc>
+    <lastmod>2026-07-13</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/docs/security.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/docs/security.html"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/ru/docs/security.html</loc>
+    <lastmod>2026-07-13</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/docs/security.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/docs/security.html"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://kaspaforge.org/docs/safe.html</loc>
@@ -278,6 +339,22 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://kaspaforge.org/blog/inside-kaspa-safe-covenant-vault.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/blog/inside-kaspa-safe-covenant-vault.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/blog/inside-kaspa-safe-covenant-vault.html"/>
+    <lastmod>2026-07-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/ru/blog/inside-kaspa-safe-covenant-vault.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/blog/inside-kaspa-safe-covenant-vault.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/blog/inside-kaspa-safe-covenant-vault.html"/>
+    <lastmod>2026-07-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://kaspaforge.org/blog/kaspa-post-toccata-operator-checklist.html</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/blog/kaspa-post-toccata-operator-checklist.html"/>
     <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/blog/kaspa-post-toccata-operator-checklist.html"/>
@@ -306,6 +383,86 @@
     <lastmod>2026-07-11</lastmod>
     <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/blog/kaspa-blockdag-ghostdag-explained.html"/>
     <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/blog/kaspa-blockdag-ghostdag-explained.html"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/blog/kaspa-escrow-covenant-spending-paths.html</loc>
+    <lastmod>2026-07-12</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/blog/kaspa-escrow-covenant-spending-paths.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/blog/kaspa-escrow-covenant-spending-paths.html"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/ru/blog/kaspa-escrow-covenant-spending-paths.html</loc>
+    <lastmod>2026-07-12</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/blog/kaspa-escrow-covenant-spending-paths.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/blog/kaspa-escrow-covenant-spending-paths.html"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/blog/kaspalytics-kaspa-covenants-opcodes-protocol-activity.html</loc>
+    <lastmod>2026-07-13</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/blog/kaspalytics-kaspa-covenants-opcodes-protocol-activity.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/blog/kaspalytics-kaspa-covenants-opcodes-protocol-activity.html"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/ru/blog/kaspalytics-kaspa-covenants-opcodes-protocol-activity.html</loc>
+    <lastmod>2026-07-13</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/blog/kaspalytics-kaspa-covenants-opcodes-protocol-activity.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/blog/kaspalytics-kaspa-covenants-opcodes-protocol-activity.html"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/blog/client-side-keys-kaspa-desk.html</loc>
+    <lastmod>2026-07-13</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/blog/client-side-keys-kaspa-desk.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/blog/client-side-keys-kaspa-desk.html"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/ru/blog/client-side-keys-kaspa-desk.html</loc>
+    <lastmod>2026-07-13</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/blog/client-side-keys-kaspa-desk.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/blog/client-side-keys-kaspa-desk.html"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/blog/kaspa-10-bps-one-second-confirmations.html</loc>
+    <lastmod>2026-07-14</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/blog/kaspa-10-bps-one-second-confirmations.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/blog/kaspa-10-bps-one-second-confirmations.html"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/ru/blog/kaspa-10-bps-one-second-confirmations.html</loc>
+    <lastmod>2026-07-14</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/blog/kaspa-10-bps-one-second-confirmations.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/blog/kaspa-10-bps-one-second-confirmations.html"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/blog/running-own-kaspa-node-services.html</loc>
+    <lastmod>2026-07-14</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/blog/running-own-kaspa-node-services.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/blog/running-own-kaspa-node-services.html"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/ru/blog/running-own-kaspa-node-services.html</loc>
+    <lastmod>2026-07-14</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/blog/running-own-kaspa-node-services.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/blog/running-own-kaspa-node-services.html"/>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>

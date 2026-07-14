@@ -24,7 +24,7 @@
 <meta name="theme-color" content="#0E1116">
 <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/safe.css?v=14">
-<script src="/assets/nav.js?v=5" defer></script>
+<script src="/assets/nav.js?v=7" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"How Kaspa Escrow works — non-custodial P2P escrow on Kaspa","description":"The escrow covenant's spend paths, the deal lifecycle, fees, the end-to-end encrypted on-chain deal chat, AI mediator, human arbiter and timeout guarantees.","inLanguage":"en","url":"https://kaspaforge.org/docs/escrow.html","image":"https://kaspaforge.org/assets/og-escrow.png","dateModified":"2026-07-10","isPartOf":{"@type":"WebSite","name":"Kaspa Forge","url":"https://kaspaforge.org/"},"publisher":{"@type":"Organization","name":"OfficeForge","url":"https://officeforge.co"}}
 </script>
@@ -51,6 +51,7 @@
   <nav aria-label="Documentation sections" style="display:flex;gap:16px;flex-wrap:wrap;margin:20px 0 8px;padding:10px 0;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);font-family:var(--mono);font-size:11.5px;letter-spacing:.09em;text-transform:uppercase">
     <a href="/docs/" style="color:var(--ash);text-decoration:none">Overview</a>
     <a href="/docs/desk.html" style="color:var(--ash);text-decoration:none">Desk &amp; keys</a>
+    <a href="/docs/security.html" style="color:var(--ash);text-decoration:none">Security</a>
     <a href="/docs/safe.html" style="color:var(--ash);text-decoration:none">Safe</a>
     <a href="/docs/escrow.html" style="color:var(--kaspa);text-decoration:none">Escrow</a>
     <a href="/docs/market.html" style="color:var(--ash);text-decoration:none">Marketplace</a>
@@ -67,7 +68,7 @@
     <div class="kv"><span class="k" style="min-width:210px">Arbitrate — arbiter signs</span><span class="v" style="text-align:left">Three variants: all to the buyer, all to the seller, or a split between them. <b>There is no path that pays the arbiter or any third party</b> — the network rejects such a transaction outright.</span></div>
     <div class="kv"><span class="k" style="min-width:210px">Timeout — keyless</span><span class="v" style="text-align:left">The arbiter missed their deadline → funds go to the deal's default side (normally the buyer), with <b>no service fee</b>. A deal can never hang, even if we vanish.</span></div>
   </div>
-  <p class="hint" style="margin-top:10px">That's the whole trust story: we are not asking you to believe the guarantor is honest — the guarantor holds nothing and has no door to walk the money out of. Being precise about the boundary: the covenant guarantees funds <b>can't be stolen</b>; whether a disputed verdict is <b>fair</b> is the work of a human reading your evidence.</p>
+  <p class="hint" style="margin-top:10px">That's the whole trust story: we are not asking you to believe the guarantor is honest — the guarantor holds nothing and has no door to walk the money out of. Being precise about the boundary: every spend path in the covenant pays a party of the deal — <b>the operator can't redirect funds</b>; whether a disputed verdict is <b>fair</b> is the work of a human reading your evidence.</p>
 
   <h2 style="margin-top:32px">A deal, start to finish</h2>
   <ol class="steps" style="margin-top:10px">
@@ -78,9 +79,19 @@
   </ol>
   <div style="margin-top:14px">
     <div class="kv"><span class="k" style="min-width:210px">Deal size</span><span class="v" style="text-align:left">50 – 10&nbsp;000 KAS (open beta; below 50 KAS the arbitration minimum would eat too large a share).</span></div>
-    <div class="kv"><span class="k" style="min-width:210px">Dispute window</span><span class="v" style="text-align:left">Chosen by the deal's creator from six presets: 24&nbsp;h / 48&nbsp;h / 72&nbsp;h / 96&nbsp;h / 120&nbsp;h / 7&nbsp;days — shown to the other side <i>before</i> joining. Defaults by deal type: goods 72&nbsp;h, OTC 24&nbsp;h, service 120&nbsp;h. Arbitrary values are deliberately impossible (no "micro-window" tricks that would strip the buyer of a real chance to dispute).</span></div>
+    <div class="kv"><span class="k" style="min-width:210px">Dispute window</span><span class="v" style="text-align:left">Your <b>budget for delivery + inspection</b>: the timer starts the moment the escrow is funded, and until it runs out the buyer can open a dispute — that is the normal buyer protection, not an emergency. Chosen by the deal's creator from eight presets: 24&nbsp;h / 48&nbsp;h / 72&nbsp;h / 96&nbsp;h / 120&nbsp;h / 7&nbsp;days / <b>14&nbsp;days (domestic shipping)</b> / <b>30&nbsp;days (international shipping)</b> — shown to the other side <i>before</i> joining. Defaults by deal type: goods <b>7&nbsp;days</b> (a physical parcel needs time to arrive), OTC 24&nbsp;h, service 120&nbsp;h. Received the goods with a dispute already open? No problem — a normal <b>Release</b> closes it. Arbitrary values are deliberately impossible (no "micro-window" tricks that would strip the buyer of a real chance to dispute).</span></div>
     <div class="kv"><span class="k" style="min-width:210px">Fees</span><span class="v" style="text-align:left">Creating a deal — free. Release / refund / mutual — <b>0.5%</b> (min 1.2 KAS, which also pays for the on-chain chat). Arbitration, only if a dispute happens — <b>2%</b> (min 5 KAS). Timeout — no service fee. The fee is enforced by the contract itself and visible before you confirm. Telegram guarantors charge 3–10% <i>and</i> hold your money; we charge 0.5% and can't.</span></div>
   </div>
+
+  <h2 style="margin-top:32px">OTC deals: swapping KAS for another asset</h2>
+  <p class="hint">In an <b>OTC / crypto exchange</b> deal the two legs live on different chains: the buyer locks <b>KAS</b> in the covenant, and the seller pays the <b>counter-leg</b> — USDT/USDC on another network, a native coin, or fiat. The escrow protects the KAS; the counter-payment happens on its own chain. Two things turn that from a blind swap into a safe one:</p>
+  <div style="margin-top:12px">
+    <div class="kv"><span class="k" style="min-width:210px">Fixed at creation</span><span class="v" style="text-align:left">The buyer picks the <b>currency / network</b> and the <b>amount</b> of the counter-payment and enters the <b>receiving address</b> where they expect it — checked against the chosen network the moment you type it. These terms are locked into the deal and visible to both sides and the arbiter; they can't be quietly changed in chat later.</span></div>
+    <div class="kv"><span class="k" style="min-width:210px">Order that protects the seller</span><span class="v" style="text-align:left"><b>The buyer funds the KAS into escrow first.</b> Only then does the seller pay the counter-leg. Until the escrow is funded the seller's payment panel stays hidden behind a warning — never send your payment before the KAS is locked, or you would be paying into an empty escrow.</span></div>
+    <div class="kv"><span class="k" style="min-width:210px">On-chain auto-verification</span><span class="v" style="text-align:left">For supported networks the seller presses <b>“I have paid”</b> — the service finds the recent payment to the buyer's address (or you paste the transaction id) and <b>checks it live on the public blockchain</b>. A green <b>“payment confirmed on-chain”</b> badge appears for both sides only when everything lines up: the transaction succeeded, has enough confirmations, uses the canonical token contract (no fake-USDT), the recipient is exactly the buyer's fixed address, the amount is at least what was agreed, and the payment is newer than the deal itself (anti-replay). One transaction can back only one deal.</span></div>
+    <div class="kv"><span class="k" style="min-width:210px">A signal, not an action</span><span class="v" style="text-align:left">The badge <b>moves nothing on its own</b>. Release stays the buyer's own signature — even with a green badge, confirm the funds truly arrived (an exchange deposit can lag the on-chain confirmation), then release. In a dispute the verified leg is the <b>strongest possible evidence</b> that the seller performed, and the arbiter sees it.</span></div>
+  </div>
+  <p class="hint" style="margin-top:10px">Auto-verified networks: <b>USDT</b> on Tron, TON, Ethereum, BSC, Polygon and Arbitrum; <b>USDC</b> on Ethereum, BSC, Polygon, Arbitrum and Base; native <b>TRX, TON, ETH, BNB</b>; and <b>BTC, LTC</b>. Any other crypto or fiat still works as an OTC deal — the leg's terms are recorded and shown to both sides — but there is no live badge, so you confirm receipt yourself before releasing.</p>
 
   <h2 style="margin-top:32px">The deal chat: evidence that can't be forged</h2>
   <p class="hint">The chat inside every deal is not a support chat — it's <b>end-to-end encrypted on-chain messaging</b> (the Kasia protocol on the Kaspa BlockDAG). Each message is encrypted in your browser and anchored as a Kaspa transaction; photos, videos and documents are encrypted per-file with an integrity hash anchored on-chain. The server relays and stores only ciphertext it cannot read. The consequence matters in a dispute: the correspondence <b>can't be forged, edited or backdated</b> — it is the case file. A tiny on-chain fee for your chat messages is covered by the service.</p>
@@ -99,21 +110,43 @@
   <ol class="steps" style="margin-top:10px">
     <li><b>The arbiter can't steal</b> — no covenant path leads outside the buyer/seller/fee triangle.</li>
     <li><b>The server can't steal</b> — it never holds deal keys; the keyless paths (auto-release, timeout) hard-wire their payees.</li>
+    <li><b>The service token can't spend</b> — it's a per-side capability that unlocks reading state, chatting (ciphertext only) and filing dispute claims; every fund-moving action still needs a signature from the deal key, which never leaves the browser. Full boundary: <a href="/privacy-escrow.html#token">Escrow privacy</a>.</li>
     <li><b>The chat is private until <i>you</i> open it</b> — plaintext exists for the mediator only after a party voluntarily reveals a chat key, and that key can't move funds.</li>
     <li><b>The AI never executes anything</b> — its proposal becomes real only through a party's signature or the human arbiter's; the covenant caps the outcome either way.</li>
     <li><b>The service dying ≠ losing the deal</b> — timeouts are keyless and on-chain. The <a href="/recover-escrow.html">deal recovery page</a> shows how a deal outlives the website.</li>
   </ol>
 
   <div class="note" style="margin-top:20px">
-    <b>Beta limits.</b> The contract passed native VM equivalence tests and an adversarial on-chain cycle (52/52 self-tests); an external audit is still ahead. Deals are capped at 50–10&nbsp;000 KAS. One thing no escrow can see is the off-chain world — whether the parcel actually arrived. That's precisely why the dispute rail exists, and why the tamper-proof chat is where your deal should live.
+    <b>Beta limits.</b> The contract passed native VM equivalence tests and an adversarial on-chain cycle (52/52 self-tests). Deals are capped at 50–10&nbsp;000 KAS. One thing no escrow can see is the off-chain world — whether the parcel actually arrived. That's precisely why the dispute rail exists, and why the tamper-proof chat is where your deal should live.
   </div>
 
   <p class="hint" style="margin-top:24px">See also: <a href="/escrow-index.html">Kaspa Escrow overview</a> · <a href="/recover-escrow.html">deal recovery</a> · <a href="/docs/market.html">the Marketplace</a> — listings with this escrow built in</p>
 </div>
 
-<footer><div class="row wrap"><a class="foot-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="OfficeForge"><img src="/assets/logo.png" alt="OfficeForge"></a><span>Kaspa Forge · non-custodial beta · <a href="https://officeforge.co">OfficeForge</a> · feedback: kaspa@officeforge.co · <a href="/privacy-escrow.html">Privacy</a></span></div></footer>
+<footer>
+  <div class="foot">
+    <span class="fb">
+      <img class="k" src="/assets/brand/emblem-flat-header.png" alt="" aria-hidden="true">
+      <span>© 2026 Kaspa Forge — built by the</span>
+      <a class="foot-ofs-logo" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="Visit OfficeForge"><img src="/assets/of-wordmark.png" alt="OfficeForge"></a>
+    </span>
+    <nav aria-label="Footer">
+      <a href="/safe.html">Safe</a>
+      <a href="/escrow-index.html">Escrow</a>
+      <a href="/market.html">Market</a>
+      <a href="/blog/">Blog</a>
+      <a href="/docs/">Docs</a>
+      <a href="/recover.html">Recovery</a>
+      <a href="https://github.com/Kaspaforge/kaspaforge" target="_blank" rel="noopener">GitHub</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+      <a href="/security.html">Security</a>
+      <a href="mailto:kaspa@officeforge.co">kaspa@officeforge.co</a>
+    </nav>
+  </div>
+</footer>
 </div>
 
-<script src="/assets/kaspa-widget.js?v=3" defer></script>
+<script src="/assets/kaspa-widget.js?v=4" defer></script>
 </body>
 </html>

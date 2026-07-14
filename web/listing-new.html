@@ -11,7 +11,7 @@
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <meta name="theme-color" content="#0E1116">
 <link rel="stylesheet" href="/assets/safe.css?v=14">
-<script src="/assets/nav.js?v=5" defer></script>
+<script src="/assets/nav.js?v=7" defer></script>
 <style>
 /* Page-scoped, same discipline as market.html's own <style> block — don't touch safe.css. */
 .trust-strip{display:flex;align-items:flex-start;gap:12px;margin-bottom:18px}
@@ -75,6 +75,27 @@
     <div class="field"><label for="l-category">Category</label>
       <select id="l-category"><option value="goods">Physical goods</option><option value="otc">OTC / crypto trade</option><option value="services">Service / freelance</option></select>
     </div>
+    <!-- OTC counter-leg (Task 10): shown only for the OTC category; the server verifies the same
+         methods matrix. NO address field here — the listing creator is ALWAYS the seller; the buyer
+         supplies their receiving address when they join the deal (deal.html join-plate). -->
+    <div class="field" id="ln-otc-leg" style="display:none">
+      <label>Counter-payment — what you send the buyer for their KAS</label>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <div style="flex:1;min-width:180px">
+          <label for="ln-otc-method">Currency / network you pay in</label>
+          <select id="ln-otc-method"></select>
+        </div>
+        <div id="ln-otc-currency-wrap" style="display:none;flex:0 0 130px">
+          <label for="ln-otc-currency">Ticker</label>
+          <input type="text" id="ln-otc-currency" maxlength="16" placeholder="e.g. XMR">
+        </div>
+        <div id="ln-otc-amount-wrap" style="display:none;flex:0 0 160px">
+          <label for="ln-otc-amount">Amount you will send</label>
+          <input type="text" id="ln-otc-amount" inputmode="decimal" autocomplete="off">
+        </div>
+      </div>
+      <p class="hint" id="ln-otc-hint" style="margin-top:6px"></p>
+    </div>
     <!-- Shipping geography — physical goods category only (decision 2026-07-10). Goes as the first
          line of the description: visible on the marketplace card, in the buyer's deal terms and
          to the arbiter in a dispute — same as escrow.html. -->
@@ -90,8 +111,13 @@
     <div class="field"><label for="l-price">Price (KAS)</label><input id="l-price" type="number" min="50" max="10000"></div>
     <div class="field"><label for="l-window">Dispute window</label>
       <select id="l-window">
-        <option value="24">24 h</option><option value="48">48 h</option><option value="72" selected>72 h</option>
-        <option value="96">96 h</option><option value="120">120 h</option><option value="168">168 h</option>
+        <option value="24">24 h — OTC / same-day</option>
+        <option value="48">48 h</option>
+        <option value="72">72 h — digital goods &amp; services</option>
+        <option value="120">5 days</option>
+        <option value="168" selected>7 days — local shipping</option>
+        <option value="336">14 days — domestic shipping</option>
+        <option value="720">30 days — international shipping</option>
       </select>
     </div>
     <div class="field"><label for="l-descr">Description</label><textarea id="l-descr" maxlength="2000"></textarea></div>
@@ -127,11 +153,24 @@
   <div class="body" id="step-3-body"></div>
 </div>
 
+<footer>
+  <div class="foot">
+    <span class="fb">
+      <img class="k" src="/assets/brand/emblem-flat-header.png" alt="" aria-hidden="true">
+      <span>© 2026 Kaspa Forge — built by the</span>
+      <a class="foot-ofs-logo" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="Visit OfficeForge"><img src="/assets/of-wordmark.png" alt="OfficeForge"></a>
+    </span>
+    <nav aria-label="Footer">
+      <a href="/safe.html">Safe</a><a href="/escrow-index.html">Escrow</a><a href="/market.html">Market</a><a href="/blog/">Blog</a><a href="/docs/">Docs</a><a href="/recover.html">Recovery</a><a href="https://github.com/Kaspaforge/kaspaforge" target="_blank" rel="noopener">GitHub</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><a href="/security.html">Security</a><a href="mailto:kaspa@officeforge.co">kaspa@officeforge.co</a>
+    </nav>
+  </div>
+</footer>
+
 </div>
 <script type="module">
 import { getDeals, setDeals, getListings, setListings } from '/assets/identity.js';
-import { $, genToken, kas } from '/assets/app.js?v=15';
-import { core, boot, net, chatSupported } from '/assets/escrow.js?v=30';
+import { $, genToken, kas } from '/assets/app.js?v=18';
+import { core, boot, net, chatSupported, otcMethods } from '/assets/escrow.js?v=40';
 import { requireUnlock } from '/assets/lock-ui.js';
 import * as session from '/assets/session.js';
 
@@ -148,7 +187,7 @@ function stepTo(n) {
   }
 }
 
-let draft = null; // { title, descr, priceKas, priceSompi, category, listingType, repeatable, windowHours, keys, chat, token }
+let draft = null; // { title, descr, priceKas, priceSompi, category, listingType, repeatable, windowHours, keys, chat, token, otcMethod, otcCurrency, otcAmount }
 
 // ── type ↔ category ↔ shipping ────────────────────────────────────────────
 // Matrix (decision 2026-07-10): an item is ONLY "Physical goods" (an OTC swap is a service,
@@ -166,6 +205,35 @@ function syncTypeFields() {
   else if (cat.value === 'goods') cat.value = 'services';
   cat.disabled = item;   // an item has exactly one category — lock the select so it doesn't look interactive
   $('ship-block').style.display = item ? 'block' : 'none';
+  // default dispute window follows the type: a physical item ships (7 days), a service is delivered
+  // fast (72h). The seller can still override in the select; the server whitelists every preset.
+  $('l-window').value = item ? '168' : '72';
+  renderOtcLeg();   // OTC counter-leg block is category-driven (only for 'otc')
+}
+
+// OTC counter-leg (Task 10): server-verified methods matrix + fiat/other-crypto options. Shown only
+// for the OTC category. No address field — the listing creator is always the seller; the buyer
+// supplies their receiving address on join. Values go into the create body as otc_method/_currency/
+// _amount (empty for fiat/non-otc — the server treats that as "no leg").
+async function renderOtcLeg() {
+  const on = $('l-category').value === 'otc';
+  $('ln-otc-leg').style.display = on ? 'block' : 'none';
+  if (!on) return;
+  const { methods } = await otcMethods();
+  const sel = $('ln-otc-method');
+  if (!sel.options.length) {
+    const opt = (v, txt) => { const o = document.createElement('option'); o.value = v; o.textContent = txt; sel.appendChild(o); };
+    opt('', 'Fiat / other (flow unchanged)');   // default: no server-side otc fields are sent
+    for (const m of methods) opt(m.id, `${m.label} — ${m.auto_verify ? 'auto-verified on-chain' : 'no auto-verification — manual check'}`);
+    opt('other-crypto', 'Other cryptocurrency…');
+    sel.onchange = renderOtcLeg;
+  }
+  const mid = sel.value;
+  $('ln-otc-currency-wrap').style.display = mid === 'other-crypto' ? '' : 'none';
+  $('ln-otc-amount-wrap').style.display = mid ? '' : 'none';
+  $('ln-otc-hint').textContent = !mid ? '' :
+    ((methods.find((m) => m.id === mid)?.auto_verify ? 'auto-verified on-chain' : 'no auto-verification — manual check')
+     + ' · the buyer enters their receiving address when they take the listing');
 }
 $('l-type').onchange = syncTypeFields;
 $('l-category').onchange = syncTypeFields;
@@ -247,6 +315,13 @@ $('l1-next').onclick = () => {
     if (!shipTxt) return showErr('l1-err', 'List the countries you can ship to.');
     descr = `📦 Ships to: ${shipTxt}` + (descr ? '\n' + descr : '');
   }
+  // OTC counter-leg (Task 10): the server validates it too, but catch the obvious gaps here at step 1
+  // (empty method = fiat/no leg = fine, matches the server's Ok(None)).
+  const otcMethod = $('l-category').value === 'otc' ? $('ln-otc-method').value : '';
+  const otcCurrency = otcMethod === 'other-crypto' ? $('ln-otc-currency').value.trim() : '';
+  const otcAmount = otcMethod ? $('ln-otc-amount').value.trim() : '';
+  if (otcMethod === 'other-crypto' && !otcCurrency) return showErr('l1-err', 'Enter the cryptocurrency ticker for the counter-payment.');
+  if (otcMethod && !otcAmount) return showErr('l1-err', 'Enter the expected counter-payment amount.');
 
   // Same two-call key pattern escrow.html uses to create a deal (escrow_gen_keys for the deal,
   // separate chat_gen_keys for chat — NOT one combined field). Runs right here at the 1→2
@@ -265,6 +340,7 @@ $('l1-next').onclick = () => {
     category: $('l-category').value, listingType: isItem() ? 'item' : 'service',
     repeatable: t === 'item_repeat' || t === 'service',
     windowHours: Number($('l-window').value), keys, chat, token: listingToken,
+    otcMethod, otcCurrency, otcAmount,
   };
   $('l2-price').textContent = kas(draft.priceSompi);
   $('l2-window').textContent = draft.windowHours + ' h';
@@ -287,6 +363,7 @@ $('l2-publish').onclick = async () => {
         category: draft.category, listing_type: draft.listingType, repeatable: draft.repeatable, dispute_hours: draft.windowHours,
         photo_ids: photos.map((p) => p.id),
         pk: draft.keys.pk, token: draft.token, chat_pk: draft.chat ? draft.chat.pk : '',
+        otc_method: draft.otcMethod, otc_currency: draft.otcCurrency, otc_amount: draft.otcAmount,
       }),
     });
     const listing = await resp.json();
@@ -340,6 +417,6 @@ function renderResult(listing) {
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 function showErr(id, msg) { $(id).style.display = 'block'; $(id).textContent = '⚠ ' + msg; }
 </script>
-<script src="/assets/kaspa-widget.js?v=3" defer></script>
+<script src="/assets/kaspa-widget.js?v=4" defer></script>
 </body>
 </html>
