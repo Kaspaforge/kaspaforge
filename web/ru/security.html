@@ -88,7 +88,7 @@
 
   <div class="plate" id="verify">
     <h2 style="font-size:20px">3. Проверьте контракт сами</h2>
-    <p>Всё для проверки ковенантов открыто в <a href="https://github.com/Kaspaforge/kaspaforge" target="_blank" rel="noopener">github.com/Kaspaforge/kaspaforge</a>: оба <span class="mono">.sil</span>-исходника, CLI <span class="mono">vaultctl</span> / <span class="mono">escrowctl</span>, веб-фронт и Android-приложение с его сборочным workflow.</p>
+    <p>Всё для проверки ковенантов открыто в <a href="https://github.com/Kaspaforge/kaspaforge" target="_blank" rel="noopener">github.com/Kaspaforge/kaspaforge</a>: оба <span class="mono">.sil</span>-исходника, CLI <span class="mono">vaultctl</span> / <span class="mono">escrowctl</span>, веб-фронт и исходник Android-обёртки.</p>
     <p style="margin-top:12px"><b>Сверьте хеш исходника</b> с тем, что заявлено на этой странице:</p>
     <div class="cmd"><pre><span class="c"># после клонирования репозитория</span>
 <span class="p">sha256sum contracts/vault.sil contracts/escrow.sil</span>
@@ -125,17 +125,9 @@
 
   <div class="plate" id="builds">
     <h2 style="font-size:20px">6. Воспроизводимые сборки и приложение</h2>
-    <p>WASM-ядро сейфа/эскроу собирается из исходников скриптом <span class="mono">wasm/build.sh</span> (wasm-pack, release). Android-приложение собирает публичный workflow <span class="mono">android-apk</span> в GitHub Actions в том же репозитории, поэтому устанавливаемый бинарь прослеживается до открытого исходника и CI, а не залит руками.</p>
-    <p style="margin-top:12px"><b>Текущая Android-сборка.</b> APK и его SHA-256 публикуются рядом со скачиванием; проверьте перед установкой:</p>
-    <div style="margin-top:12px">
-      <div class="kv"><span class="k">версия</span><span class="v">0.1.1</span></div>
-      <div class="kv"><span class="k">apk sha-256</span><span class="v">086421854bedd54b1c123092f06ab309be2aea04efbbfff3590ff7a089bc413b</span></div>
-      <div class="kv"><span class="k">файл контрольной суммы</span><span class="v"><a href="/dl/KaspaSafe.apk.sha256">/dl/KaspaSafe.apk.sha256</a></span></div>
-    </div>
-    <div class="cmd" style="margin-top:14px"><pre><span class="c"># проверка скачанного APK</span>
-<span class="p">sha256sum KaspaSafe.apk</span>
-<span class="c"># должно быть равно 086421854bedd54b1c123092f06ab309be2aea04efbbfff3590ff7a089bc413b</span></pre></div>
-    <p style="margin-top:12px" class="hint">Подписанные релизные APK также публикуются в <a href="https://github.com/Kaspaforge/kaspaforge/releases" target="_blank" rel="noopener">GitHub Releases</a>. Веб-приложение работает целиком в браузере; его Content-Security-Policy запрещает любые сетевые соединения, кроме как к этому origin, поэтому ключ нельзя выкрасть даже через инъекцию скрипта.</p>
+    <p>WASM-ядро сейфа/эскроу собирается из исходников скриптом <span class="mono">wasm/build.sh</span> (wasm-pack, release), а исходник Android-обёртки остаётся открытым для аудита и локальной сборки.</p>
+    <div class="note" style="margin-top:14px"><b>Android APK сейчас не распространяется.</b> Предыдущие пакетные сборки сняты, потому что они больше не соответствуют текущему продукту Kaspa Forge. Не устанавливайте старый пакет из кеша или стороннего зеркала; до выхода актуальной сборки используйте браузерную/PWA-версию.</div>
+    <p style="margin-top:12px" class="hint">Веб-приложение работает целиком в браузере; его Content-Security-Policy запрещает любые сетевые соединения, кроме как к этому origin, поэтому ключ нельзя выкрасть даже через инъекцию скрипта.</p>
   </div>
 
   <div class="plate" id="limits">

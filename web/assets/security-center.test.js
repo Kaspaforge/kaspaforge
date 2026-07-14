@@ -24,5 +24,7 @@ for (const [language, url, commonFooterPage] of pages) {
     assert.match(html, /32 passed · 0 failed/);
     assert.match(html, /180 passed · 0 failed/);
     assert.match(html, /Forge Sync/);
+    assert.doesNotMatch(html, /KaspaSafe\.apk|GitHub Releases|android-apk/);
+    assert.match(html, language === "English" ? /No Android APK is currently distributed/ : /Android APK сейчас не распространяется/);
   });
 }

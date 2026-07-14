@@ -103,16 +103,11 @@ covenant compiled into every escrow address on-chain.
 - Anything these contracts allow requires **your** keys (or, for the emergency/auto paths,
   a hard-bound destination) — there is no admin path, for us or anyone.
 
-## Kaspa Forge web frontend & Android app
+## Kaspa Forge web frontend & Android source
 
 This repo also contains the full web frontend (`web/`) and a Tauri 2 Android wrapper (`app/`)
-for Kaspa Safe: all assets (including the WASM signing core) are bundled into the APK, so the
-app keeps working even if the website is down — it only needs the HTTP API / a Kaspa node to
-broadcast.
+for Kaspa Safe. No prebuilt Android package is currently distributed: the previous APK releases
+were retired because they no longer represent the current Kaspa Forge product. Do not install an
+old package from a cache or third-party mirror.
 
-- Signed APK + SHA-256: https://kaspaforge.org/dl/KaspaSafe.apk (checksum: `KaspaSafe.apk.sha256`);
-  mirrored to [GitHub Releases](https://github.com/Kaspaforge/kaspaforge/releases) of this repo (tag `apk-v*`, published by the `release-apk` workflow)
-- CI (`.github/workflows/android-apk.yml`) builds an **unsigned** APK from this repo — reproduce it
-  yourself and compare with the signed one (`apksigner` adds only the signature). Release signing
-  happens offline; the key never touches CI.
 - Build locally: `cd app && npm install && cp -r ../web web && npx tauri android init && npx tauri icon app-icon.png && npx tauri android build --apk`

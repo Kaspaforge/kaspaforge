@@ -88,7 +88,7 @@
 
   <div class="plate" id="verify">
     <h2 style="font-size:20px">3. Verify a contract yourself</h2>
-    <p>Everything needed to check the covenants is public in <a href="https://github.com/Kaspaforge/kaspaforge" target="_blank" rel="noopener">github.com/Kaspaforge/kaspaforge</a>: both <span class="mono">.sil</span> sources, the <span class="mono">vaultctl</span> / <span class="mono">escrowctl</span> CLIs, the web front-end and the Android app with its build workflow.</p>
+    <p>Everything needed to check the covenants is public in <a href="https://github.com/Kaspaforge/kaspaforge" target="_blank" rel="noopener">github.com/Kaspaforge/kaspaforge</a>: both <span class="mono">.sil</span> sources, the <span class="mono">vaultctl</span> / <span class="mono">escrowctl</span> CLIs, the web front-end and the Android wrapper source.</p>
     <p style="margin-top:12px"><b>Confirm the source hash</b> matches what this page claims:</p>
     <div class="cmd"><pre><span class="c"># after cloning the repo</span>
 <span class="p">sha256sum contracts/vault.sil contracts/escrow.sil</span>
@@ -125,17 +125,9 @@
 
   <div class="plate" id="builds">
     <h2 style="font-size:20px">6. Reproducible builds &amp; the app</h2>
-    <p>The WASM vault/escrow core is built from source with <span class="mono">wasm/build.sh</span> (wasm-pack, release). The Android app is built by the public <span class="mono">android-apk</span> GitHub Actions workflow in the same repository, so the binary you install traces back to auditable source and CI, not a hand-uploaded file.</p>
-    <p style="margin-top:12px"><b>Current Android build.</b> The APK and its SHA-256 are published alongside the download; verify before you install:</p>
-    <div style="margin-top:12px">
-      <div class="kv"><span class="k">version</span><span class="v">0.1.1</span></div>
-      <div class="kv"><span class="k">apk sha-256</span><span class="v">086421854bedd54b1c123092f06ab309be2aea04efbbfff3590ff7a089bc413b</span></div>
-      <div class="kv"><span class="k">checksum file</span><span class="v"><a href="/dl/KaspaSafe.apk.sha256">/dl/KaspaSafe.apk.sha256</a></span></div>
-    </div>
-    <div class="cmd" style="margin-top:14px"><pre><span class="c"># verify a downloaded APK</span>
-<span class="p">sha256sum KaspaSafe.apk</span>
-<span class="c"># must equal 086421854bedd54b1c123092f06ab309be2aea04efbbfff3590ff7a089bc413b</span></pre></div>
-    <p style="margin-top:12px" class="hint">Signed release APKs are also published on <a href="https://github.com/Kaspaforge/kaspaforge/releases" target="_blank" rel="noopener">GitHub Releases</a>. The web app runs entirely in your browser; its Content-Security-Policy blocks any network connection other than to this origin, so a key can't be exfiltrated even via a script injection.</p>
+    <p>The WASM vault/escrow core is built from source with <span class="mono">wasm/build.sh</span> (wasm-pack, release), and the Android wrapper source remains public for audit and local builds.</p>
+    <div class="note" style="margin-top:14px"><b>No Android APK is currently distributed.</b> The previous packaged builds were retired because they no longer represent the current Kaspa Forge product. Do not install an old package from a cache or third-party mirror; use the browser/PWA version until a current build is released.</div>
+    <p style="margin-top:12px" class="hint">The web app runs entirely in your browser; its Content-Security-Policy blocks any network connection other than to this origin, so a key can't be exfiltrated even via a script injection.</p>
   </div>
 
   <div class="plate" id="limits">
