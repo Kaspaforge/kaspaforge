@@ -12,6 +12,7 @@ Key facts:
 - Dispute resolution is a rail, not a favor: an AI mediator reads the deal and proposes a non-binding outcome in minutes; a human arbiter has the final word; auto-release protects the seller from silent buyers. The covenant caps where funds can go no matter who decides: buyer, seller, or the visible fee.
 - The deal chat is end-to-end encrypted on-chain messaging on the Kaspa BlockDAG (Kasia protocol), photos and videos included — it cannot be forged or backdated, and becomes the case file in a dispute.
 - Kaspa Marketplace: physical goods, OTC trades and services priced in KAS. The Buy button doesn't pay the seller — it opens an escrow deal with the listing's terms. Listings are free, AI-moderated (text and photos), stay live for 30 days.
+- Agent layer: the Market moderator checks listing text and up to three photos before publication; the Escrow mediator analyzes only the deal material deliberately disclosed during a dispute and proposes refund, release, or split. These agents hold no wallet or deal signing keys, cannot execute a payout, and escalate uncertain moderation or a rejected mediation proposal to a human.
 - Open source: contract, arbiter tool and offline recovery are public.
 
 ## Products
@@ -20,6 +21,7 @@ Key facts:
 - [Kaspa Safe](https://kaspaforge.org/safe.html): how the covenant vault works — withdrawal delay, alarm key, inheritance
 - [Kaspa Escrow](https://kaspaforge.org/escrow-index.html): deal mechanics in three steps, the dispute rail, fees, and FAQ
 - [Kaspa Marketplace](https://kaspaforge.org/market.html): escrow-first listings — how buying and selling works, costs, FAQ
+- [AI agents in Market & Escrow](https://kaspaforge.org/agents/): what the moderator and mediator inspect, what they can propose, and why covenants and user signatures keep authority over money
 - [Forge Contracts (deal templates)](https://kaspaforge.org/contracts.html): a catalog of ready-made escrow deal templates — hire a developer, buy goods, OTC swap, rental deposit and more — each preset with sensible deadlines, a recommended deposit and an evidence checklist, deep-linking into `escrow.html?template=<id>`
 
 ## Documentation (how it works & security)
@@ -46,6 +48,7 @@ Key facts:
 - [Kaspa Escrow — Russian version (RU)](https://kaspaforge.org/ru/escrow-index.html)
 - [Kaspa Marketplace — Russian version (RU)](https://kaspaforge.org/ru/market.html)
 - [Forge Contracts — Russian version (RU)](https://kaspaforge.org/ru/contracts.html)
+- [AI agents in Market & Escrow — Russian version (RU)](https://kaspaforge.org/ru/agents/)
 
 ## Company
 

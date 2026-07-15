@@ -94,9 +94,9 @@
 <span class="p">git clone</span> https://github.com/Kaspaforge/kaspaforge
 <span class="p">cd</span> kaspa-safe/vaultctl && <span class="p">cargo build --release</span>
 
-<span class="c"># cargo build also produces kaspa-unlock. Have only the master key file (.age)?</span>
+<span class="c"># decrypt with web/keyfile-decrypt.html offline, or use standard age:</span>
 <span class="c"># decrypt it once, then pull out the vault you need — vaultctl reads JSON too:</span>
-<span class="p">kaspa-unlock</span> decrypt kaspa-office-profile.age profile.json   <span class="c"># asks your Desk password</span>
+<span class="p">age -d</span> kaspa-office-profile.age &gt; profile.json       <span class="c"># asks your Desk password</span>
 <span class="p">jq</span> '.vaults[0]' profile.json &gt; vault.json                 <span class="c"># pick the vault you need</span>
 
 <span class="c"># vault state: balance, age, inheritance timer</span>

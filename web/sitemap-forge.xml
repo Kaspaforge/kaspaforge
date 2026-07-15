@@ -22,6 +22,25 @@
   </url>
 
   <url>
+    <loc>https://kaspaforge.org/agents/</loc>
+    <lastmod>2026-07-14</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/agents/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/agents/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kaspaforge.org/agents/"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/ru/agents/</loc>
+    <lastmod>2026-07-14</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/agents/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/agents/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kaspaforge.org/agents/"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
     <loc>https://kaspaforge.org/safe.html</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/safe.html"/>
     <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/safe.html"/>
@@ -463,6 +482,22 @@
     <lastmod>2026-07-14</lastmod>
     <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/blog/running-own-kaspa-node-services.html"/>
     <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/blog/running-own-kaspa-node-services.html"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/blog/kaspa-deterministic-key-derivation-backup.html</loc>
+    <lastmod>2026-07-14</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/blog/kaspa-deterministic-key-derivation-backup.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/blog/kaspa-deterministic-key-derivation-backup.html"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/ru/blog/kaspa-deterministic-key-derivation-backup.html</loc>
+    <lastmod>2026-07-14</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/blog/kaspa-deterministic-key-derivation-backup.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/blog/kaspa-deterministic-key-derivation-backup.html"/>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>

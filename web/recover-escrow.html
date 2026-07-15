@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Recover a deal — Kaspa Escrow</title>
-<meta name="description" content="Kaspa Escrow recovery: restore from your master key file (or an old recovery sheet), why the deal can't hang (on-chain timeout), and how to act offline against any Kaspa node if our site is down.">
+<meta name="description" content="Kaspa Escrow recovery: restore the encrypted Desk profile, decrypt its age backup offline, verify the covenant, and understand the current no-site recovery boundary.">
 <link rel="canonical" href="https://kaspaforge.org/recover-escrow.html">
 <link rel="alternate" hreflang="en" href="https://kaspaforge.org/recover-escrow.html">
 <link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/recover-escrow.html">
@@ -43,44 +43,44 @@
       <div style="font-size:13px;color:var(--ash)">You are on the real site only if the address bar shows exactly:</div>
       <div class="u">kaspaforge.org</div>
     </div>
-    <div class="hint" style="flex:1;min-width:220px">Never enter your keys on a lookalike. Just to <i>watch</i> the escrow, no keys are needed: paste the escrow address from your recovery sheet into <span class="mono">kaspa.stream</span> — the balance and every transaction are public, visible without us and without keys.</div>
+    <div class="hint" style="flex:1;min-width:220px">Never enter your keys on a lookalike. Just to <i>watch</i> the escrow, no keys are needed: copy its address from the Desk or decrypted profile and paste it into <span class="mono">kaspa.stream</span> — the balance and every transaction are public.</div>
   </div>
 
   <!-- BLOCK 0: master key file (primary path) -->
   <div class="plate" style="margin-top:28px;border-left:3px solid var(--kaspa)">
     <h2 style="font-size:20px">Recover from your master key file (the simple way)</h2>
-    <p class="hint">Every deal you create or join is saved automatically into one encrypted <b>master key file</b> — your Desk profile, together with your vaults and listings. On any device, open your <a href="/desk.html"><b>Desk</b></a>, choose <b>Import / restore</b> and load your master key file (<span class="mono">.age</span>) with its password — this deal (and everything else) comes back at once. Back it up from the Desk ("Export key file"); that one file is your recovery.</p>
-    <p class="hint" style="margin-top:8px">Have an older <span class="mono">.txt</span> recovery sheet from before this change, or just one deal to reopen? The manual steps below still work.</p>
+    <p class="hint">Every deal you create or join is saved automatically into one encrypted <b>master key file</b> — your Desk profile, together with your vaults and listings. On any device, open your <a href="/desk.html"><b>Desk</b></a>, choose <b>Import / restore</b> and load the <span class="mono">.age</span> file with its password. The Desk restores the profile and re-discovers its public deal records.</p>
+    <p class="hint" style="margin-top:8px"><b>Back up the current file now:</b> Desk → Export key file. Forge Sync is useful for an encrypted mirror, but a fresh offline <span class="mono">.age</span> export remains the recovery copy you control.</p>
   </div>
 
-  <!-- BLOCK 1: reopen in a new browser (legacy single deal / old sheet) -->
+  <!-- BLOCK 1: inspect the key file without the site -->
   <div class="plate" style="margin-top:28px">
-    <h2 style="font-size:20px">Reopen a single deal from an old recovery sheet</h2>
-    <p class="hint">Your side of the deal isn't stored in one browser — the deal lives on the blockchain, and your keys live on an old recovery sheet (or the public values in your master key file). Reopen it from there.</p>
+    <h2 style="font-size:20px">Open the key file completely offline</h2>
+    <p class="hint"><a href="/keyfile-decrypt.html" download="kaspa-keyfile-decrypt.html"><b>Download the standalone key-file decryptor</b></a> while the site is available, or keep the copy from <a href="https://github.com/Kaspaforge/kaspaforge" target="_blank" rel="noopener">the public repository</a> (<span class="mono">web/keyfile-decrypt.html</span>). It is one self-contained HTML file with the decryption code embedded.</p>
     <div style="margin-top:8px;font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--kaspa)">Steps</div>
     <ol class="steps">
-      <li>Open the deal by its number: <span class="mono">kaspaforge.org/deal.html?id=<b>N</b></span> — the deal <b>#</b> is on your recovery sheet.</li>
-      <li>The panel asks for your <b>key</b> and <b>service token</b> — both printed on the sheet. Paste them in.</li>
-      <li>To restore the deal chat too, also paste the <b>chat key</b> from the sheet (optional — a deal works without it, you just won't see past messages).</li>
-      <li>Press <b>Open deal</b> — the panel rebuilds your side and re-verifies the escrow address against the server.</li>
-      <li>The escrow address matches the sheet? You're back in — fund, release, refund or dispute as before.</li>
+      <li>Disconnect the computer from the internet.</li>
+      <li>Open <span class="mono">keyfile-decrypt.html</span> from disk (<span class="mono">file://</span>), choose the Desk <span class="mono">.age</span> backup and enter its password.</li>
+      <li>Find the required deal by its number and verify its escrow address in an explorer.</li>
+      <li>If needed, download <span class="mono">profile.json</span> from the tool. Treat it as cash: it contains private keys and service tokens.</li>
+      <li>Delete the plaintext JSON after recovery. Never send it, the <span class="mono">.age</span> file, or the Desk password to support.</li>
     </ol>
-    <div class="note" style="margin-top:12px"><b>Buyer who hasn't funded yet?</b> The funding key that builds the escrow lives only on the device where you created or joined the deal. Fund from that device (or re-enter using its recovery sheet), then any device can act on the deal.</div>
+    <div class="note" style="margin-top:12px">The key file is standard passphrase-encrypted <span class="mono">age</span>. Technical fallback: <span class="mono">age -d kaspa-office-profile.age &gt; profile.json</span>.</div>
   </div>
 
-  <!-- BLOCK 2: what's on the sheet -->
+  <!-- BLOCK 2: what's in the profile -->
   <div class="plate">
-    <h2 style="font-size:20px">What's on your recovery sheet</h2>
-    <p class="hint">The <span class="mono">.txt</span> that downloaded when you created or joined the deal is the <b>only copy</b> of your keys. It holds:</p>
+    <h2 style="font-size:20px">What the encrypted profile preserves</h2>
+    <p class="hint">Each deal record in the decrypted profile contains:</p>
     <ul class="need">
       <li><b>Deal #</b> and your role (buyer / seller) — to open the right panel</li>
       <li><b>Your key</b> — signs release / refund / dispute for your side</li>
       <li><b>Funding key</b> (buyer only) — builds the on-chain escrow when you lock the funds</li>
       <li><b>Chat key</b> — decrypts the deal chat; it can <b>never</b> move funds</li>
       <li><b>Service token</b> — authorizes reading and acting on your side of the deal</li>
-      <li><b>Escrow address</b> — to double-check you reopened the right deal (and to watch it on any explorer)</li>
+      <li><b>Escrow address and public parameters</b> — to identify and inspect the on-chain deal</li>
     </ul>
-    <p class="hint" style="margin-top:10px">Keep the sheet the way you'd keep cash. Anyone with your key <i>and</i> token can act as your side of the deal.</p>
+    <p class="hint" style="margin-top:10px">Keep the encrypted backup and password separately. Anyone who obtains the decrypted deal key and token can act as your side of the deal.</p>
   </div>
 
   <!-- BLOCK 3: can't hang -->
@@ -105,13 +105,7 @@
       <li><b>Verify the contract</b> — the escrow covenant <span class="mono">escrow.sil</span> is open source: its rules are enforced on-chain by Kaspa consensus, independent of us.</li>
       <li><b>Emergency timeout</b> — if a dispute is open and the deadline passes, the covenant's timeout path returns funds to the default side on its own; it needs no key and no website.</li>
     </ul>
-    <div class="note" style="margin-top:12px"><b>Honest status:</b> the command-line tools — <span class="mono">escrowctl</span> for the arbiter and a party-side CLI to build your own release / refund / dispute — are being published alongside the contract. Today those actions go through the panel, which reopens on any device from your master key file or an old recovery sheet (block above). Have only the master key file (<span class="mono">.age</span>)? Once <span class="mono">kaspa-unlock</span> and <span class="mono">escrowctl</span> are built from the repo above, pull this deal out and check its on-chain status — no key needed:</div>
-    <div class="cmd" style="margin-top:10px"><pre><span class="c"># decrypt the master key file once, then pull out this deal</span>
-<span class="p">kaspa-unlock</span> decrypt kaspa-office-profile.age profile.json   <span class="c"># asks your Desk password</span>
-<span class="p">jq</span> '.deals[0]' profile.json &gt; deal.json                   <span class="c"># pick this deal — public fields only, no keys</span>
-
-<span class="c"># on-chain state: in dispute or not, time left, amount at stake</span>
-<span class="p">escrowctl status</span> --deal deal.json</pre></div>
+    <div class="note" style="margin-top:12px"><b>Honest status:</b> this repository currently publishes the covenant, the browser frontend and the offline <span class="mono">.age</span> decryptor. It does <b>not</b> yet publish a standalone party-side CLI for release, refund or dispute. While the site is available, importing the encrypted profile restores those actions in Desk. If the site disappears, the on-chain auto-release and timeout paths still apply, but do not install an unofficial <span class="mono">escrowctl</span> from a cache or third party.</div>
     <p class="hint" style="margin-top:10px">The covenant guarantees your funds can only ever reach the buyer, the seller or the fee address regardless — so a lost website never means lost money, only a wait for the timeout at worst.</p>
   </div>
 
@@ -136,7 +130,7 @@
   <!-- BLOCK 7: rehearse -->
   <div class="plate" style="margin-top:16px">
     <h2 style="font-size:20px">Before you ever need this page</h2>
-    <p class="hint">Rehearse once with a small deal: create it, reopen it in a fresh browser from the sheet, and walk through release. A calm rehearsal is what saves you on a bad day.</p>
+    <p class="hint">Rehearse once with a small deal: export the <span class="mono">.age</span> file, decrypt it offline, verify the escrow address, then import it into a fresh browser and walk through release. Delete the plaintext test export afterwards.</p>
     <div class="actions-row">
       <button class="btn btn-kaspa" id="dl-checklist">Download the recovery checklist</button>
       <a class="btn btn-ghost" href="mailto:kaspa@officeforge.co">Contact support</a>
@@ -175,16 +169,14 @@ document.getElementById('dl-checklist').addEventListener('click', function () {
     'KASPA ESCROW — DEAL RECOVERY CHECKLIST',
     '================================================',
     'Real site: kaspaforge.org  (enter keys only there)',
-    'Open source / contract + arbiter tool: github.com/Kaspaforge/kaspaforge',
+    'Open source / contract + offline .age decryptor: github.com/Kaspaforge/kaspaforge',
     'Watch the escrow without keys: escrow address on kaspa.stream',
     '',
-    'REOPEN THE DEAL IN A NEW BROWSER:',
-    '  1. Open kaspaforge.org/deal.html?id=N   (deal # is on the sheet)',
-    '  2. Enter your KEY + SERVICE TOKEN from the sheet.',
-    '  3. Optional: paste the CHAT KEY to restore the conversation.',
-    '  4. Press Open deal - the panel re-verifies the escrow address.',
-    '  (Buyer not funded yet? The funding key is only on the device where you',
-    '   created/joined - fund from there first.)',
+    'OFFLINE KEY RECOVERY:',
+    '  1. Keep a current Desk .age export and its password separately.',
+    '  2. Disconnect; open web/keyfile-decrypt.html from the repository ZIP.',
+    '  3. Load the .age file and verify the deal number + escrow address.',
+    '  4. Delete any downloaded plaintext profile.json after recovery.',
     '',
     'THE DEAL CANT HANG:',
     '  - No one acts after funding -> auto-release to the seller when the window ends.',
@@ -194,14 +186,14 @@ document.getElementById('dl-checklist').addEventListener('click', function () {
     'IF THE SITE IS DOWN:',
     '  - Watch: escrow address on kaspa.stream.',
     '  - Verify contract: escrow.sil is open source (github), enforced on-chain.',
-    '  - CLI tools (escrowctl for arbiter + party-side CLI) are being published;',
-    '    today act via the panel (reopens on any device from the sheet).',
+    '  - No standalone party-side escrow CLI is published today.',
+    '  - Do not install unofficial escrowctl binaries from third parties.',
     '',
-    'IF YOU LOSE THE SHEET:',
+    'IF YOU LOSE THE .age BACKUP:',
     '  You cant act on your side, but funds are NOT stolen - they follow the deal',
     '  paths or the timeout. Nobody (incl. us) can recover your key.',
     '',
-    'WE WILL NEVER ASK for a private key or your whole recovery sheet.',
+    'WE WILL NEVER ASK for a private key, Desk password or key file.',
     'In a dispute you may reveal only your CHAT key (it cant move funds).',
   ].join('\n');
   var a = document.createElement('a');

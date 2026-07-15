@@ -1,5 +1,5 @@
-// Offline vault recovery via the recovery sheet — against any Kaspa v2+ node (--utxoindex).
-// Input: the recovery sheet .txt as-is (RU or EN, as the wizard emitted it) OR JSON with the same fields.
+// Offline vault recovery via a vault JSON record extracted from the encrypted Desk profile —
+// against any Kaspa v2+ node (--utxoindex). Legacy RU/EN text sheets remain parser-compatible.
 // The commands do not depend on the Kaspa Safe server: the contract checks only keys and time.
 
 use std::io::Read as _;
@@ -51,7 +51,7 @@ pub struct Recovery {
     /// Constructor feeBudget; the sheet line / JSON field is optional → defaults to FEE (1M).
     /// The value is part of the address: require_addr_match will catch a mismatch.
     pub fee_budget: u64,
-    pub sheet_vault_addr: Option<String>,
+    pub sheet_vault_addr: Option<String>, // vault_addr from JSON; name kept for legacy parser compatibility
     pub hot_sk: Option<[u8; 32]>,
     pub hot_pk: [u8; 32],
     pub alarm_sk: Option<[u8; 32]>,
@@ -131,12 +131,16 @@ impl Recovery {
                 _ => die(&format!("JSON: {k} must be true/false, not a string/number")),
             }
         };
+        let fee_budget = int_field("fee_budget", FEE as i64);
+        if !(1_000_000..=10_000_000).contains(&fee_budget) {
+            die("JSON: fee_budget must be in [1_000_000, 10_000_000] sompi");
+        }
         Recovery {
             network: s("network").unwrap_or_else(|| "mainnet".into()),
             delay: match &v["delay"] { serde_json::Value::Number(n) => n.as_i64().unwrap_or_else(|| die("JSON: delay is not an integer")), _ => die("JSON: delay is required (a DAA number)") },
             inherit_delay: int_field("inherit_delay", 0),
             auto_inherit: bool_field("auto_inherit"),
-            fee_budget: int_field("fee_budget", FEE as i64) as u64,
+            fee_budget: fee_budget as u64,
             sheet_vault_addr: s("vault_addr"),
             hot_sk,
             hot_pk: hot_pk.unwrap_or_else(|| die("JSON: hot_pk or hot_sk is required")),
@@ -235,7 +239,7 @@ impl Recovery {
                     "\nNOTE: fee budget = 1_000_000 sompi (the default assumed when the sheet has no \"Fee budget\" line — sheets predate 11.07.2026). If the vault was created with a non-default budget, add `Fee budget: <N> sompi` (or `fee_budget` in JSON)."
                 } else { "" };
                 die(&format!(
-                    "the address from the parameters did not match the sheet:\n  computed:  {computed}\n  in sheet:  {sheet}\ncommon causes: wrong inheritance mode (auto/manual), a different term, a different network, a wrong/missing fee budget, OR the vault was created under an older contract version (this vaultctl carries the current one).{fee_hint}\nRun `status` to diagnose; for a no-heir vault try JSON input with auto_inherit:true."
+                    "the address from the parameters did not match vault_addr in the recovery record:\n  computed:  {computed}\n  in record: {sheet}\ncommon causes: wrong inheritance mode (auto/manual), a different term, a different network, a wrong/missing fee budget, OR the vault was created under an older contract version (this vaultctl carries the current one).{fee_hint}\nRun `status` to diagnose; for a no-heir vault use auto_inherit:false."
                 ));
             }
         }
@@ -298,7 +302,7 @@ async fn submit_or_dry(c: &GrpcClient, tx: &kaspa_consensus_core::tx::Transactio
 }
 
 fn need(sk: &Option<[u8; 32]>, what: &str) -> [u8; 32] {
-    sk.unwrap_or_else(|| die(&format!("this action needs {what} (a recovery-sheet line)")))
+    sk.unwrap_or_else(|| die(&format!("this action needs {what} in vault.json (or a separate alarm card where applicable)")))
 }
 
 /// Generic single-input transition covenant-UTXO -> output out (the binding preserves covenant_id).
@@ -319,10 +323,10 @@ pub async fn status(c: &GrpcClient, r: &Recovery, dest: Option<&str>) {
     println!("vault address (computed): {vaddr}");
     if let Some(sheet) = &r.sheet_vault_addr {
         if sheet != &vaddr.to_string() {
-            println!("⚠ address did NOT match the recovery sheet ({sheet}).");
+            println!("⚠ address did NOT match vault_addr in the recovery record ({sheet}).");
             println!("  Common causes: wrong inheritance mode (auto/manual), a different term, a different network.");
         } else {
-            println!("✓ matches the recovery sheet");
+            println!("✓ matches vault_addr in the recovery record");
         }
     }
     match covenant_utxo(c, vaddr.clone()).await {
@@ -499,7 +503,7 @@ pub async fn inherit(c: &GrpcClient, r: &Recovery, heir_sk: Option<&str>, dry: b
         let sk_hex = heir_sk.unwrap_or_else(|| die("manual mode: --heir-sk <heir's private key, hex> is required"));
         let sk = hex32_str(sk_hex, "--heir-sk");
         if pk_from_sk(&sk) != r.heir_pk {
-            die("--heir-sk does not match the heir pubkey from the recovery sheet");
+            die("--heir-sk does not match heir_pk in vault.json");
         }
         let sig = input_signature(&PopulatedTransaction::new(&tx, entries), 0, &sk);
         tx.inputs[0].signature_script = covenant_sigscript(&vault_c, "inheritSigned", vec![sig.into()]);
@@ -516,5 +520,25 @@ mod tests {
     fn detects_age_armor() {
         assert!(is_age_armor("-----BEGIN AGE ENCRYPTED FILE-----\nx"));
         assert!(!is_age_armor("Vault address: kaspa:q...\nHot key: ab..."));
+    }
+
+    #[test]
+    fn current_desk_json_derives_the_production_v3_address() {
+        // Same public vector as desk/src/features/safes/vault-cfg.parity.test.ts. If vaultctl's
+        // contract arguments/source drift from the shipped browser WASM, this address changes.
+        let json = r#"{
+          "network":"mainnet",
+          "vault_addr":"kaspa:prn46scxqnuzynmz2xg93nv4d5wlkmpac8tqvnwgqcfyg936e464q8asuyfkw",
+          "hot_pk":"7c69e9ea9b643b25f62727c9f261ba05b45f74963bfc81f9d3fe6c33f8656d49",
+          "alarm_pk":"5b0d2e0c4d02721a73e55eb17ce57a595005304f6e33f02389395a935921b31a",
+          "delay":864000,
+          "heir_pk":"35b09c8b0ac8dc04a7cb8244907f5b50fd892f80d0128c84ff106a79541d843a",
+          "inherit_delay":25920000,
+          "auto_inherit":false,
+          "fee_budget":1000000
+        }"#;
+        let r = Recovery::from_json(json);
+        let derived = r.addr(&p2sh(&r.vault_contract().script)).to_string();
+        assert_eq!(derived, r.sheet_vault_addr.unwrap());
     }
 }

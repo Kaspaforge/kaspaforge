@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Kaspa Forge — your keys, three tools, one desk</title>
-<meta name="description" content="Non-custodial desk on Kaspa covenants: a vault where theft can be cancelled, escrow whose guarantor physically can't steal, and a marketplace with escrow built in — one encrypted profile that never leaves your browser.">
+<title>Kaspa Forge — Non-Custodial Kaspa Vault, Escrow &amp; Marketplace</title>
+<meta name="description" content="A non-custodial Kaspa vault where theft can be cancelled, covenant escrow and a marketplace in one encrypted Desk. Keys stay in your browser; optional Forge Sync uploads ciphertext only.">
 <link rel="canonical" href="https://kaspaforge.org/">
 <link rel="alternate" hreflang="en" href="https://kaspaforge.org/">
 <link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/">
@@ -12,15 +12,15 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Kaspa Forge">
 <meta property="og:locale" content="en_US">
-<meta property="og:title" content="Kaspa Forge — your keys, three tools, one desk">
-<meta property="og:description" content="Non-custodial vault, escrow and marketplace on Kaspa covenants — one encrypted profile that never leaves your browser.">
+<meta property="og:title" content="Kaspa Forge — a Kaspa vault where theft can be cancelled">
+<meta property="og:description" content="Non-custodial Kaspa vault, covenant escrow and marketplace. Keys stay local; optional Forge Sync uploads ciphertext only.">
 <meta property="og:url" content="https://kaspaforge.org/">
 <meta property="og:image" content="https://kaspaforge.org/assets/og-forge.png?v=1">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Kaspa Forge — your keys, three tools, one desk">
-<meta name="twitter:description" content="Non-custodial vault, escrow and marketplace on Kaspa covenants — one encrypted profile that never leaves your browser.">
+<meta name="twitter:title" content="Kaspa Forge — a Kaspa vault where theft can be cancelled">
+<meta name="twitter:description" content="Non-custodial Kaspa vault, covenant escrow and marketplace. Keys stay local; optional Forge Sync uploads ciphertext only.">
 <meta name="twitter:image" content="https://kaspaforge.org/assets/og-forge.png?v=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -31,9 +31,9 @@
 <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
 <!-- NO language auto-redirect (decision 2026-07-11): the site is international, default is always EN;
      Russian is an explicit option (RU link in the header / kf-nav switcher on the other pages) -->
-<link rel="stylesheet" href="/assets/forge-landing.css?v=6">
+<link rel="stylesheet" href="/assets/forge-landing.css?v=8">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebApplication","name":"Kaspa Forge","url":"https://kaspaforge.org/","applicationCategory":"FinanceApplication","operatingSystem":"Web","inLanguage":"en","description":"Non-custodial desk on Kaspa Toccata covenants: vault with a cancel window, covenant escrow for P2P deals and a marketplace — one encrypted profile in your browser.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD","description":"On-chain operations are free; you pay only the Kaspa network fee."}}
+{"@context":"https://schema.org","@type":"WebApplication","name":"Kaspa Forge","url":"https://kaspaforge.org/","applicationCategory":"FinanceApplication","operatingSystem":"Web","inLanguage":"en","description":"Non-custodial Kaspa Desk with a vault cancellation window, covenant escrow and marketplace. Keys stay in the browser; optional sync stores ciphertext only.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD","description":"Vault service operations cost 0 KAS; the Kaspa network fee still applies."}}
 </script>
 </head>
 <body>
@@ -46,8 +46,8 @@
     <nav aria-label="Kaspa Forge">
       <a href="/safe.html">Safe</a>
       <a href="/escrow-index.html">Escrow</a>
-      <a href="/contracts.html">Contracts</a>
       <a href="/market.html">Market</a>
+      <a href="/agents/">Agents</a>
       <a href="/blog/">Blog</a>
       <a href="/docs/">Docs</a>
       <a href="/recover.html">Recovery</a>
@@ -61,6 +61,7 @@
     <a href="/escrow-index.html">Escrow</a>
     <a href="/contracts.html">Contracts</a>
     <a href="/market.html">Market</a>
+    <a href="/agents/">Agents</a>
     <a href="/desk.html">Desk</a>
     <a href="/blog/">Blog</a>
     <a href="/docs/">Docs</a>
@@ -71,12 +72,12 @@
 
 <div class="strip" id="netstat">
   <div class="wrap strip-in">
-    <span>network <b class="ok" id="ns-net">…</b></span>
-    <span>DAA <b class="ns-daa" id="ns-daa">…</b></span>
-    <span>node <b><span class="ns-dot" id="ns-dot"></span><span id="ns-status">…</span></b></span>
-    <span>covenants <b>Toccata</b></span>
-    <span>keys <b>this browser only</b></span>
-    <span>custody <b class="ok">none</b></span>
+    <span>network <b class="ok" id="ns-net">checking</b></span>
+    <span class="status-secondary">DAA <b class="ns-daa" id="ns-daa">checking</b></span>
+    <span>node <b><span class="ns-dot" id="ns-dot"></span><span id="ns-status">checking</span></b></span>
+    <span class="status-secondary">covenants <b>Toccata</b></span>
+    <span class="status-secondary">keys <b>local</b></span>
+    <span class="status-secondary">custody <b class="ok">none</b></span>
     <span>status <b class="beta">open beta</b></span>
   </div>
 </div>
@@ -84,35 +85,35 @@
 
 <div class="strip" id="secstat" style="display:none">
   <div class="wrap strip-in">
-    <span>contracts <b id="sec-contracts">…</b></span>
-    <span>tests <b class="ok" id="sec-tests">…</b></span>
-    <span>release <b id="sec-release">…</b></span>
+    <span>contracts <b id="sec-contracts">checking</b></span>
+    <span>tests <b class="ok" id="sec-tests">checking</b></span>
+    <span class="status-secondary">verified <b id="sec-verified">checking</b></span>
     <span><a href="/security.html" id="sec-link">Security ▸</a></span>
     <span><a href="https://github.com/Kaspaforge/kaspaforge" id="sec-github" target="_blank" rel="noopener">GitHub</a></span>
   </div>
 </div>
-<script src="/assets/sec-status.js?v=3" defer></script>
+<script src="/assets/sec-status.js?v=4" defer></script>
 
 <section class="hero">
   <div class="hero-glow" aria-hidden="true"></div>
   <div class="wrap hero-in">
     <div>
-      <div class="kicker">Non-custodial tools on the Kaspa blockchain</div>
-      <h1>Your keys.<br>Three tools.<br><span class="t">One desk.</span></h1>
+      <div class="kicker">Non-custodial Kaspa vault · escrow · market</div>
+      <h1>A Kaspa vault<br>where theft can<br><span class="t">be cancelled.</span></h1>
       <p class="lead">
-        A <b>vault</b> where a theft can be cancelled, a <b>covenant escrow</b> whose guarantor
-        physically can’t steal, and a <b>marketplace</b> where every purchase opens into that
-        escrow. All three run off one password-locked, encrypted profile that never
-        leaves your browser.
+        Unauthorized withdrawals wait through the window you choose. Your separate alarm key
+        sends the funds back to the vault <b>before the window closes</b>. Add covenant
+        <b>Escrow</b> and a <b>Market</b> in one Desk: keys stay in your browser, while optional
+        Forge Sync uploads <b>ciphertext only</b> after you enable it.
       </p>
       <div class="hero-cta">
         <a class="btn btn-kaspa" href="/desk.html">Open My Desk&nbsp;▸</a>
-        <a class="btn btn-ghost" href="#safe">See the mechanics</a>
+        <a class="btn btn-ghost" href="#desk">Preview the Desk</a>
       </div>
       <ul class="assur">
-        <li><b>Keys are forged in your browser</b> — and never leave it. We can’t move your funds, ever.</li>
-        <li><b>Rules live in on-chain scripts,</b> not on our servers. If the site dies, your money doesn’t.</li>
-        <li><b>Even the dispute arbiter</b> can only route funds to buyer or seller — the network rejects anything else.</li>
+        <li><b>Keys are forged and used in your browser.</b> We can’t move your funds.</li>
+        <li><b>Rules live in on-chain scripts,</b> not on our servers.</li>
+        <li><b>The alarm key stays separate</b> when you choose separate storage.</li>
       </ul>
     </div>
 
@@ -121,28 +122,20 @@
         <div class="desk-head">
           <svg class="k" viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="none" stroke="#00C1AF" stroke-width="8"/><path d="M58 30 v40 M36 32 L54 50 L36 68" fill="none" stroke="#00C1AF" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg>
           Kaspa Forge Desk
-          <span class="beta">mainnet beta</span>
+          <span class="beta">interface preview</span>
         </div>
-        <div class="desk-tiles">
-          <a class="tile" href="/safe.html" aria-label="Safe — non-custodial vault with cancel delay and alarm key">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#00C1AF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10.5" width="16" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/><circle cx="12" cy="15.5" r="1.6" fill="#00C1AF" stroke="none"/></svg>
-            <div class="tn">Safe</div>
-            <div class="td">Vault · delay ·<br>alarm key</div>
-          </a>
-          <a class="tile" href="/escrow-index.html" aria-label="Escrow — covenant deals with arbiter">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#00C1AF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v17"/><path d="M5 7h14"/><path d="M5 7 2.8 12.6a3.2 3.2 0 0 0 4.4 0z"/><path d="M19 7l-2.2 5.6a3.2 3.2 0 0 0 4.4 0z"/><path d="M8.5 20.5h7"/></svg>
-            <div class="tn">Escrow</div>
-            <div class="td">Covenant deals ·<br>arbiter</div>
-          </a>
-          <a class="tile" href="/market.html" aria-label="Market — listings with built-in escrow">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#00C1AF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 3.5h7l10 10-7 7-10-10z"/><circle cx="8" cy="8" r="1.5" fill="#00C1AF" stroke="none"/></svg>
-            <div class="tn">Market</div>
-            <div class="td">Listings ·<br>escrow built in</div>
-          </a>
+        <div class="preview-wallet">
+          <span>Desk wallet · example data</span>
+          <strong>1 284.65 KAS</strong>
+        </div>
+        <div class="preview-list">
+          <div class="preview-row safe"><span class="preview-dot"></span><b>Savings Safe</b><small>2 100 KAS · secured</small></div>
+          <div class="preview-row escrow"><span class="preview-dot"></span><b>Escrow #7C19</b><small>funded · 24 h window</small></div>
+          <div class="preview-row market"><span class="preview-dot"></span><b>Mechanical keyboard</b><small>listed · 150 KAS</small></div>
         </div>
         <div class="desk-foot">
           <span>one profile · one wallet</span>
-          <span>encrypted <b>age</b> · local only</span>
+          <span>encrypted <b>age</b> · keys local</span>
         </div>
       </div>
     </div>
@@ -151,16 +144,15 @@
 
 <div class="ribbon">
   <div class="wrap ribbon-in">
-    <div class="spec">cancel window<b>1 h — 90 d</b></div>
-    <div class="spec">inheritance<b>1 d — 5 y</b></div>
+    <div class="spec">vault service fee<b>0 KAS<sup>*</sup></b></div>
     <div class="spec">escrow fee<b>0.5 %</b></div>
     <div class="spec">arbitration<b>2 %</b></div>
     <div class="spec">deal size<b>50 — 10 000 KAS</b></div>
-    <div class="spec">on-chain ops<b>0 KAS</b></div>
+    <div class="ribbon-note">* Kaspa network fee applies</div>
   </div>
 </div>
 
-<section class="tool" id="safe">
+<section class="tool tool-safe" id="safe">
   <div class="wrap tool-grid">
     <div class="tool-copy">
       <span class="stamp">
@@ -168,25 +160,15 @@
         Kaspa Safe
       </span>
       <h2>A vault where theft can be cancelled</h2>
-      <p class="d">
-        Every withdrawal from the Safe waits out a window you set. The destination address is
-        <b>fixed on-chain the moment a withdrawal starts</b> — the covenant accepts no other destination. If the withdrawal
-        wasn’t yours, one move with a separate <b>alarm key</b> (kept on paper, at home, anywhere
-        apart from the hot key) returns everything to the vault.
-      </p>
-      <p class="d">
-        Optional inheritance works on a “check in that you’re alive” basis: stop checking in, and
-        after the term you chose the vault opens to your heir — automatically, or by the heir’s own
-        key. Point it at your own second address and it doubles as insurance against losing your hot key.
-      </p>
+      <p class="d">Every withdrawal waits through your chosen window, with its destination fixed
+        on-chain from the start. If it wasn’t yours, the separate <b>alarm key returns everything
+        to the vault</b>. Optional inheritance opens only after your check-ins stop for the period you set.</p>
       <div class="kvs">
         <div class="kv"><span class="k">Cancel window</span><span class="v m">presets 6 h – 14 d · custom 1 h – 90 d</span></div>
         <div class="kv"><span class="k">Keys</span><span class="v">hot + alarm, stored apart — a thief with one gets nothing</span></div>
         <div class="kv"><span class="k">Inheritance</span><span class="v m">off · 6 / 12 / 24 mo · custom 1 d – 5 y</span></div>
-        <div class="kv"><span class="k">Heir email alert</span><span class="v">free, fires even without a subscription</span></div>
-        <div class="kv"><span class="k">Telegram alerts</span><span class="v m">100 KAS / yr · first 30 days free</span></div>
-        <div class="kv"><span class="k">On-chain ops</span><span class="v">free forever — network fee only</span></div>
-        <div class="kv"><span class="k">Android</span><span class="v">wrapper source is public; packaged release temporarily retired</span></div>
+        <div class="kv"><span class="k">Alerts</span><span class="v m">Telegram 100 KAS / yr · heir email free</span></div>
+        <div class="kv"><span class="k">Vault service fee</span><span class="v">0 KAS — network fee only</span></div>
       </div>
       <a class="tool-more" href="/safe.html">How Safe works&nbsp;▸</a>
       <div style="margin-top:12px;font-size:12px;color:var(--ash2)">
@@ -221,6 +203,12 @@
           </div>
         </div>
       </div>
+      <div class="key-split">
+        <div><span>Hot key</span><b>encrypted Desk profile</b></div>
+        <span class="key-sep">≠</span>
+        <div><span>Alarm key</span><b>paper or full local export</b></div>
+        <p>With separate storage, alarm cards remain separate and never sync.</p>
+      </div>
       <div class="note teal">
         <b>Lost both keys?</b> We can’t help — the vault has no backdoor key that could. Turn
         inheritance on, even if the heir is just your own second address.
@@ -229,7 +217,7 @@
   </div>
 </section>
 
-<section class="tool" id="escrow">
+<section class="tool tool-escrow" id="escrow">
   <div class="wrap tool-grid flip">
     <div class="tool-copy">
       <span class="stamp">
@@ -237,24 +225,14 @@
         Kaspa Escrow
       </span>
       <h2>The guarantor that physically can’t steal</h2>
-      <p class="d">
-        Money for a P2P deal sits in an <b>on-chain covenant</b>, not with us. The script allows a
-        fixed set of outcomes, and in every one the funds go to the buyer, the seller, or a split
-        between them. Even the arbiter’s signature opens no other door — <b>the Kaspa network simply
-        rejects any other destination.</b> That’s mathematics, not a promise.
-      </p>
-      <p class="d">
-        Being honest about the boundary: every spend path in the covenant pays a party of the deal —
-        <b>the operator can’t redirect funds</b>; the fairness of a verdict is the work of a human
-        arbiter judging your evidence. And the evidence is solid — the deal chat runs on the Kasia
-        protocol, where <b>every message is an end-to-end encrypted Kaspa transaction</b>, anchored
-        on-chain — it can’t be silently forged or backdated.
-      </p>
+      <p class="d">Deal funds sit in an <b>on-chain covenant</b>, not with us. Every valid path pays
+        the buyer, seller or a split between them. The arbiter can judge evidence, but cannot redirect
+        the principal: the Kaspa network rejects every other destination.</p>
       <div class="kvs">
         <div class="kv"><span class="k">Deal types</span><span class="v">goods · OTC exchange · service</span></div>
         <div class="kv"><span class="k">Dispute window</span><span class="v m">6 presets, 24 h – 7 d — shown before joining</span></div>
         <div class="kv"><span class="k">Nobody acts?</span><span class="v">auto-release to the seller when the window closes</span></div>
-        <div class="kv"><span class="k">Arbiter silent?</span><span class="v">emergency timeout refunds the default side — a deal can’t hang</span></div>
+        <div class="kv"><span class="k">Evidence</span><span class="v">end-to-end encrypted Kasia chat anchored on-chain</span></div>
         <div class="kv"><span class="k">Deal size</span><span class="v m">50 – 10 000 KAS (beta)</span></div>
       </div>
       <a class="tool-more" href="/escrow-index.html">How Escrow works&nbsp;▸</a>
@@ -291,15 +269,16 @@
           <span class="f warn">Dispute → verdict</span>
         </div>
       </div>
-      <div class="note">
-        <b>Telegram guarantors:</b> 3–10 % commission and they hold your money.
-        <b style="color:var(--kaspa)">Kaspa Escrow:</b> 0.5 % — and they can’t.
-      </div>
     </div>
+  </div>
+  <div class="wrap escrow-compare">
+    <div class="compare-side legacy"><span>Typical Telegram guarantor</span><strong>3–10 %</strong><p>Holds the funds and asks you to trust a person’s discretion.</p></div>
+    <div class="compare-vs">vs</div>
+    <div class="compare-side forge"><span>Kaspa Escrow</span><strong>0.5 %</strong><p>The covenant holds the funds and cannot pay the operator.</p></div>
   </div>
 </section>
 
-<section class="tool" id="market">
+<section class="tool tool-market" id="market">
   <div class="wrap tool-grid">
     <div class="tool-copy">
       <span class="stamp">
@@ -307,12 +286,8 @@
         Marketplace
       </span>
       <h2>Trade with strangers. Trust nobody.</h2>
-      <p class="d">
-        A storefront of listings where the <b>Buy button opens a covenant escrow automatically</b>.
-        The seller physically can’t take the money until the buyer confirms, and a dispute goes to
-        the arbiter — exactly like any escrow deal. No reputation games, no “trusted middleman”:
-        the same on-chain script guards every purchase.
-      </p>
+      <p class="d">Every Buy button opens covenant escrow automatically. The seller cannot take the
+        funds before release, and a dispute uses the same fixed payout paths as any Forge deal.</p>
       <div class="kvs">
         <div class="kv"><span class="k">Post a listing</span><span class="v">goods or service · price in KAS · photos · moderated, then live</span></div>
         <div class="kv"><span class="k">Buy</span><span class="v">one click opens the escrow deal — then fund, receive, release</span></div>
@@ -355,28 +330,44 @@
   </div>
 </section>
 
+<section class="agent-home">
+  <div class="wrap agent-home-grid">
+    <div>
+      <div class="kicker">The agent layer</div>
+      <h2>Agents do the work. Covenants keep the authority.</h2>
+      <p>Kaspa Forge already uses specialised AI agents inside <b>Market</b> and <b>Escrow</b>. They review offers and structure disclosed evidence — but receive no signing keys and cannot move the money.</p>
+      <a class="tool-more" href="/agents/">Meet the Forge agents&nbsp;▸</a>
+    </div>
+    <div class="agent-home-cards">
+      <div class="agent-home-card market"><span>Market moderator</span><b>Text + photo review</b><small>Uncertainty waits for a human; it never silently publishes.</small></div>
+      <div class="agent-home-card"><span>Escrow mediator</span><b>Evidence → proposal</b><small>refund · release · split — non-binding until signed.</small></div>
+      <div class="agent-home-boundary">0 agent signing keys · 0 agent-controlled payout paths</div>
+    </div>
+  </div>
+</section>
+
 <section class="band">
   <div class="wrap">
     <div class="kicker">Custody, spelled out</div>
-    <h2 style="margin-top:14px">Your keys stay yours.<br>We built it so we can’t touch them.</h2>
+    <h2 style="margin-top:14px">Encrypted locally.<br>Synced only as ciphertext.</h2>
     <p class="band-sub">
-      Everything — vault keys, deal keys, listing keys and your personal wallet — lives in
-      <b>one age-encrypted profile locked by your password</b>, inside your browser. Unlock once,
-      use all three tools. We never see the password. We never see the keys.
+      Your shared Desk data lives in an <b>age-encrypted profile locked by your password</b>.
+      Optional Forge Sync uploads ciphertext only after you enable it; the server cannot decrypt it.
+      Separate-storage Safe alarm keys never enter the mirror.
     </p>
     <ul class="claims">
       <li>
         <svg viewBox="0 0 24 24" fill="none" stroke="#00C1AF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10.5" width="16" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/><circle cx="12" cy="15.5" r="1.6" fill="#00C1AF" stroke="none"/></svg>
         <div>
-          <div class="cn">Encrypted, local, password-locked</div>
-          <div class="cd">The profile is always stored encrypted. Every unlock and every money move re-asks the password — like a password manager, because it is one.</div>
+          <div class="cn">Keys stay in the browser</div>
+          <div class="cd">Creation, decryption and signing happen locally. The password and plaintext keys are never sent to Forge.</div>
         </div>
       </li>
       <li>
         <svg viewBox="0 0 24 24" fill="none" stroke="#00C1AF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7.5 10.5 4.5 4.5 4.5-4.5"/><path d="M4.5 20.5h15"/></svg>
         <div>
-          <div class="cn">One file is your whole backup</div>
-          <div class="cd">Export the keyfile (<b>.age</b>) once, keep it apart from the password. Import it on any device — every vault, deal and listing comes back.</div>
+          <div class="cn">One export restores the shared profile</div>
+          <div class="cd">The encrypted <b>.age</b> export restores shared Desk data. Separate-storage alarm cards remain separate and need their own protected copy.</div>
         </div>
       </li>
       <li>
@@ -490,27 +481,25 @@
   </div>
 </section>
 
-<section class="band" id="learn">
+<section class="band learn-band" id="learn">
   <div class="wrap">
-    <div class="eyebrow">Learn before you lock funds</div>
-    <h2>Verify the security model, then choose a product</h2>
-    <p class="d">Start with the <a href="/docs/">Kaspa Forge documentation</a>, read how <a href="/blog/kaspa-covenants-how-they-work.html">Kaspa covenants enforce spending rules</a>, then inspect the fixed payout paths in <a href="/escrow-index.html">Kaspa Escrow</a>.</p>
+    <div class="learn-copy"><div class="eyebrow">Learn before you lock funds</div><h2>Verify the security model</h2></div>
+    <p class="d">Read the <a href="/docs/security.html">key-security and Sync boundary</a>, inspect the <a href="/security.html">live verification center</a>, then check the <a href="https://github.com/Kaspaforge/kaspaforge" target="_blank" rel="noopener">open source</a>.</p>
   </div>
 </section>
 
 <section class="fin">
   <div class="fin-glow" aria-hidden="true"></div>
   <div class="wrap fin-in">
-    <h2>Forge your first vault tonight</h2>
-    <p>
-      Runs in your browser. No account. No seed phrase handed to anyone.
-      <b>No custody — by construction, not by promise.</b>
-    </p>
-    <div class="hero-cta">
-      <a class="btn btn-kaspa" href="/desk.html">Open My Desk&nbsp;▸</a>
-      <a class="btn btn-ghost" href="/market.html">Browse the market</a>
+    <div class="fin-card">
+      <h2>Forge your first vault tonight</h2>
+      <p>Runs in your browser. No account. <b>No custody — by construction, not by promise.</b></p>
+      <div class="hero-cta">
+        <a class="btn btn-kaspa" href="/desk.html">Open My Desk&nbsp;▸</a>
+        <a class="btn btn-ghost" href="/market.html">Browse the market</a>
+      </div>
+      <div class="fin-sub">mainnet · 180 tests · open source · no account</div>
     </div>
-    <div class="fin-sub">mainnet · open beta · open source</div>
   </div>
 </section>
 
@@ -525,6 +514,7 @@
       <a href="/safe.html">Safe</a>
       <a href="/escrow-index.html">Escrow</a>
       <a href="/market.html">Market</a>
+      <a href="/agents/">Agents</a>
       <a href="/blog/">Blog</a>
       <a href="/docs/">Docs</a>
       <a href="/recover.html">Recovery</a>

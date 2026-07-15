@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-12",
+  "updated": "2026-07-14",
   "versions": {
     "vault": {
       "version": "v3",
@@ -14,27 +14,22 @@
   },
   "tests": {
     "server": {
-      "passed": 119,
+      "passed": 148,
       "failed": 0,
-      "ignored": 1
+      "ignored": 4
     },
     "wasm": {
-      "passed": 29,
+      "passed": 32,
       "failed": 0
     },
     "total": {
-      "passed": 148,
+      "passed": 180,
       "failed": 0
     },
     "vm_selftest": {
       "vault": 25,
       "escrow": 52
     }
-  },
-  "release": {
-    "apk_version": "0.1.1",
-    "apk_sha256": "086421854bedd54b1c123092f06ab309be2aea04efbbfff3590ff7a089bc413b",
-    "date": "2026-07-05"
   },
   "links": {
     "github": "https://github.com/Kaspaforge/kaspaforge",

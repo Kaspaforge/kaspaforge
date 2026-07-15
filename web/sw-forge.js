@@ -2,11 +2,11 @@
    Strategy: network-first with cache fallback — this is a financial app, code freshness matters
    more than speed; the cache exists only so the desk/landing pages open offline or during a site outage.
    /api/ and non-GET requests are never touched (never cached, always go straight to the network). */
-const CACHE = 'kforge-v48';
+const CACHE = 'kforge-v49';
 const PRECACHE = [
-  '/', '/desk.html', '/safe.html', '/escrow-index.html', '/market.html',
+  '/', '/desk.html', '/safe.html', '/escrow-index.html', '/market.html', '/agents/', '/ru/agents/',
   '/contracts.html', '/ru/contracts.html',
-  '/assets/safe.css?v=14', '/assets/app.js?v=18', '/assets/identity.js',
+  '/assets/safe.css?v=14', '/assets/forge-landing.css?v=8', '/assets/app.js?v=18', '/assets/identity.js',
   '/assets/nav.js?v=7', '/assets/netstat.js?v=1', '/assets/desk.css?v=11', '/assets/desk-routes.js?v=1', '/assets/desk-overview.js?v=1', '/assets/desk-tour.js?v=4', '/assets/swap-widget.js?v=5', '/assets/favicon.svg', '/manifest-forge.json',
   '/assets/kaspa-widget.js?v=4',   // shared Sara widget on all pages
   '/assets/icons/icon-192.png?v=2', '/assets/icons/icon-512.png?v=2',

@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Kaspa Forge — твои ключи, три инструмента, один деск</title>
-<meta name="description" content="Некостодиальный деск на ковенантах Kaspa: сейф, в котором кражу можно отменить, эскроу, чей гарант физически не может украсть, и маркетплейс со встроенным эскроу — один шифрованный профиль, который не покидает твой браузер.">
+<title>Kaspa Forge — некастодиальный сейф, эскроу и маркет Kaspa</title>
+<meta name="description" content="Некастодиальный сейф Kaspa, где кражу можно отменить, ковенант-эскроу и маркет в одном зашифрованном Деске. Ключи остаются в браузере; Forge Sync получает только шифротекст.">
 <link rel="canonical" href="https://kaspaforge.org/ru/">
 <link rel="alternate" hreflang="en" href="https://kaspaforge.org/">
 <link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/">
@@ -12,15 +12,15 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Kaspa Forge">
 <meta property="og:locale" content="ru_RU">
-<meta property="og:title" content="Kaspa Forge — твои ключи, три инструмента, один деск">
-<meta property="og:description" content="Некостодиальные сейф, эскроу и маркетплейс на ковенантах Kaspa — один шифрованный профиль, который не покидает твой браузер.">
+<meta property="og:title" content="Kaspa Forge — сейф Kaspa, где кражу можно отменить">
+<meta property="og:description" content="Некастодиальный сейф Kaspa, ковенант-эскроу и маркет. Ключи локальны; Forge Sync получает только шифротекст.">
 <meta property="og:url" content="https://kaspaforge.org/ru/">
 <meta property="og:image" content="https://kaspaforge.org/assets/og-forge.png?v=1">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Kaspa Forge — твои ключи, три инструмента, один деск">
-<meta name="twitter:description" content="Некостодиальные сейф, эскроу и маркетплейс на ковенантах Kaspa — один шифрованный профиль в твоём браузере.">
+<meta name="twitter:title" content="Kaspa Forge — сейф Kaspa, где кражу можно отменить">
+<meta name="twitter:description" content="Некастодиальный сейф Kaspa, ковенант-эскроу и маркет. Ключи локальны; Forge Sync получает только шифротекст.">
 <meta name="twitter:image" content="https://kaspaforge.org/assets/og-forge.png?v=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,9 +29,9 @@
 <link rel="manifest" href="/manifest-forge.json">
 <meta name="theme-color" content="#0E1116">
 <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
-<link rel="stylesheet" href="/assets/forge-landing.css?v=6">
+<link rel="stylesheet" href="/assets/forge-landing.css?v=8">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebApplication","name":"Kaspa Forge","url":"https://kaspaforge.org/ru/","applicationCategory":"FinanceApplication","operatingSystem":"Web","inLanguage":"ru","description":"Некостодиальный деск на ковенантах Kaspa Toccata: сейф с окном отмены, ковенант-эскроу для P2P-сделок и маркетплейс — один шифрованный профиль в твоём браузере.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD","description":"Ончейн-операции бесплатны; платится только сетевая комиссия Kaspa."}}
+{"@context":"https://schema.org","@type":"WebApplication","name":"Kaspa Forge","url":"https://kaspaforge.org/ru/","applicationCategory":"FinanceApplication","operatingSystem":"Web","inLanguage":"ru","description":"Некастодиальный Деск Kaspa с окном отмены вывода из сейфа, ковенант-эскроу и маркетом. Ключи остаются в браузере; синхронизация хранит только шифротекст.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD","description":"Сервисная комиссия операций сейфа — 0 KAS; сетевая комиссия Kaspa сохраняется."}}
 </script>
 </head>
 <body>
@@ -45,6 +45,7 @@
       <a href="/ru/safe.html">Сейф</a>
       <a href="/ru/escrow-index.html">Эскроу</a>
       <a href="/ru/market.html">Маркет</a>
+      <a href="/ru/agents/">Агенты</a>
       <a href="/ru/blog/">Блог</a>
       <a href="/ru/docs/">Доки</a>
       <a href="/ru/recover.html">Восстановление</a>
@@ -57,6 +58,7 @@
     <a href="/ru/safe.html">Сейф</a>
     <a href="/ru/escrow-index.html">Эскроу</a>
     <a href="/ru/market.html">Маркет</a>
+    <a href="/ru/agents/">Агенты</a>
     <a href="/ru/desk.html">Деск</a>
     <a href="/ru/blog/">Блог</a>
     <a href="/ru/docs/">Документация</a>
@@ -67,12 +69,12 @@
 
 <div class="strip" id="netstat">
   <div class="wrap strip-in">
-    <span>сеть <b class="ok" id="ns-net">…</b></span>
-    <span>DAA <b class="ns-daa" id="ns-daa">…</b></span>
-    <span>нода <b><span class="ns-dot" id="ns-dot"></span><span id="ns-status">…</span></b></span>
-    <span>ковенанты <b>Toccata</b></span>
-    <span>ключи <b>только этот браузер</b></span>
-    <span>кастодия <b class="ok">нет</b></span>
+    <span>сеть <b class="ok" id="ns-net">проверка</b></span>
+    <span class="status-secondary">DAA <b class="ns-daa" id="ns-daa">проверка</b></span>
+    <span>нода <b><span class="ns-dot" id="ns-dot"></span><span id="ns-status">проверка</span></b></span>
+    <span class="status-secondary">ковенанты <b>Toccata</b></span>
+    <span class="status-secondary">ключи <b>локально</b></span>
+    <span class="status-secondary">кастодия <b class="ok">нет</b></span>
     <span>статус <b class="beta">открытая бета</b></span>
   </div>
 </div>
@@ -80,35 +82,35 @@
 
 <div class="strip" id="secstat" style="display:none">
   <div class="wrap strip-in">
-    <span>контракты <b id="sec-contracts">…</b></span>
-    <span>тесты <b class="ok" id="sec-tests">…</b></span>
-    <span>релиз <b id="sec-release">…</b></span>
+    <span>контракты <b id="sec-contracts">проверка</b></span>
+    <span>тесты <b class="ok" id="sec-tests">проверка</b></span>
+    <span class="status-secondary">проверено <b id="sec-verified">проверка</b></span>
     <span><a href="/ru/security.html" id="sec-link">Безопасность ▸</a></span>
     <span><a href="https://github.com/Kaspaforge/kaspaforge" id="sec-github" target="_blank" rel="noopener">GitHub</a></span>
   </div>
 </div>
-<script src="/assets/sec-status.js?v=3" defer></script>
+<script src="/assets/sec-status.js?v=4" defer></script>
 
 <section class="hero">
   <div class="hero-glow" aria-hidden="true"></div>
   <div class="wrap hero-in">
     <div>
-      <div class="kicker">Некостодиальные инструменты на блокчейне Kaspa</div>
-      <h1>Твои ключи.<br>Три инструмента.<br><span class="t">Один деск.</span></h1>
+      <div class="kicker">Некастодиальный сейф Kaspa · эскроу · маркет</div>
+      <h1>Сейф Kaspa<br>где кражу можно<br><span class="t">отменить.</span></h1>
       <p class="lead">
-        <b>Сейф</b>, в котором кражу можно отменить, <b>ковенант-эскроу</b>, чей гарант физически
-        не может украсть, и <b>маркетплейс</b>, где каждая покупка открывается в этот эскроу.
-        Все три работают от одного шифрованного профиля под паролем, который не покидает
-        твой браузер.
+        Неизвестный вывод ждёт выбранное тобой окно. Отдельный alarm-ключ возвращает средства
+        в сейф <b>до закрытия окна</b>. Рядом — ковенант-<b>Эскроу</b> и <b>Маркет</b> в одном
+        Деске: ключи остаются в браузере, а Forge Sync после твоего включения отправляет
+        <b>только шифротекст</b>.
       </p>
       <div class="hero-cta">
         <a class="btn btn-kaspa" href="/ru/desk.html">Открыть мой деск&nbsp;▸</a>
-        <a class="btn btn-ghost" href="#safe">Посмотреть механику</a>
+        <a class="btn btn-ghost" href="#desk">Посмотреть Деск</a>
       </div>
       <ul class="assur">
-        <li><b>Ключи куются в твоём браузере</b> — и не покидают его. Мы не можем двинуть твои средства. Никогда.</li>
-        <li><b>Правила живут в ончейн-скриптах,</b> а не на наших серверах. Умрёт сайт — твои деньги нет.</li>
-        <li><b>Даже арбитр спора</b> может направить средства только покупателю или продавцу — всё остальное сеть отвергает.</li>
+        <li><b>Ключи создаются и используются в браузере.</b> Мы не можем двигать средства.</li>
+        <li><b>Правила живут в ончейн-скриптах,</b> а не на наших серверах.</li>
+        <li><b>Alarm-ключ остаётся отдельно,</b> если ты выбрал раздельное хранение.</li>
       </ul>
     </div>
 
@@ -117,28 +119,20 @@
         <div class="desk-head">
           <svg class="k" viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="none" stroke="#00C1AF" stroke-width="8"/><path d="M58 30 v40 M36 32 L54 50 L36 68" fill="none" stroke="#00C1AF" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg>
           Kaspa Forge Desk
-          <span class="beta">mainnet бета</span>
+          <span class="beta">превью интерфейса</span>
         </div>
-        <div class="desk-tiles">
-          <a class="tile" href="/ru/safe.html" aria-label="Сейф — некостодиальное хранилище с задержкой отмены и тревожным ключом">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#00C1AF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10.5" width="16" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/><circle cx="12" cy="15.5" r="1.6" fill="#00C1AF" stroke="none"/></svg>
-            <div class="tn">Сейф</div>
-            <div class="td">Задержка ·<br>тревожный ключ</div>
-          </a>
-          <a class="tile" href="/ru/escrow-index.html" aria-label="Эскроу — ковенант-сделки с арбитром">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#00C1AF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v17"/><path d="M5 7h14"/><path d="M5 7 2.8 12.6a3.2 3.2 0 0 0 4.4 0z"/><path d="M19 7l-2.2 5.6a3.2 3.2 0 0 0 4.4 0z"/><path d="M8.5 20.5h7"/></svg>
-            <div class="tn">Эскроу</div>
-            <div class="td">Ковенант-сделки ·<br>арбитр</div>
-          </a>
-          <a class="tile" href="/ru/market.html" aria-label="Маркет — объявления со встроенным эскроу">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#00C1AF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 3.5h7l10 10-7 7-10-10z"/><circle cx="8" cy="8" r="1.5" fill="#00C1AF" stroke="none"/></svg>
-            <div class="tn">Маркет</div>
-            <div class="td">Объявления ·<br>эскроу внутри</div>
-          </a>
+        <div class="preview-wallet">
+          <span>Кошелёк Деска · пример данных</span>
+          <strong>1 284.65 KAS</strong>
+        </div>
+        <div class="preview-list">
+          <div class="preview-row safe"><span class="preview-dot"></span><b>Сейф «Накопления»</b><small>2 100 KAS · защищён</small></div>
+          <div class="preview-row escrow"><span class="preview-dot"></span><b>Эскроу #7C19</b><small>профинансирован · окно 24 ч</small></div>
+          <div class="preview-row market"><span class="preview-dot"></span><b>Механическая клавиатура</b><small>в маркете · 150 KAS</small></div>
         </div>
         <div class="desk-foot">
           <span>один профиль · один кошелёк</span>
-          <span>шифрование <b>age</b> · только локально</span>
+          <span>шифрование <b>age</b> · ключи локально</span>
         </div>
       </div>
     </div>
@@ -147,16 +141,15 @@
 
 <div class="ribbon">
   <div class="wrap ribbon-in">
-    <div class="spec">окно отмены<b>1 ч — 90 д</b></div>
-    <div class="spec">наследование<b>1 д — 5 лет</b></div>
+    <div class="spec">сервис сейфа<b>0 KAS<sup>*</sup></b></div>
     <div class="spec">комиссия эскроу<b>0.5 %</b></div>
     <div class="spec">арбитраж<b>2 %</b></div>
     <div class="spec">сделки<b>50 — 10 000 KAS</b></div>
-    <div class="spec">ончейн-операции<b>0 KAS</b></div>
+    <div class="ribbon-note">* сетевая комиссия Kaspa сохраняется</div>
   </div>
 </div>
 
-<section class="tool" id="safe">
+<section class="tool tool-safe" id="safe">
   <div class="wrap tool-grid">
     <div class="tool-copy">
       <span class="stamp">
@@ -164,25 +157,15 @@
         Kaspa Safe
       </span>
       <h2>Сейф, в котором кражу можно отменить</h2>
-      <p class="d">
-        Любой вывод из сейфа выдерживает окно, которое задал ты. Адрес назначения
-        <b>намертво фиксируется ончейн в момент старта вывода</b> — ковенант не принимает другой адрес.
-        Если вывод запускал не ты, один ход отдельным <b>тревожным ключом</b> (лежит на бумаге,
-        дома — где угодно отдельно от горячего) возвращает всё в сейф.
-      </p>
-      <p class="d">
-        Опциональное наследование работает по принципу «чекинься, что жив»: перестал отмечаться —
-        после выбранного срока сейф открывается наследнику, автоматически или по его собственному
-        ключу. Укажи наследником свой же второй адрес — и это страховка от потери горячего ключа.
-      </p>
+      <p class="d">Любой вывод ждёт выбранное тобой окно, а адрес назначения фиксируется ончейн
+        с самого старта. Если вывод не твой, отдельный <b>alarm-ключ возвращает всё в сейф</b>.
+        Наследование откроется только когда чекины прекратятся на заданный тобой срок.</p>
       <div class="kvs">
         <div class="kv"><span class="k">Окно отмены</span><span class="v m">пресеты 6 ч – 14 д · своё 1 ч – 90 д</span></div>
         <div class="kv"><span class="k">Ключи</span><span class="v">горячий + тревожный, врозь — вор с одним не получает ничего</span></div>
         <div class="kv"><span class="k">Наследование</span><span class="v m">выкл · 6 / 12 / 24 мес · своё 1 д – 5 лет</span></div>
-        <div class="kv"><span class="k">Email наследнику</span><span class="v">бесплатно, сработает даже без подписки</span></div>
-        <div class="kv"><span class="k">Telegram-алерты</span><span class="v m">100 KAS / год · первые 30 дней бесплатно</span></div>
-        <div class="kv"><span class="k">Ончейн-операции</span><span class="v">бесплатны навсегда — только сетевая комиссия</span></div>
-        <div class="kv"><span class="k">Android</span><span class="v">исходник обёртки открыт; пакетный релиз временно снят</span></div>
+        <div class="kv"><span class="k">Алерты</span><span class="v m">Telegram 100 KAS / год · email наследнику бесплатно</span></div>
+        <div class="kv"><span class="k">Сервис сейфа</span><span class="v">0 KAS — только сетевая комиссия</span></div>
       </div>
       <a class="tool-more" href="/ru/safe.html">Как работает сейф&nbsp;▸</a>
       <div style="margin-top:12px;font-size:12px;color:var(--ash2)">
@@ -217,6 +200,12 @@
           </div>
         </div>
       </div>
+      <div class="key-split">
+        <div><span>Горячий ключ</span><b>зашифрованный профиль Деска</b></div>
+        <span class="key-sep">≠</span>
+        <div><span>Alarm-ключ</span><b>бумага или полный локальный экспорт</b></div>
+        <p>При раздельном хранении alarm-карточки остаются отдельно и не синхронизируются.</p>
+      </div>
       <div class="note teal">
         <b>Потерял оба ключа?</b> Мы не поможем — у сейфа просто нет ключа-лазейки, который мог бы это сделать.
         Включай наследование, пусть даже наследник — твой же второй адрес.
@@ -225,7 +214,7 @@
   </div>
 </section>
 
-<section class="tool" id="escrow">
+<section class="tool tool-escrow" id="escrow">
   <div class="wrap tool-grid flip">
     <div class="tool-copy">
       <span class="stamp">
@@ -233,24 +222,14 @@
         Kaspa Escrow · Гарант
       </span>
       <h2>Гарант, который физически не может украсть</h2>
-      <p class="d">
-        Деньги P2P-сделки лежат в <b>ончейн-ковенанте</b>, а не у нас. Скрипт допускает
-        фиксированный набор исходов, и в каждом средства уходят покупателю, продавцу или делятся
-        между ними. Даже подпись арбитра не открывает других дверей — <b>любой другой адрес сеть
-        Kaspa просто не примет.</b> Это математика, а не обещание.
-      </p>
-      <p class="d">
-        Честно про границу: каждый путь траты в ковенанте платит стороне сделки —
-        <b>оператор не может перенаправить средства</b>; справедливость вердикта — работа
-        человека-арбитра по твоим доказательствам. И доказательства железные: чат сделки работает
-        на протоколе Kasia, где <b>каждое сообщение — сквозно зашифрованная транзакция Kaspa</b>,
-        заякоренная ончейн — незаметно подделать или переписать задним числом нельзя.
-      </p>
+      <p class="d">Средства сделки лежат в <b>ончейн-ковенанте</b>, а не у нас. Каждый допустимый
+        путь платит покупателю, продавцу или делит сумму между ними. Арбитр оценивает доказательства,
+        но не может перенаправить тело сделки: любой другой адрес сеть Kaspa отвергнет.</p>
       <div class="kvs">
         <div class="kv"><span class="k">Типы сделок</span><span class="v">товар · OTC-обмен · услуга</span></div>
         <div class="kv"><span class="k">Окно споров</span><span class="v m">6 пресетов, 24 ч – 7 д — видно до входа в сделку</span></div>
         <div class="kv"><span class="k">Никто не нажал?</span><span class="v">авто-релиз продавцу, когда окно закрылось</span></div>
-        <div class="kv"><span class="k">Арбитр молчит?</span><span class="v">аварийный таймаут вернёт средства стороне по умолчанию — сделка не зависнет</span></div>
+        <div class="kv"><span class="k">Доказательства</span><span class="v">сквозно шифрованный чат Kasia, заякоренный ончейн</span></div>
         <div class="kv"><span class="k">Сумма сделки</span><span class="v m">50 – 10 000 KAS (бета)</span></div>
       </div>
       <a class="tool-more" href="/ru/escrow-index.html">Как работает Гарант&nbsp;▸</a>
@@ -287,15 +266,16 @@
           <span class="f warn">Спор → вердикт</span>
         </div>
       </div>
-      <div class="note">
-        <b>Телеграм-гаранты:</b> 3–10 % комиссии, и деньги лежат у них.
-        <b style="color:var(--kaspa)">Kaspa Гарант:</b> 0.5 % — и у него не лежат.
-      </div>
     </div>
+  </div>
+  <div class="wrap escrow-compare">
+    <div class="compare-side legacy"><span>Обычный Telegram-гарант</span><strong>3–10 %</strong><p>Держит деньги и просит довериться решению человека.</p></div>
+    <div class="compare-vs">vs</div>
+    <div class="compare-side forge"><span>Kaspa Escrow</span><strong>0.5 %</strong><p>Деньги держит ковенант, который не может заплатить оператору.</p></div>
   </div>
 </section>
 
-<section class="tool" id="market">
+<section class="tool tool-market" id="market">
   <div class="wrap tool-grid">
     <div class="tool-copy">
       <span class="stamp">
@@ -303,12 +283,8 @@
         Маркетплейс
       </span>
       <h2>Торгуй с незнакомцами. Не доверяй никому.</h2>
-      <p class="d">
-        Витрина объявлений, где кнопка <b>«Купить» автоматически открывает ковенант-эскроу</b>.
-        Продавец физически не может забрать деньги, пока покупатель не подтвердит, а спор уходит
-        арбитру — ровно как в обычной сделке Гаранта. Без рейтингов «доверия» и «проверенных
-        посредников»: каждую покупку стережёт один и тот же ончейн-скрипт.
-      </p>
+      <p class="d">Каждая кнопка «Купить» автоматически открывает ковенант-эскроу. Продавец не
+        может забрать средства до релиза, а спор использует те же фиксированные пути выплаты.</p>
       <div class="kvs">
         <div class="kv"><span class="k">Выставить</span><span class="v">товар или услуга · цена в KAS · фото · модерация — и в эфир</span></div>
         <div class="kv"><span class="k">Купить</span><span class="v">один клик открывает эскроу-сделку — дальше закладка, получение, релиз</span></div>
@@ -351,28 +327,44 @@
   </div>
 </section>
 
+<section class="agent-home">
+  <div class="wrap agent-home-grid">
+    <div>
+      <div class="kicker">Слой агентов</div>
+      <h2>Агенты делают работу. Ковенанты сохраняют власть.</h2>
+      <p>Kaspa Forge уже использует специализированных ИИ-агентов внутри <b>Маркета</b> и <b>Эскроу</b>. Они проверяют офферы и структурируют раскрытые улики, но не получают ключей подписи и не могут двигать деньги.</p>
+      <a class="tool-more" href="/ru/agents/">Познакомиться с агентами Forge&nbsp;▸</a>
+    </div>
+    <div class="agent-home-cards">
+      <div class="agent-home-card market"><span>Модератор Маркета</span><b>Проверка текста и фото</b><small>Сомнение ждёт человека и никогда не публикуется молча.</small></div>
+      <div class="agent-home-card"><span>Медиатор Эскроу</span><b>Улики → предложение</b><small>refund · release · split — без обязательной силы до подписи.</small></div>
+      <div class="agent-home-boundary">0 ключей подписи у агентов · 0 путей выплаты под их контролем</div>
+    </div>
+  </div>
+</section>
+
 <section class="band">
   <div class="wrap">
     <div class="kicker">Кастодия — по буквам</div>
-    <h2 style="margin-top:14px">Твои ключи остаются твоими.<br>Мы построили так, что не можем их коснуться.</h2>
+    <h2 style="margin-top:14px">Шифруется локально.<br>Синхронизируется только шифротекст.</h2>
     <p class="band-sub">
-      Всё — ключи сейфов, сделок, объявлений и личный кошелёк — живёт в
-      <b>одном age-зашифрованном профиле под твоим паролем</b>, внутри твоего браузера.
-      Разблокируй один раз — работают все три инструмента. Мы не видим пароль. Мы не видим ключи.
+      Общие данные Деска живут в <b>age-зашифрованном профиле под твоим паролем</b>.
+      Forge Sync только после твоего включения отправляет на сервер только шифротекст — сервер
+      не может его расшифровать. Alarm-ключи с раздельным хранением в зеркало не попадают.
     </p>
     <ul class="claims">
       <li>
         <svg viewBox="0 0 24 24" fill="none" stroke="#00C1AF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10.5" width="16" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/><circle cx="12" cy="15.5" r="1.6" fill="#00C1AF" stroke="none"/></svg>
         <div>
-          <div class="cn">Шифрованный, локальный, под паролем</div>
-          <div class="cd">Профиль всегда хранится зашифрованным. Каждая разблокировка и каждое движение денег — переспрос пароля. Как менеджер паролей — потому что это он и есть.</div>
+          <div class="cn">Ключи остаются в браузере</div>
+          <div class="cd">Создание, расшифровка и подпись происходят локально. Пароль и открытые ключевые данные не отправляются Forge.</div>
         </div>
       </li>
       <li>
         <svg viewBox="0 0 24 24" fill="none" stroke="#00C1AF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7.5 10.5 4.5 4.5 4.5-4.5"/><path d="M4.5 20.5h15"/></svg>
         <div>
-          <div class="cn">Один файл — весь твой бэкап</div>
-          <div class="cd">Экспортируй файл ключей (<b>.age</b>) один раз и храни отдельно от пароля. Импорт на любом устройстве — и все сейфы, сделки и объявления вернутся.</div>
+          <div class="cn">Один экспорт восстанавливает общий профиль</div>
+          <div class="cd">Зашифрованный экспорт <b>.age</b> восстанавливает общие данные Деска. Alarm-карточки остаются отдельно и требуют собственной защищённой копии.</div>
         </div>
       </li>
       <li>
@@ -486,27 +478,25 @@
   </div>
 </section>
 
-<section class="band" id="learn">
+<section class="band learn-band" id="learn">
   <div class="wrap">
-    <div class="eyebrow">Разберитесь до блокировки средств</div>
-    <h2>Проверьте модель безопасности — затем выбирайте продукт</h2>
-    <p class="d">Начните с <a href="/ru/docs/">документации Kaspa Forge</a>, прочитайте, как <a href="/ru/blog/kaspa-covenants-how-they-work.html">ковенанты Kaspa ограничивают расходование</a>, затем изучите фиксированные пути выплат в <a href="/ru/escrow-index.html">Kaspa Гаранте</a>.</p>
+    <div class="learn-copy"><div class="eyebrow">Разберись до блокировки средств</div><h2>Проверь модель безопасности</h2></div>
+    <p class="d">Прочитай о <a href="/ru/docs/security.html">безопасности ключей и границе Sync</a>, открой <a href="/ru/security.html">центр проверки</a>, затем изучи <a href="https://github.com/Kaspaforge/kaspaforge" target="_blank" rel="noopener">исходный код</a>.</p>
   </div>
 </section>
 
 <section class="fin">
   <div class="fin-glow" aria-hidden="true"></div>
   <div class="wrap fin-in">
-    <h2>Выкуй свой первый сейф сегодня</h2>
-    <p>
-      Работает в браузере. Без аккаунта. Сид-фраза никому не передаётся.
-      <b>Без кастодии — по конструкции, а не по обещанию.</b>
-    </p>
-    <div class="hero-cta">
-      <a class="btn btn-kaspa" href="/ru/desk.html">Открыть мой деск&nbsp;▸</a>
-      <a class="btn btn-ghost" href="/ru/market.html">Смотреть маркет</a>
+    <div class="fin-card">
+      <h2>Выкуй свой первый сейф сегодня</h2>
+      <p>Работает в браузере. Без аккаунта. <b>Без кастодии — по конструкции, а не по обещанию.</b></p>
+      <div class="hero-cta">
+        <a class="btn btn-kaspa" href="/ru/desk.html">Открыть мой деск&nbsp;▸</a>
+        <a class="btn btn-ghost" href="/ru/market.html">Смотреть маркет</a>
+      </div>
+      <div class="fin-sub">mainnet · 180 тестов · открытый код · без аккаунта</div>
     </div>
-    <div class="fin-sub">mainnet · открытая бета · открытый код</div>
   </div>
 </section>
 
@@ -521,6 +511,7 @@
       <a href="/ru/safe.html">Сейф</a>
       <a href="/ru/escrow-index.html">Эскроу</a>
       <a href="/ru/market.html">Маркет</a>
+      <a href="/ru/agents/">Агенты</a>
       <a href="/ru/blog/">Блог</a>
       <a href="/ru/docs/">Документация</a>
       <a href="/ru/recover.html">Восстановление</a>

@@ -4,7 +4,7 @@
    anymore; the default for any visitor = EN. Russian is just an OPTION: an explicit RU/EN
    switcher in the services bar (kf-nav below) on pages that have a mirror. */
 // pages that have a RU mirror (needed by the switcher in kf-nav)
-var KF_RU_MIRROR = /^\/(|index\.html|safe\.html|create\.html|manage\.html|desk\.html|escrow-index\.html|escrow\.html|deal\.html|market\.html|listing-new\.html|recover\.html|recover-escrow\.html|privacy\.html|privacy-escrow\.html|kaspa-forge\.html|docs\/([a-z-]+\.html)?|blog\/([a-z0-9-]+\.html)?)$/;
+var KF_RU_MIRROR = /^\/(|index\.html|safe\.html|create\.html|manage\.html|desk\.html|escrow-index\.html|escrow\.html|deal\.html|market\.html|listing-new\.html|recover\.html|recover-escrow\.html|privacy\.html|privacy-escrow\.html|kaspa-forge\.html|agents\/?|docs\/([a-z-]+\.html)?|blog\/([a-z0-9-]+\.html)?)$/;
 
 /* Kaspa Forge — single-origin service navigation: a "workbench" bar above the header on EVERY
    page (Forge/Desk/Safe/Escrow/Market/Docs/Recovery). The active tab is a teal "hallmark"
@@ -51,6 +51,7 @@ var KF_RU_MIRROR = /^\/(|index\.html|safe\.html|create\.html|manage\.html|desk\.
     [p + '/safe.html', ru ? 'Сейф' : 'Safe'],
     [p + '/escrow-index.html', ru ? 'Эскроу' : 'Escrow'],
     [p + '/market.html', ru ? 'Маркет' : 'Market'],
+    [p + '/agents/', ru ? 'Агенты' : 'Agents'],
     [p + '/blog/', ru ? 'Блог' : 'Blog'],
     [p + '/docs/', ru ? 'Доки' : 'Docs'],
     [p + '/recover.html', ru ? 'Восстановление' : 'Recovery'],

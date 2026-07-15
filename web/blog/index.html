@@ -55,6 +55,30 @@
   "blogPost": [
     {
       "@type": "BlogPosting",
+      "headline": "Kaspa Key Derivation Backup: One Seed for All Future Keys",
+      "url": "https://kaspaforge.org/blog/kaspa-deterministic-key-derivation-backup.html",
+      "datePublished": "2026-07-14"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "Non-Custodial Kaspa Wallet: Browser-Only Keys in Desk",
+      "url": "https://kaspaforge.org/blog/client-side-keys-kaspa-desk.html",
+      "datePublished": "2026-07-13"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "Inside Kaspa Safe: Anatomy of an On-Chain Covenant Vault",
+      "url": "https://kaspaforge.org/blog/inside-kaspa-safe-covenant-vault.html",
+      "datePublished": "2026-07-11"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "Kaspa BlockDAG & GHOSTDAG: How Parallel Blocks Are Ordered",
+      "url": "https://kaspaforge.org/blog/kaspa-blockdag-ghostdag-explained.html",
+      "datePublished": "2026-07-11"
+    },
+    {
+      "@type": "BlogPosting",
       "headline": "Run a Kaspa Node for Your Services: Why We Built Our Own",
       "url": "https://kaspaforge.org/blog/running-own-kaspa-node-services.html",
       "datePublished": "2026-07-14"
@@ -63,12 +87,6 @@
       "@type": "BlogPosting",
       "headline": "Kaspa 10 BPS: What 10 Blocks per Second Mean for Payments",
       "url": "https://kaspaforge.org/blog/kaspa-10-bps-one-second-confirmations.html",
-      "datePublished": "2026-07-13"
-    },
-    {
-      "@type": "BlogPosting",
-      "headline": "Non-Custodial Kaspa Wallet: Browser-Only Keys in Desk",
-      "url": "https://kaspaforge.org/blog/client-side-keys-kaspa-desk.html",
       "datePublished": "2026-07-13"
     },
     {
@@ -82,18 +100,6 @@
       "headline": "Kaspa Escrow Contract: Spending Paths Explained",
       "url": "https://kaspaforge.org/blog/kaspa-escrow-covenant-spending-paths.html",
       "datePublished": "2026-07-12"
-    },
-    {
-      "@type": "BlogPosting",
-      "headline": "Inside Kaspa Safe: Anatomy of an On-Chain Covenant Vault",
-      "url": "https://kaspaforge.org/blog/inside-kaspa-safe-covenant-vault.html",
-      "datePublished": "2026-07-11"
-    },
-    {
-      "@type": "BlogPosting",
-      "headline": "Kaspa BlockDAG & GHOSTDAG: How Parallel Blocks Are Ordered",
-      "url": "https://kaspaforge.org/blog/kaspa-blockdag-ghostdag-explained.html",
-      "datePublished": "2026-07-11"
     },
     {
       "@type": "BlogPosting",
@@ -140,34 +146,16 @@
   <p class="lead">Kaspa, proof-of-work and self-custody — news with our angle, and guides that go one level deeper.</p>
 
   <div class="posts">
-    <a class="postcard" href="/blog/running-own-kaspa-node-services.html">
+    <a class="postcard" href="/blog/kaspa-deterministic-key-derivation-backup.html">
       <div class="pc-meta"><span>Deep dive</span><span class="date">14 Jul 2026</span></div>
-      <h2>Run a Kaspa Node for Your Services: Why We Built Our Own</h2>
-      <p>How Kaspa Forge runs its own kaspad instance, connects via gRPC, and serves vaults, escrow, and payments without trusting third-party APIs.</p>
-      <span class="pc-more">Read →</span>
-    </a>
-    <a class="postcard" href="/blog/kaspa-10-bps-one-second-confirmations.html">
-      <div class="pc-meta"><span>Deep dive</span><span class="date">13 Jul 2026</span></div>
-      <h2>Kaspa 10 BPS: What 10 Blocks per Second Mean for Payments</h2>
-      <p>Kaspa runs at 10 blocks per second via blockDAG. A practical look at confirmation times, escrow funding, and payment UX — with honest trade-offs.</p>
+      <h2>Kaspa Key Derivation Backup: One Seed for All Future Keys</h2>
+      <p>Learn how Kaspa Forge's deterministic key derivation works — one master seed, one .age backup, every vault and deal restored with a gap-scan.</p>
       <span class="pc-more">Read →</span>
     </a>
     <a class="postcard" href="/blog/client-side-keys-kaspa-desk.html">
       <div class="pc-meta"><span>Deep dive</span><span class="date">13 Jul 2026</span></div>
       <h2>Non-Custodial Kaspa Wallet: Browser-Only Keys in Desk</h2>
       <p>How Kaspa Desk keeps private keys browser-only with WASM, age-encrypted profiles, and HD derivation — a non-custodial Kaspa wallet deep dive.</p>
-      <span class="pc-more">Read →</span>
-    </a>
-    <a class="postcard" href="/blog/kaspalytics-kaspa-covenants-opcodes-protocol-activity.html">
-      <div class="pc-meta"><span>News</span><span class="date">13 Jul 2026</span></div>
-      <h2>Kaspalytics Adds Covenant &amp; Script Dashboards for Kaspa</h2>
-      <p>Kaspalytics adds new Covenant and Script tracking to its Kaspa analytics suite, making post-Toccata protocol adoption measurable on-chain.</p>
-      <span class="pc-more">Read →</span>
-    </a>
-    <a class="postcard" href="/blog/kaspa-escrow-covenant-spending-paths.html">
-      <div class="pc-meta"><span>Deep dive</span><span class="date">12 Jul 2026</span></div>
-      <h2>Kaspa Escrow Contract: Spending Paths Explained</h2>
-      <p>Every spending path in the kaspa escrow contract pays only the buyer or seller — never the platform, not the arbiter. Here is how the on-chain covenant works.</p>
       <span class="pc-more">Read →</span>
     </a>
     <a class="postcard" href="/blog/inside-kaspa-safe-covenant-vault.html">
@@ -180,6 +168,30 @@
       <div class="pc-meta"><span>Deep dive</span><span class="date">11 Jul 2026</span></div>
       <h2>Kaspa BlockDAG &amp; GHOSTDAG: How Parallel Blocks Are Ordered</h2>
       <p>How Kaspa's GHOSTDAG protocol orders parallel blocks in a BlockDAG — and what it means for fast confirmations, time-lock covenants, and on-chain tooling.</p>
+      <span class="pc-more">Read →</span>
+    </a>
+    <a class="postcard" href="/blog/running-own-kaspa-node-services.html">
+      <div class="pc-meta"><span>Deep dive</span><span class="date">14 Jul 2026</span></div>
+      <h2>Run a Kaspa Node for Your Services: Why We Built Our Own</h2>
+      <p>How Kaspa Forge runs its own kaspad instance, connects via gRPC, and serves vaults, escrow, and payments without trusting third-party APIs.</p>
+      <span class="pc-more">Read →</span>
+    </a>
+    <a class="postcard" href="/blog/kaspa-10-bps-one-second-confirmations.html">
+      <div class="pc-meta"><span>Deep dive</span><span class="date">13 Jul 2026</span></div>
+      <h2>Kaspa 10 BPS: What 10 Blocks per Second Mean for Payments</h2>
+      <p>Kaspa runs at 10 blocks per second via blockDAG. A practical look at confirmation times, escrow funding, and payment UX — with honest trade-offs.</p>
+      <span class="pc-more">Read →</span>
+    </a>
+    <a class="postcard" href="/blog/kaspalytics-kaspa-covenants-opcodes-protocol-activity.html">
+      <div class="pc-meta"><span>News</span><span class="date">13 Jul 2026</span></div>
+      <h2>Kaspalytics Adds Covenant &amp; Script Dashboards for Kaspa</h2>
+      <p>Kaspalytics adds new Covenant and Script tracking to its Kaspa analytics suite, making post-Toccata protocol adoption measurable on-chain.</p>
+      <span class="pc-more">Read →</span>
+    </a>
+    <a class="postcard" href="/blog/kaspa-escrow-covenant-spending-paths.html">
+      <div class="pc-meta"><span>Deep dive</span><span class="date">12 Jul 2026</span></div>
+      <h2>Kaspa Escrow Contract: Spending Paths Explained</h2>
+      <p>Every spending path in the kaspa escrow contract pays only the buyer or seller — never the platform, not the arbiter. Here is how the on-chain covenant works.</p>
       <span class="pc-more">Read →</span>
     </a>
     <a class="postcard" href="/blog/kaspa-covenants-how-they-work.html">

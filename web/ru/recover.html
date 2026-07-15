@@ -94,9 +94,9 @@
 <span class="p">git clone</span> https://github.com/Kaspaforge/kaspaforge
 <span class="p">cd</span> kaspa-safe/vaultctl && <span class="p">cargo build --release</span>
 
-<span class="c"># cargo build также собирает kaspa-unlock. Есть только мастер key-file (.age)?</span>
+<span class="c"># расшифруй офлайн через web/keyfile-decrypt.html или стандартный age:</span>
 <span class="c"># расшифруй его один раз и вытащи нужный сейф — vaultctl понимает и JSON:</span>
-<span class="p">kaspa-unlock</span> decrypt kaspa-office-profile.age profile.json   <span class="c"># спросит пароль Деска</span>
+<span class="p">age -d</span> kaspa-office-profile.age &gt; profile.json       <span class="c"># спросит пароль Деска</span>
 <span class="p">jq</span> '.vaults[0]' profile.json &gt; vault.json                 <span class="c"># выбери нужный сейф</span>
 
 <span class="c"># состояние сейфа: баланс, возраст, таймер наследования</span>

@@ -26,7 +26,7 @@
   }).then(function (s) {
     set('sec-contracts', 'vault ' + s.versions.vault.version + ' · escrow ' + s.versions.escrow.version);
     set('sec-tests', s.tests.total.passed + (ru ? ' пройдено' : ' passed'));
-    set('sec-release', s.release.apk_version + ' · ' + fmtDate(s.release.date));
+    set('sec-verified', fmtDate(s.updated));
 
     var secLink = root.querySelector('#sec-link');
     if (secLink) secLink.href = ru ? s.links.security_ru : s.links.security_en;

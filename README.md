@@ -1,113 +1,174 @@
-# Kaspa Forge — contracts, apps & recovery kit
+# Kaspa Forge — contracts, apps and recovery kit
 
-This is the open-source code behind **Kaspa Forge — Safe + Escrow + Market + Desk**, built
-on Kaspa Toccata covenants. It contains the browser app, contracts, Android client and
-offline recovery tooling needed to verify the platform's non-custodial claims.
+This is the public source mirror behind **Kaspa Forge — Safe + Escrow + Market + Desk**, built
+on Kaspa Toccata covenants.
 
 - **[Safe](https://kaspaforge.org/safe.html)** — a vault for KAS. Every withdrawal waits out
   a delay you set and can be cancelled with a separate alarm key.
-- **[Escrow](https://kaspaforge.org/escrow-index.html)** — escrow for P2P deals. Funds sit in
-  an on-chain contract; even the arbiter can only send them to the buyer, the seller, or the
-  fixed service fee.
-- **[Market](https://kaspaforge.org/market.html)** — a marketplace powered by non-custodial
-  Kaspa payments and escrow.
-- **[Desk](https://kaspaforge.org/desk.html)** — the unified browser workspace for the wallet,
-  safes, escrow deals, listings and opt-in encrypted profile sync.
+- **[Escrow](https://kaspaforge.org/escrow-index.html)** — non-custodial escrow for P2P deals.
+- **[Market](https://kaspaforge.org/market.html)** — a marketplace powered by Kaspa payments
+  and escrow.
+- **[Desk](https://kaspaforge.org/desk.html)** — the browser workspace for the wallet, safes,
+  deals, listings and opt-in encrypted profile sync.
 
-This repository includes the **offline recovery kit** for Safe and the **on-chain contracts**
-for Safe and Escrow, so you can verify — and, for Safe, operate — everything **without our
-website**, against any Kaspa node.
+## What is recoverable without Kaspa Forge
 
-- [`contracts/vault.sil`](contracts/vault.sil) — the vault covenant (Silverscript).
-- [`contracts/escrow.sil`](contracts/escrow.sil) — the escrow covenant (Silverscript).
-  Its rules live on-chain, enforced by Kaspa consensus; the website and our server are
-  conveniences, not custodians.
-- [`vaultctl/`](vaultctl/) — a CLI that does everything the vault website does, from your
-  recovery sheet.
+The current backup format is one passphrase-encrypted Desk profile (`.age`). It replaces the old
+per-vault and per-deal text recovery sheets. Keep the `.age` file, its password, and any separate
+Safe alarm cards offline.
 
-## Emergency quickstart (vault)
+This repository contains:
 
-You need the **recovery sheet** (`kaspa-safe-recovery-….txt`) printed or saved when the
-vault was created. It contains all keys and parameters — the tool reads it as is.
+- [`web/keyfile-decrypt.html`](web/keyfile-decrypt.html) — a self-contained offline decryptor for
+  the Desk `.age` backup. Its WebAssembly core is embedded in the HTML; it loads no scripts,
+  fonts or code from the network.
+- [`vaultctl/`](vaultctl/) — the complete standalone Safe recovery CLI. It can inspect and operate
+  a vault against any Kaspa v2+ node with `--utxoindex`, without the Kaspa Forge website or API.
+- [`contracts/vault.sil`](contracts/vault.sil) and
+  [`contracts/escrow.sil`](contracts/escrow.sil) — the on-chain covenant sources.
+- [`web/`](web/) and [`app/`](app/) — the browser frontend and Android wrapper source.
+- [`RECOVERY-SHA256SUMS`](RECOVERY-SHA256SUMS) — checksums generated from the exact recovery kit
+  in this revision.
+
+Recovery capability is intentionally stated narrowly: **Safe has a standalone recovery CLI.**
+For Escrow, the covenant and browser frontend are public, but a separately packaged party-side
+recovery CLI is not published yet. Do not rely on a cached or third-party `escrowctl` binary.
+
+## Keep an offline copy now
+
+1. Use **Code → Download ZIP** on this repository and store the ZIP with your encrypted `.age`
+   backup. Do not wait for an emergency.
+2. Extract the ZIP and open `web/keyfile-decrypt.html` from disk once with networking disabled.
+3. Confirm that it accepts a test/exported `.age` backup and offers **Download decrypted JSON**.
+4. Delete the plaintext JSON after the rehearsal. It contains private keys.
+
+The key file is standard passphrase-encrypted [age](https://age-encryption.org/) data. Technical
+users may also decrypt it with:
 
 ```bash
-# 1. Prerequisites: Rust (https://rustup.rs), protobuf-compiler, clang
-#    Debian/Ubuntu: apt install -y protobuf-compiler clang
-# 2. Build (5–10 min first time):
-cd vaultctl && cargo build --release
-# 3. Check your vault:
-./target/release/vaultctl status --recovery /path/to/kaspa-safe-recovery-XXXX.txt
+age -d kaspa-office-profile.age > profile.json
 ```
 
-## Commands (vault)
+## Emergency quickstart — Safe
 
-| command | what it does | needs |
+### 1. Decrypt the Desk backup offline
+
+Disconnect the computer from the network, open `web/keyfile-decrypt.html`, choose the `.age` file,
+enter its password, and click **Download decrypted JSON**. The result is `profile.json`.
+
+The decryptor is deliberately a single local HTML file. The password, encrypted backup and
+plaintext profile stay in that browser window. Never upload the `.age` file or plaintext JSON to
+an online decryptor or send either file to support.
+
+### 2. Extract the vault record
+
+List the vault addresses, then select the record whose `vault_addr` matches your vault:
+
+```bash
+jq -r '.vaults[] | .vault_addr' profile.json
+jq '.vaults[] | select(.vault_addr == "kaspa:YOUR_VAULT_ADDRESS")' profile.json > vault.json
+chmod 600 profile.json vault.json
+```
+
+The normal recovery input is now `vault.json`. A full `.age` export from the Safe's creation
+device includes `alarm_sk` only when you chose shared alarm-key storage. Forge Sync deliberately
+never transfers alarm keys. For separate storage, add the private key from the alarm card as the
+`alarm_sk` field before `cancel` or `migrate`. Keep hot and alarm keys apart: together they can
+move the whole vault immediately.
+
+### 3. Build and check the vault
+
+Prerequisites: Rust, `protobuf-compiler`, and `clang`.
+
+```bash
+# Debian/Ubuntu
+sudo apt install -y protobuf-compiler clang
+
+cd vaultctl
+cargo build --release
+./target/release/vaultctl status --recovery ../vault.json
+```
+
+`vaultctl` defaults to `grpc://node.kaspaforge.org:16110`. To remove that remaining service
+dependency, run your own Kaspa v2+ node with `--utxoindex` and add
+`--node grpc://YOUR_NODE:16110`.
+
+## Safe commands
+
+| command | what it does | required secret |
 |---|---|---|
-| `status   --recovery <sheet>` | vault balance, age, inheritance timer; add `--dest <addr>` to see an in-flight withdrawal and its cancel window | nothing |
-| `initiate --recovery <sheet> --to <kaspa:q…>` | start a withdrawal (destination is locked forever) | hot key (in sheet) |
-| `cancel   --recovery <sheet> --dest <kaspa:q…>` | cancel an in-flight withdrawal — coins snap back to the vault | alarm key (in sheet) |
-| `complete --recovery <sheet> --dest <kaspa:q…>` | deliver a matured withdrawal to its destination | no key |
-| `checkin  --recovery <sheet>` | "I'm alive" — resets the inheritance timer | hot key |
-| `inherit  --recovery <sheet> [--heir-sk <hex>]` | after the inheritance period: deliver the funds to the heir. Automatic mode needs no key at all; manual mode needs the heir's own private key | — / heir key |
-| `migrate  --recovery <sheet> --to <kaspa:q…> [--dest <addr>]` | move the WHOLE vault anywhere instantly, no delay — both signatures are full owner authority by definition (vault-version upgrade, rotation of a leaked key, exit). `--dest` rescues a mid-withdrawal UTXO from the unvault address. Store the two keys apart: together they are instant full power | hot + alarm keys |
+| `status --recovery vault.json [--dest <addr>]` | show balance, vault age and timers; `--dest` checks a known in-flight withdrawal | none |
+| `initiate --recovery vault.json --to <kaspa:q…>` | start a delayed withdrawal; the destination becomes immutable | hot key |
+| `cancel --recovery vault.json --dest <kaspa:q…>` | cancel an in-flight withdrawal and return coins to the vault | alarm key |
+| `complete --recovery vault.json --dest <kaspa:q…>` | deliver a matured withdrawal to its fixed destination | none |
+| `checkin --recovery vault.json` | reset the inheritance timer | hot key |
+| `inherit --recovery vault.json [--heir-sk <hex>]` | claim after the inheritance period; automatic mode needs no key, manual mode needs the heir's key | none / heir key |
+| `migrate --recovery vault.json --to <kaspa:q…> [--dest <addr>]` | instantly move the entire vault; `--dest` targets an in-flight withdrawal UTXO | hot + alarm keys |
 
-Global flags:
+Useful flags:
 
-- `--node grpc://host:16110` — any Kaspa v2+ node with `--utxoindex`
-  (default: `grpc://node.kaspaforge.org:16110`, the Kaspa Forge public node).
-- `--dry-run` — build and sign the transaction, print its txid, **don't** broadcast.
-  Use it first if you're unsure.
+- `--dry-run` — build and sign the transaction but do not broadcast it. Use this first.
+- `--node grpc://host:16110` — use any Kaspa v2+ node started with `--utxoindex`.
 
-`--recovery` accepts the wizard's `.txt` sheet (English or Russian) or a JSON file:
-`{"network":"mainnet","delay":8640,"hot_sk":"…","alarm_pk":"…","heir_pk":"…","inherit_delay":259200,"auto_inherit":true}`.
+For `cancel`, `complete`, or an in-flight `migrate`, `--dest` is the withdrawal destination,
+not the vault address. It is shown in the Safe panel/alert; `status --dest ...` verifies it.
 
-`--dest` for `cancel`/`complete` is the address the withdrawal is going **to**: for your
-own withdrawal you know it; for a thief's it is shown in your Telegram alert and in the
-website's vault panel.
-
-## Verify the vault contract yourself
+Delete plaintext recovery files when finished:
 
 ```bash
-cd vaultctl && cargo run --release -- selftest
+rm -f profile.json vault.json
 ```
 
-Runs all contract paths (including attacks: early completion, wrong keys, wrong
-destination, premature inheritance, one-key migrate, two-input siphon) inside the real
-Kaspa node VM — 25 checks, executed with the consensus compute-budget limit.
+## Verify the Safe covenant
 
-## The escrow contract
+```bash
+cd vaultctl
+cargo run --release -- selftest
+```
 
-[`contracts/escrow.sil`](contracts/escrow.sil) is the covenant behind Kaspa Escrow. A deal's
-funds live in it while the deal is open. The contract admits a fixed set of paths, and in
-**every** one the money goes strictly to the **buyer**, the **seller**, or the **service fee
-address** — never anywhere else, including to the arbiter:
+The self-test executes all contract paths, including early completion, wrong-key, wrong-destination,
+premature-inheritance, one-key-migration and two-input-siphon attacks, in the Kaspa consensus VM.
 
-- `release` (buyer) / `refund` (seller) — the amicable outcomes.
-- `autoRelease` — no signature: once the dispute window passes with no dispute, funds
-  auto-release to the seller.
-- `dispute` (buyer) — freezes the optimistic auto-release and summons the arbiter.
-- `arbitrateToBuyer` / `arbitrateToSeller` / `arbitrateSplit` (arbiter) — a dispute verdict.
-  The arbiter can only pick **buyer**, **seller**, or a **split between the two** — theft is
-  not an expressible transaction.
-- `timeoutToBuyer` / `timeoutToSeller` — no signature: an emergency exit if the arbiter never
-  rules by the contract deadline, so the deal outlives the website.
+## Escrow recovery boundary
 
-Read the annotated source in [`contracts/escrow.sil`](contracts/escrow.sil); it is the same
-covenant compiled into every escrow address on-chain.
+[`contracts/escrow.sil`](contracts/escrow.sil) is the covenant behind Kaspa Escrow. Every allowed
+path sends funds only to the buyer, seller, their split, or the fixed service-fee address:
 
-## Trust model
+- `release` / `refund` — amicable outcomes;
+- `autoRelease` — seller payout after the dispute window when no dispute was opened;
+- `dispute` — freezes optimistic auto-release;
+- `arbitrateToBuyer`, `arbitrateToSeller`, `arbitrateSplit` — constrained arbiter outcomes;
+- `timeoutToBuyer`, `timeoutToSeller` — emergency exits after the arbiter deadline.
 
-- Keys are generated in your browser and printed on your recovery sheet. We never see them.
-- The vault address is a pure function of your parameters — `status` recomputes it and
-  warns if it doesn't match the sheet (most common cause: wrong inheritance mode).
-- Anything these contracts allow requires **your** keys (or, for the emergency/auto paths,
-  a hard-bound destination) — there is no admin path, for us or anyone.
+The encrypted Desk profile contains the deal key, chat key, service token and public escrow data;
+the offline decryptor exposes those fields. While the Kaspa Forge site is available, importing the
+`.age` file into Desk restores the deal UI. Without the site, you can still inspect the escrow
+address in any Kaspa explorer and audit the published covenant. A standalone party-side CLI for
+release/refund/dispute is **not part of this repository today**; the timeout paths remain enforced
+by the covenant, but this README does not claim an unpublished recovery tool.
 
-## Kaspa Forge web frontend & Android source
+## Trust and backup boundaries
 
-This repo also contains the full web frontend (`web/`) and a Tauri 2 Android wrapper (`app/`)
-for Kaspa Safe. No prebuilt Android package is currently distributed: the previous APK releases
-were retired because they no longer represent the current Kaspa Forge product. Do not install an
-old package from a cache or third-party mirror.
+- Keys are generated in the browser and encrypted in the Desk `.age` backup. Kaspa Forge does not
+  know the profile password.
+- Forge Sync stores an encrypted profile projection and deliberately strips every Safe `alarm_sk`.
+  Sync is not a replacement for a fresh full `.age` export or a separate alarm card.
+- A Safe address is a pure function of its parameters. `vaultctl status` recomputes it and reports
+  a mismatch rather than operating on a different vault.
+- Never send support your password, private keys, complete `.age` backup, `profile.json`, or
+  `vault.json`.
 
-- Build locally: `cd app && npm install && cp -r ../web web && npx tauri android init && npx tauri icon app-icon.png && npx tauri android build --apk`
+## Android source
+
+`app/` is a Tauri 2 wrapper around the public `web/` frontend. No prebuilt Android package is
+currently distributed: old APK releases were retired because they no longer represent the current
+product. Do not install an old package from a cache or third-party mirror.
+
+```bash
+cd app
+npm install
+cp -r ../web web
+npx tauri android init
+npx tauri icon app-icon.png
+npx tauri android build --apk
+```

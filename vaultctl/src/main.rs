@@ -1,9 +1,9 @@
 // vaultctl — Kaspa Safe utility.
 //
-// RECOVERY (primary purpose): offline access to the vault via the recovery sheet,
+// RECOVERY (primary purpose): offline access to the vault via an extracted vault JSON record,
 // against any Kaspa v2+ node with --utxoindex. No Kaspa Safe server required.
 // Commands: status | initiate | cancel | complete | checkin | inherit (see USAGE below).
-// --recovery accepts the recovery sheet as-is (RU/EN .txt from the wizard) or JSON.
+// --recovery accepts JSON from the decrypted Desk profile. Old RU/EN sheets remain parser-compatible.
 //
 // DEV MODE (spike, simnet 127.0.0.1:16510): keygen | mine | balance | create | send |
 // vault-status | selftest; initiate/cancel/complete WITHOUT --recovery work off .keys/keys.json.
@@ -141,14 +141,14 @@ async fn recovery_client(flags: &std::collections::HashMap<String, String>) -> G
 
 const USAGE: &str = "vaultctl — Kaspa Safe
 
-Recovery (via the recovery sheet, any v2+ node with --utxoindex):
-  status   --recovery <sheet.txt> [--dest <address>] [--node grpc://host:16110]
-  initiate --recovery <sheet.txt> --to <kaspa:q…>   [--dry-run]
-  cancel   --recovery <sheet.txt> --dest <kaspa:q…> [--dry-run]
-  complete --recovery <sheet.txt> --dest <kaspa:q…> [--dry-run]
-  checkin  --recovery <sheet.txt>                   [--dry-run]
-  inherit  --recovery <sheet.txt> [--heir-sk <hex>] [--dry-run]
-  migrate  --recovery <sheet.txt> --to <kaspa:q…> [--dest <addr>] [--dry-run]
+Recovery (via vault.json extracted from the decrypted Desk .age profile):
+  status   --recovery <vault.json> [--dest <address>] [--node grpc://host:16110]
+  initiate --recovery <vault.json> --to <kaspa:q…>   [--dry-run]
+  cancel   --recovery <vault.json> --dest <kaspa:q…> [--dry-run]
+  complete --recovery <vault.json> --dest <kaspa:q…> [--dry-run]
+  checkin  --recovery <vault.json>                   [--dry-run]
+  inherit  --recovery <vault.json> [--heir-sk <hex>] [--dry-run]
+  migrate  --recovery <vault.json> --to <kaspa:q…> [--dest <addr>] [--dry-run]
            (both keys = instant full-authority move: upgrade/rotation/exit;
             --dest = the withdrawal-in-progress destination, to rescue an UNVAULTING UTXO)
 
@@ -187,7 +187,7 @@ async fn main() {
             recovery::migrate(&recovery_client(&flags).await, &r, to, flags.get("dest").map(|s| s.as_str()), dry).await
         }
         ("status" | "checkin" | "inherit", None) => {
-            eprintln!("{cmd}: --recovery <recovery-sheet.txt or .json> required");
+            eprintln!("{cmd}: --recovery <vault.json> required (extract it from the decrypted Desk .age profile)");
             std::process::exit(2);
         }
         // ---- spike dev mode (simnet, .keys/keys.json) ----
