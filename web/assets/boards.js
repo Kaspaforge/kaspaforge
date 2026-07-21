@@ -37,14 +37,53 @@ async function renderCatalog() {
            <span class="hint">${t.post_count} posts</span></span></a>`).join('')}</div>`;
   } catch { box.innerHTML = '<p class="note alarm">Couldn\'t load this board right now.</p>'; }
 }
+async function fetchThread(t, { limit, offset } = {}) {
+  let url = `/api/safe/board/thread?t=${encodeURIComponent(t)}`;
+  if (limit !== undefined) url += `&limit=${limit}`;
+  if (offset !== undefined) url += `&offset=${offset}`;
+  const res = await fetch(url);
+  return res.json();
+}
 async function renderThread(t) {
   const box = $('thread'); $('catalog').style.display = 'none'; box.style.display = 'block';
-  const res = await fetch(`/api/safe/board/thread?t=${encodeURIComponent(t)}`);
-  const data = await res.json();
-  const head = data.thread;
-  box.innerHTML = `<p><a href="?board=${encodeURIComponent(boardOf())}" class="back-link">&larr; Back to /${esc(boardOf())}/</a></p>
-    <h1>${head && !head.op_hidden ? esc(head.subject || '(no subject)') : 'Hidden thread'}</h1>
-    ${data.posts.map(renderPost).join('')}`;
+  try {
+    const data = await fetchThread(t, {});
+    const head = data.thread;
+    const total = head ? head.post_count : 0;
+    const skipped = Math.max(0, total - data.posts.length);
+    // default view = OP + server-side tail; the notice offers the offset-paged full thread
+    const notice = skipped > 0
+      ? `<p class="hint skipped-note">Skipped ${skipped} posts — <a href="#" id="load-full">show full thread</a></p>`
+      : '';
+    const [op, ...tail] = data.posts;
+    box.innerHTML = `<p><a href="?board=${encodeURIComponent(boardOf())}" class="back-link">&larr; Back to /${esc(boardOf())}/</a></p>
+      <h1>${head && !head.op_hidden ? esc(head.subject || '(no subject)') : 'Hidden thread'}</h1>
+      ${op ? renderPost(op) : ''}${notice}<div id="tail">${tail.map(renderPost).join('')}</div>`;
+    const link = document.getElementById('load-full');
+    if (link) link.addEventListener('click', async (e) => {
+      e.preventDefault();
+      if (link.dataset.busy) return;
+      link.dataset.busy = '1';
+      link.textContent = 'loading…';
+      const page = 200; // matches the server's default cap; server clamps anyway
+      try {
+        let all = [];
+        let offset = 0;
+        while (offset < total) {
+          const chunk = await fetchThread(t, { limit: page, offset });
+          if (!chunk.posts.length) break; // defensive: server said fewer posts than head claimed
+          all = all.concat(chunk.posts);
+          offset += chunk.posts.length;   // advance by what actually came back — server may clamp below `page`
+        }
+        document.querySelector('.skipped-note')?.remove();
+        document.getElementById('tail').innerHTML = all.slice(1).map(renderPost).join('');
+      } catch {
+        link.textContent = 'failed — retry';
+        delete link.dataset.busy;
+        return;
+      }
+    });
+  } catch { box.innerHTML = '<p class="note alarm">Couldn\'t load this thread right now.</p>'; }
 }
 const t = new URLSearchParams(location.search).get('t');
 if (t) renderThread(t); else renderCatalog();

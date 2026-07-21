@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Canonical sitemap for Kaspa Forge (kaspaforge.org). Indexable pages only:
-     umbrella landing, the three service landings, market storefront, privacy and recovery guides.
+     umbrella landing, the four service landings, market storefront, privacy and recovery guides.
      App pages (desk/create/manage/escrow/deal/listing-new) are excluded: they are key-gated
      interfaces, not content; manage.html is additionally disallowed in robots.txt. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
@@ -227,6 +227,22 @@
     <loc>https://kaspaforge.org/ru/docs/escrow.html</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/docs/escrow.html"/>
     <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/docs/escrow.html"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/docs/deposit.html</loc>
+    <lastmod>2026-07-21</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/docs/deposit.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/docs/deposit.html"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/ru/docs/deposit.html</loc>
+    <lastmod>2026-07-21</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/docs/deposit.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/docs/deposit.html"/>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>

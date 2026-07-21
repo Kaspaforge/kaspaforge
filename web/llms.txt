@@ -26,12 +26,13 @@ Key facts:
 
 ## Documentation (how it works & security)
 
-- [Docs overview](https://kaspaforge.org/docs/): the covenant idea, the four pieces, the security model in five verifiable claims, fees and current product boundaries
+- [Docs overview](https://kaspaforge.org/docs/): the covenant idea, four non-custodial services plus Desk and key security, five verifiable security claims, fees and current product boundaries
 - [The Desk & the master key file](https://kaspaforge.org/docs/desk.html): the age-encrypted in-browser profile, master-seed derivation (one backup covers future vaults/deals — except alarm keys, which live on alarm cards by design), restore on any device, offline decryptor, what the server can and cannot see
 - [How Kaspa Safe works](https://kaspaforge.org/docs/safe.html): the vault covenant's seven spend paths (initiate/cancel/complete/check-in/inherit×2/migrate), the three keys and the alarm card, funding mechanics, inheritance modes, costs, full security model
 - [How Kaspa Escrow works](https://kaspaforge.org/docs/escrow.html): the escrow covenant's spend paths and why no path pays the arbiter, deal lifecycle, dispute windows, fees, the Kasia encrypted chat, AI mediator + human arbiter, timeout guarantees
+- [How Kaspa Deposit works](https://kaspaforge.org/docs/deposit.html): depositor and holder roles, 7–730 day terms, claim windows, auto-return, fees, evidence, dispute settlement and emergency timeout guarantees
 - [How the Kaspa Marketplace works](https://kaspaforge.org/docs/market.html): Buy button → escrow deal, listing types and moderation, shipping geography, seller mechanics, security model
-- Russian versions: [/ru/docs/](https://kaspaforge.org/ru/docs/), [desk](https://kaspaforge.org/ru/docs/desk.html), [safe](https://kaspaforge.org/ru/docs/safe.html), [escrow](https://kaspaforge.org/ru/docs/escrow.html), [market](https://kaspaforge.org/ru/docs/market.html)
+- Russian versions: [/ru/docs/](https://kaspaforge.org/ru/docs/), [desk](https://kaspaforge.org/ru/docs/desk.html), [safe](https://kaspaforge.org/ru/docs/safe.html), [escrow](https://kaspaforge.org/ru/docs/escrow.html), [deposit](https://kaspaforge.org/ru/docs/deposit.html), [market](https://kaspaforge.org/ru/docs/market.html)
 
 ## Guides & policies
 
