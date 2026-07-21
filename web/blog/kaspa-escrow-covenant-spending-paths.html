@@ -102,7 +102,7 @@
       "description": "Every spending path in the kaspa escrow contract pays only the buyer or seller — never the platform, not the arbiter. Here is how the on-chain covenant works.",
       "url": "https://kaspaforge.org/blog/kaspa-escrow-covenant-spending-paths.html",
       "datePublished": "2026-07-12",
-      "dateModified": "2026-07-12",
+      "dateModified": "2026-07-20",
       "inLanguage": "en",
       "image": "https://kaspaforge.org/assets/blog/kaspa-escrow-covenant-spending-paths.png",
       "author": {
@@ -321,7 +321,7 @@ require(out.scriptPublicKey == buyer_spk  ||
   <h2>Trade-offs and Honest Limitations</h2>
   <p>Honest accounting of what this design does not solve and where it constrains users:</p>
   <ul>
-    <li><b>Beta caps.</b> Current limits are 50–10,000 KAS per deal. Below 50 KAS, the dispute-fee floor (minimum 5 KAS) would consume more than 10 % of the escrow. Above 10,000 KAS, we want more mainnet mileage before opening the ceiling.</li>
+    <li><b>Economic floor, no platform ceiling.</b> The minimum is 50 KAS because the dispute-fee floor (minimum 5 KAS) would consume more than 10% of a smaller escrow. There is no platform upper cap; exact-sompi validation remains in place so browser signing cannot silently round an amount.</li>
   </ul>
   <ul>
     <li><b>Arbiter dependency.</b> If the arbiter key is lost, disputed deals can only resolve through the timeout path. The timeout destination is fixed at construction — you cannot change your mind about who gets the fallback after the fact. This is a deliberate trade-off: a recoverable arbiter key would introduce a different attack surface.</li>

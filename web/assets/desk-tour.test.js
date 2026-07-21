@@ -40,9 +40,9 @@ test('settings step explains Forge Sync without promising separate-key transfer'
   const en = deskTourPlan('en').steps.find((step) => step.view === 'settings');
   const ru = deskTourPlan('ru').steps.find((step) => step.view === 'settings');
   assert.match(en.text, /Forge Sync/i);
-  assert.match(en.text, /alarm, heir, and arbiter keys stay/i);
+  assert.match(en.text, /Safe alarm keys are never synced/i);
   assert.match(ru.text, /Forge Sync/i);
-  assert.match(ru.text, /alarm, heir и arbiter keys остаются/i);
+  assert.match(ru.text, /тревожные ключи сейфов не синхронизирует/i);
 });
 
 test('unknown language falls back to English', () => {

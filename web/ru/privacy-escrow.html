@@ -16,7 +16,7 @@
 <meta name="theme-color" content="#0E1116">
 <link rel="apple-touch-icon" href="/assets/icons-escrow/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/safe.css?v=14">
-<script src="/assets/nav.js?v=7" defer></script>
+<script src="/assets/nav.js?v=8" defer></script>
 </head>
 <body>
 <div class="wrap">
@@ -89,7 +89,7 @@
 
   <div class="plate">
     <h2 style="font-size:20px">Споры: раскрытие и что видит арбитр</h2>
-    <p>До спора сервер держит только шифртекст, и переписку никто прочитать не может. В споре для развязки нужны доказательства, поэтому сторона может <b>осознанно раскрыть свой ключ чата</b> (отправляется на <code>/dispute/reveal</code>) — это единственный случай, когда ключ покидает устройство, и ключ чата не может двигать средства. При раскрытии сервер расшифровывает тред этой стороны и хранит расшифровку <b>только для арбитра</b>, вместе с медиа, которые арбитр расшифровывает ключами внутри раскрытых сообщений. ИИ-медиатор читает это, чтобы предложить <b>необязывающий</b> исход; человек-арбитр — только если дело эскалируется. <b>Расшифрованный тред стирается при закрытии сделки</b>, зашифрованные медиа-блобы удаляются по таймеру ретеншна после закрытия. Ончейн-шифртекст остаётся (это защищённая от подделки запись), но без раскрытого ключа он нечитаем.</p>
+    <p>До спора сервер держит только шифртекст, и переписку никто прочитать не может. В споре для развязки нужны доказательства, поэтому сторона может <b>осознанно раскрыть свой ключ чата</b> (отправляется на <code>/dispute/reveal</code>) — это единственный случай, когда ключ покидает устройство, и ключ чата не может двигать средства. При раскрытии сервер расшифровывает тред этой стороны и хранит расшифровку <b>только для арбитра</b>, вместе с медиа, которые арбитр расшифровывает ключами внутри раскрытых сообщений. ИИ-медиатор читает это, чтобы предложить <b>необязывающий</b> исход; человек-арбитр — только если дело эскалируется. <b>Расшифрованный тред стирается при закрытии сделки</b>, зашифрованные медиа-блобы удаляются через 24 часа после закрытия сделки. Ончейн-шифртекст остаётся (это защищённая от подделки запись), но без раскрытого ключа он нечитаем.</p>
   </div>
 
   <div class="plate">
@@ -104,7 +104,7 @@
 
   <div class="plate">
     <h2 style="font-size:20px">Хранение и удаление</h2>
-    <p>Записи сделки существуют, чтобы сделка работала и отслеживалась. Расшифрованный тред стирается при закрытии; медиа-блобы удаляются по таймеру ретеншна после закрытия. Чтобы удалить оставшиеся записи сделки (включая Telegram-привязку), напишите на <a href="mailto:kaspa@officeforge.co">kaspa@officeforge.co</a>, указав сделку. Ончейн-данные удалить нельзя — такова природа блокчейна.</p>
+    <p>Записи сделки существуют, чтобы сделка работала и отслеживалась. Расшифрованный тред стирается при закрытии; медиа-блобы удаляются через 24 часа после закрытия — сохраните всё нужное, включая полученную покупку, до этого момента. Чтобы удалить оставшиеся записи сделки (включая Telegram-привязку), напишите на <a href="mailto:kaspa@officeforge.co">kaspa@officeforge.co</a>, указав сделку. Ончейн-данные удалить нельзя — такова природа блокчейна.</p>
   </div>
 
   <div class="plate">
@@ -113,9 +113,8 @@
   </div>
 </div>
 
-<footer><div class="row wrap"><a class="foot-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="OfficeForge"><img src="/assets/logo.png" alt="OfficeForge"></a><span>Kaspa Гарант · некостодиальная бета · <a href="https://officeforge.co">OfficeForge</a> · связь: kaspa@officeforge.co · <a href="/ru/privacy-escrow.html">Приватность</a> · <a href="/ru/terms.html">Условия</a> &middot; <a href="/ru/security.html">Безопасность</a></span></div></footer>
+<footer><div class="row wrap"><a class="foot-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="OfficeForge"><img src="/assets/logo.png" alt="OfficeForge"></a><span>Kaspa Гарант · некостодиальный · <a href="https://officeforge.co">OfficeForge</a> · связь: kaspa@officeforge.co · <a href="/ru/privacy-escrow.html">Приватность</a> · <a href="/ru/terms.html">Условия</a> &middot; <a href="/ru/security.html">Безопасность</a></span></div></footer>
 </div>
 <script src="/assets/kaspa-widget.js?v=4" defer></script>
-<script>if("serviceWorker" in navigator&&/(^|\.)kaspaforge\.org$|(^|\.)officeforge\.co$/.test(location.hostname))navigator.serviceWorker.register("/sw-escrow.js");</script>
 </body>
 </html>

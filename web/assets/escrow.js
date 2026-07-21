@@ -116,10 +116,10 @@ const DICT = {
     brand: 'Kaspa <b>Escrow</b>',
     role_buyer: "I'm the buyer", role_seller: "I'm the seller",
     noun_buyer: 'buyer', noun_seller: 'seller',
-    tpl_goods: 'Physical goods', tpl_otc: 'OTC / crypto trade', tpl_service: 'Service / freelance',
+    tpl_goods: 'Physical goods', tpl_otc: 'OTC / crypto trade', tpl_service: 'Service / freelance', tpl_deposit: 'Deposit',
     tpl_pick_label: 'Deal template (optional)', tpl_custom_opt: '— Custom (no template) —',
-    beta_cap: 'Beta limits: 50 to 10,000 KAS per deal.',
-    amount_err: 'Enter an amount between 50 and 10,000 KAS.',
+    beta_cap: 'Minimum 50 KAS per deal (no upper limit).',
+    amount_err: 'Enter an amount of at least 50 KAS.',
     fee_arb_share: (p) => `Heads up: if this goes to arbitration, the fee is about ${p}% of the amount — arbitration is costly on small deals. It only applies if a dispute reaches a verdict.`,
     creating: 'creating…', gen_invite: 'Generate invite link',
     fee_line: (r, dp) => `Service fee: <b>${r}</b> on release/refund, <b>${dp}</b> if it goes to arbitration.`,
@@ -230,7 +230,7 @@ const DICT = {
     anchor_title: 'On-chain anchor of this message',
     decrypt_err: '(cannot decrypt this message)',
     // media
-    m_photo: 'Photo', m_video: 'Video', m_doc: 'PDF',
+    m_photo: 'Photo', m_video: 'Video', m_doc: 'PDF', m_file: 'File',
     m_load: (s) => `Load ${s}`,
     m_open: 'Open', m_save: 'Save',
     m_encrypting: 'encrypting…',
@@ -240,10 +240,11 @@ const DICT = {
     m_sent_meta: 'encrypted · hash anchored on-chain',
     m_hash_ok: 'hash matches the on-chain anchor',
     m_hash_fail: 'Integrity check FAILED — the file does not match the on-chain hash. Not displaying it.',
-    m_too_big_img: 'Image is too big — beta limit is 10 MB.',
-    m_too_big_vid: 'Video is too big — beta limit is 50 MB.',
-    m_too_big_doc: 'PDF is too big — beta limit is 20 MB.',
-    m_bad_type: 'Only images (jpg / png / webp / gif), video (mp4 / webm) and PDF documents are supported.',
+    m_too_big_img: 'Image is too big — the limit is 10 MB.',
+    m_too_big_vid: 'Video is too big — the limit is 50 MB.',
+    m_too_big_doc: 'PDF is too big — the limit is 20 MB.',
+    m_too_big_file: 'File is too big — the limit is 50 MB.',
+    m_bad_type: 'Supported: images (jpg / png / webp / gif), video (mp4 / webm), PDF, archives (zip / 7z / gz) and audio (mp3 / wav / ogg / flac).',
     // tracking number (goods deals)
     track_btn_title: 'Add a tracking number',
     track_head: 'Tracking number',
@@ -385,10 +386,10 @@ const DICT = {
     brand: 'Kaspa <b>Гарант</b>',
     role_buyer: 'Я покупатель', role_seller: 'Я продавец',
     noun_buyer: 'покупатель', noun_seller: 'продавец',
-    tpl_goods: 'Товар', tpl_otc: 'OTC / обмен крипты', tpl_service: 'Услуга / фриланс',
+    tpl_goods: 'Товар', tpl_otc: 'OTC / обмен крипты', tpl_service: 'Услуга / фриланс', tpl_deposit: 'Залог',
     tpl_pick_label: 'Шаблон сделки (необязательно)', tpl_custom_opt: '— Своя (без шаблона) —',
-    beta_cap: 'Бета-лимиты: от 50 до 10 000 KAS на сделку.',
-    amount_err: 'Введите сумму от 50 до 10 000 KAS.',
+    beta_cap: 'Минимум 50 KAS на сделку (без верхнего лимита).',
+    amount_err: 'Введите сумму не меньше 50 KAS.',
     fee_arb_share: (p) => `Обратите внимание: если дойдёт до арбитра, его комиссия — около ${p}% суммы: на мелких сделках арбитраж дорог. Списывается только если спор дошёл до вердикта.`,
     creating: 'создаём…', gen_invite: 'Создать ссылку-приглашение',
     fee_line: (r, dp) => `Комиссия сервиса: <b>${r}</b> при релизе/возврате, <b>${dp}</b> при арбитраже.`,
@@ -494,7 +495,7 @@ const DICT = {
     chat_collapse: 'Свернуть ▾',
     anchor_title: 'Ончейн-якорь этого сообщения',
     decrypt_err: '(не удалось расшифровать сообщение)',
-    m_photo: 'Фото', m_video: 'Видео', m_doc: 'PDF',
+    m_photo: 'Фото', m_video: 'Видео', m_doc: 'PDF', m_file: 'Файл',
     m_load: (s) => `Загрузить ${s}`,
     m_open: 'Открыть', m_save: 'Сохранить',
     m_encrypting: 'шифруем…',
@@ -504,10 +505,11 @@ const DICT = {
     m_sent_meta: 'зашифровано · хеш заякорен ончейн',
     m_hash_ok: 'хеш совпал с ончейн-якорем',
     m_hash_fail: 'Проверка целостности НЕ пройдена — файл не совпадает с ончейн-хешем. Не показываем.',
-    m_too_big_img: 'Изображение слишком большое — бета-лимит 10 МБ.',
-    m_too_big_vid: 'Видео слишком большое — бета-лимит 50 МБ.',
-    m_too_big_doc: 'PDF слишком большой — бета-лимит 20 МБ.',
-    m_bad_type: 'Поддерживаются изображения (jpg / png / webp / gif), видео (mp4 / webm) и PDF-документы.',
+    m_too_big_img: 'Изображение слишком большое — лимит 10 МБ.',
+    m_too_big_vid: 'Видео слишком большое — лимит 50 МБ.',
+    m_too_big_doc: 'PDF слишком большой — лимит 20 МБ.',
+    m_too_big_file: 'Файл слишком большой — лимит 50 МБ.',
+    m_bad_type: 'Поддерживаются: изображения (jpg / png / webp / gif), видео (mp4 / webm), PDF, архивы (zip / 7z / gz) и аудио (mp3 / wav / ogg / flac).',
     // tracking number (goods deals)
     track_btn_title: 'Добавить трек-номер',
     track_head: 'Трек-номер',
@@ -665,7 +667,7 @@ export function qrInto(el, data) {
 }
 export function showErr(el, e) { el.textContent = '⚠ ' + (e.message || e); el.style.display = 'block'; }
 export function hideErr(el) { el.style.display = 'none'; }
-export function templateLabel(t) { return { goods: L('tpl_goods'), otc: L('tpl_otc'), service: L('tpl_service') }[t] || t; }
+export function templateLabel(t) { return { goods: L('tpl_goods'), otc: L('tpl_otc'), service: L('tpl_service'), deposit: L('tpl_deposit') }[t] || t; }
 export function daaHuman(daa) {
   const h = daa / 36000;
   if (h < 48) return `${Math.round(h)}h`;
@@ -915,12 +917,19 @@ export function resetChatPoll() { lastChatMsgId = 0; }
 
 export function mediaSupported() { return typeof core.media_key === 'function'; }
 
-export const MEDIA_IMG_MAX = 10 * 1024 * 1024;   // client-side limit: image ≤ 10 MB (beta)
-export const MEDIA_VID_MAX = 50 * 1024 * 1024;   // video ≤ 50 MB (beta); the server enforces the overall cap
-export const MEDIA_DOC_MAX = 20 * 1024 * 1024;   // PDF document ≤ 20 MB (beta)
+export const MEDIA_IMG_MAX = 10 * 1024 * 1024;   // client-side limit: image ≤ 10 MB
+export const MEDIA_VID_MAX = 50 * 1024 * 1024;   // video ≤ 50 MB; the server enforces the overall cap
+export const MEDIA_DOC_MAX = 20 * 1024 * 1024;   // PDF document ≤ 20 MB
+export const MEDIA_FILE_MAX = 50 * 1024 * 1024;  // archive / audio deliverable ≤ 50 MB
 const MIME_IMG = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 const MIME_VID = ['video/mp4', 'video/webm'];
 const MIME_DOC = ['application/pdf'];
+// Digital-item deliverables: sendable, never previewable. Deliberately NOT in mediaKindOf — an
+// incoming archive keeps arriving with kind null, which the renderer turns into an
+// octet-stream download. Widening delivery must not widen what reaches an object URL.
+const MIME_FILE = ['application/zip', 'application/x-zip-compressed', 'application/x-7z-compressed',
+  'application/gzip', 'application/x-gzip',
+  'audio/mpeg', 'audio/wav', 'audio/x-wav', 'audio/ogg', 'audio/flac'];
 
 /** 'img' | 'vid' | 'doc' | null by mime. */
 export function mediaKindOf(mime) {
@@ -930,13 +939,19 @@ export function mediaKindOf(mime) {
   return null;
 }
 
+/** What the SENDER may attach: 'img' | 'vid' | 'doc' | 'file' | null. */
+export function sendKindOf(mime) {
+  return mediaKindOf(mime) ?? (MIME_FILE.includes(mime) ? 'file' : null);
+}
+
 /** Validate a file BEFORE upload: type + size limit. Throws a localized error. */
 export function checkMediaFile(file) {
-  const kind = mediaKindOf(file.type);
+  const kind = sendKindOf(file.type);
   if (!kind) throw new Error(L('m_bad_type'));
   if (kind === 'img' && file.size > MEDIA_IMG_MAX) throw new Error(L('m_too_big_img'));
   if (kind === 'vid' && file.size > MEDIA_VID_MAX) throw new Error(L('m_too_big_vid'));
   if (kind === 'doc' && file.size > MEDIA_DOC_MAX) throw new Error(L('m_too_big_doc'));
+  if (kind === 'file' && file.size > MEDIA_FILE_MAX) throw new Error(L('m_too_big_file'));
   return kind;
 }
 

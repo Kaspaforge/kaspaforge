@@ -52,7 +52,7 @@ a.tb-chip:hover{color:var(--ingot);border-color:var(--ash2)}
 .ov-hero .addr{margin-top:auto}
 .ov-actions{gap:10px!important;margin-top:18px!important;justify-content:flex-start!important}
 .ov-actions .btn{min-width:150px;justify-content:center;min-height:48px}
-.ov-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:16px}
+.ov-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-top:16px}
 .ov-card{display:flex;flex-direction:column;gap:10px;min-height:214px;padding:22px!important}
 .oc-head{display:flex;align-items:center;gap:9px;color:var(--ingot);text-decoration:none;font-size:15px}
 .oc-head svg{width:22px;height:22px;flex:none;color:var(--kaspa)}
@@ -180,6 +180,10 @@ a.tb-chip:hover{color:var(--ingot);border-color:var(--ash2)}
 @media (max-width:1024px){#app{grid-template-columns:196px minmax(0,1fr)}}
 @media (min-width:768px) and (max-width:1100px){
   #topbar>.tb-chip:first-of-type{display:none}
+  .ov-cards{gap:10px}
+  .ov-card{padding:16px!important}
+  .oc-head{gap:7px;font-size:14px}
+  .oc-empty{font-size:12.5px}
 }
 @media (min-width:768px) and (max-width:860px){
   #d-lock{width:44px;padding:0;justify-content:center}
@@ -242,7 +246,7 @@ a.tb-chip:hover{color:var(--ingot);border-color:var(--ash2)}
   .ov-hero .oh-bal > span:first-child{font-size:42px}
   .ov-actions{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));width:100%}
   .ov-actions .btn{min-width:0;min-height:78px;padding:10px 6px;line-height:1.25;text-align:center}
-  .ov-cards{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;overflow:visible}
+  .ov-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;overflow:visible}
   .ov-card{min-height:190px;padding:14px 10px!important;text-align:center}
   .oc-head{flex-direction:column;gap:5px}.oc-n{margin-left:0;font-size:18px}.oc-sum{display:none}
   .oc-empty{font-size:0;gap:7px}.oc-empty p{display:none}.oc-empty a{font-size:11px;line-height:1.25;padding:6px 4px}

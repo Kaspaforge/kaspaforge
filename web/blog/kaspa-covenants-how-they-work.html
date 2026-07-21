@@ -102,7 +102,7 @@
       "description": "Learn how Kaspa covenants (Toccata) enforce programmable spending rules on-chain. See how Kaspa Safe and Escrow build vaults and P2P deals on them.",
       "url": "https://kaspaforge.org/blog/kaspa-covenants-how-they-work.html",
       "datePublished": "2026-07-11",
-      "dateModified": "2026-07-11",
+      "dateModified": "2026-07-20",
       "inLanguage": "en",
       "image": "https://kaspaforge.org/assets/blog/kaspa-covenants-how-they-work.png",
       "author": {
@@ -292,7 +292,7 @@
     <li><b>State size constraints.</b> Each covenant UTXO carries a small state payload (mode flags, destination bytes, pubkeys). Complex metadata lives off-chain. This keeps validation lean but limits what the contract can "remember."</li>
   </ul>
   <ul>
-    <li><b>Beta product limits.</b> Kaspa Escrow caps deal sizes at 50–10,000 KAS during its beta period, and the AI mediator verdict is non-binding — it only executes if a party signs it or the human arbiter intervenes. These are intentional guardrails.</li>
+    <li><b>Product boundaries.</b> Kaspa Escrow accepts deals from 50 KAS and has no platform upper cap. The AI mediator verdict remains non-binding — it only executes if a party signs it or the human arbiter intervenes. The contracts are open source but have not yet had an external audit.</li>
   </ul>
   <ul>
     <li><b>No general-purpose computation.</b> Covenants are not Turing-complete smart contracts. There is no persistent storage across UTXOs, no re-entrancy, no inter-contract calls. Each UTXO is an isolated state machine. This limits expressiveness but eliminates entire classes of exploits that plague account-based systems.</li>

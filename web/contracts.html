@@ -29,7 +29,7 @@
 <meta name="theme-color" content="#0E1116">
 <link rel="manifest" href="/manifest-escrow.json">
 <link rel="apple-touch-icon" href="/assets/icons-escrow/apple-touch-icon.png">
-<script src="/assets/nav.js?v=7" defer></script>
+<script src="/assets/nav.js?v=8" defer></script>
 <link rel="stylesheet" href="/assets/safe.css?v=14">
 <style>
 /* Forge Contracts — catalog grid (page-scoped; safe.css is shared by 15+ pages, do not touch it).
@@ -76,6 +76,7 @@
   <nav>
     <a href="/escrow-index.html">How it works</a>
     <a href="/market.html">Market</a>
+    <a href="/deposit-index.html">Deposit</a>
     <a class="cta" href="/escrow.html">Create a deal</a>
   </nav>
 </header>
@@ -121,6 +122,5 @@ try {
   grid.innerHTML = '<p>Could not load the catalog. <a href="/escrow.html">Create a custom deal.</a></p>';
 }
 </script>
-<script>if("serviceWorker" in navigator&&/(^|\.)kaspaforge\.org$|(^|\.)officeforge\.co$/.test(location.hostname))navigator.serviceWorker.register("/sw-escrow.js");</script>
 </body>
 </html>

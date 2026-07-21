@@ -24,7 +24,7 @@
 <meta name="theme-color" content="#0E1116">
 <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/safe.css?v=14">
-<script src="/assets/nav.js?v=7" defer></script>
+<script src="/assets/nav.js?v=8" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"How Kaspa Escrow works — non-custodial P2P escrow on Kaspa","description":"The escrow covenant's spend paths, the deal lifecycle, fees, the end-to-end encrypted on-chain deal chat, AI mediator, human arbiter and timeout guarantees.","inLanguage":"en","url":"https://kaspaforge.org/docs/escrow.html","image":"https://kaspaforge.org/assets/og-escrow.png","dateModified":"2026-07-10","isPartOf":{"@type":"WebSite","name":"Kaspa Forge","url":"https://kaspaforge.org/"},"publisher":{"@type":"Organization","name":"OfficeForge","url":"https://officeforge.co"}}
 </script>
@@ -78,7 +78,7 @@
     <li><b>Settle.</b> Goods delivered → buyer presses <b>Release</b>. Deal fell through → seller presses <b>Refund</b>. Problem → buyer opens a <b>dispute</b> during the window. Nobody does anything → <b>auto-release</b> to the seller when the window closes.</li>
   </ol>
   <div style="margin-top:14px">
-    <div class="kv"><span class="k" style="min-width:210px">Deal size</span><span class="v" style="text-align:left">50 – 10&nbsp;000 KAS (open beta; below 50 KAS the arbitration minimum would eat too large a share).</span></div>
+    <div class="kv"><span class="k" style="min-width:210px">Deal size</span><span class="v" style="text-align:left">from 50 KAS (below 50 KAS the arbitration minimum would eat too large a share).</span></div>
     <div class="kv"><span class="k" style="min-width:210px">Dispute window</span><span class="v" style="text-align:left">Your <b>budget for delivery + inspection</b>: the timer starts the moment the escrow is funded, and until it runs out the buyer can open a dispute — that is the normal buyer protection, not an emergency. Chosen by the deal's creator from eight presets: 24&nbsp;h / 48&nbsp;h / 72&nbsp;h / 96&nbsp;h / 120&nbsp;h / 7&nbsp;days / <b>14&nbsp;days (domestic shipping)</b> / <b>30&nbsp;days (international shipping)</b> — shown to the other side <i>before</i> joining. Defaults by deal type: goods <b>7&nbsp;days</b> (a physical parcel needs time to arrive), OTC 24&nbsp;h, service 120&nbsp;h. Received the goods with a dispute already open? No problem — a normal <b>Release</b> closes it. Arbitrary values are deliberately impossible (no "micro-window" tricks that would strip the buyer of a real chance to dispute).</span></div>
     <div class="kv"><span class="k" style="min-width:210px">Fees</span><span class="v" style="text-align:left">Creating a deal — free. Release / refund / mutual — <b>0.5%</b> (min 1.2 KAS, which also pays for the on-chain chat). Arbitration, only if a dispute happens — <b>2%</b> (min 5 KAS). Timeout — no service fee. The fee is enforced by the contract itself and visible before you confirm. Telegram guarantors charge 3–10% <i>and</i> hold your money; we charge 0.5% and can't.</span></div>
   </div>
@@ -117,7 +117,7 @@
   </ol>
 
   <div class="note" style="margin-top:20px">
-    <b>Beta limits.</b> The contract passed native VM equivalence tests and an adversarial on-chain cycle (52/52 self-tests). Deals are capped at 50–10&nbsp;000 KAS. One thing no escrow can see is the off-chain world — whether the parcel actually arrived. That's precisely why the dispute rail exists, and why the tamper-proof chat is where your deal should live.
+    <b>Honest boundaries.</b> The contract passed native VM equivalence tests and an adversarial on-chain cycle (52/52 self-tests). Deals start at 50 KAS (no upper limit). One thing no escrow can see is the off-chain world — whether the parcel actually arrived. That's precisely why the dispute rail exists, and why the tamper-proof chat is where your deal should live.
   </div>
 
   <p class="hint" style="margin-top:24px">See also: <a href="/escrow-index.html">Kaspa Escrow overview</a> · <a href="/recover-escrow.html">deal recovery</a> · <a href="/docs/market.html">the Marketplace</a> — listings with this escrow built in</p>

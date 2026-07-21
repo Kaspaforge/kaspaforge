@@ -5,8 +5,8 @@ import { readFileSync } from 'node:fs';
 const page = (name) => readFileSync(new URL(name, import.meta.url), 'utf8');
 
 for (const [lang, html, desk, create, heading] of [
-  ['EN', page('../manage.html'), '/desk.html#settings', '/create.html', 'No vaults in this profile'],
-  ['RU', page('../ru/manage.html'), '/ru/desk.html#settings', '/ru/create.html', 'В этом профиле нет сейфов'],
+  ['EN', page('../manage.html'), '/desk#settings', '/create.html', 'No vaults in this profile'],
+  ['RU', page('../ru/manage.html'), '/desk#settings', '/ru/create.html', 'В этом профиле нет сейфов'],
 ]) {
   test(`${lang} manage empty state uses the unified Desk profile`, () => {
     assert.match(html, new RegExp(heading));

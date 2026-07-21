@@ -18,7 +18,7 @@
 <meta name="apple-mobile-web-app-title" content="Kaspa Forge">
 <link rel="stylesheet" href="/assets/safe.css?v=14">
 <link rel="stylesheet" href="/assets/desk.css?v=12">
-<script src="/assets/nav.js?v=7" defer></script>
+<script src="/assets/nav.js?v=8" defer></script>
 <script src="/assets/netstat.js?v=1" defer></script>
 <script src="/assets/qrcode.min.js"></script>
 <style>
@@ -87,6 +87,10 @@ label.btn{line-height:normal;margin:0}
 </style>
 </head>
 <body>
+<div id="legacy-note" style="background:#3a2c12;border-bottom:1px solid #6b5320;color:#e8d9b0;padding:10px 14px;font:500 13px/1.45 var(--sans,system-ui);text-align:center">
+  You are on the <b>previous Desk</b>. The current one lives at <a href="/desk" style="color:var(--kaspa,#00c1af)">kaspaforge.org/desk</a> —
+  same browser, same encrypted profile, nothing to move. This page stays available while the new Desk settles in.
+</div>
 <div id="app" style="display:none">
   <aside id="side-nav" aria-label="Desk sections"></aside>
   <main class="desk-main">
@@ -210,7 +214,7 @@ label.btn{line-height:normal;margin:0}
       </section>
       <section class="plate">
         <h3>Forge Sync <span class="tb-chip">Beta</span></h3>
-        <p class="hint">End-to-end encrypted mirror for devices holding copies of the same profile — including copies made before Forge Sync existed. The server cannot read it. Alarm, heir and arbiter keys stay local and are omitted automatically.</p>
+        <p class="hint">End-to-end encrypted mirror for devices holding copies of the same profile — including copies made before Forge Sync existed. The server cannot read it. Safe alarm keys are never synced; keep a current .age backup or alarm card for withdrawal cancellation on another device.</p>
         <p class="hint"><b id="st-sync-status">Off</b> · Manual sync only. Your offline backup is still required.</p>
         <button id="st-sync-btn" class="btn btn-ghost">Enable sync</button>
       </section>
@@ -256,7 +260,7 @@ import { walletBalance, walletPortfolioBalance, walletPlan, syncWalletAddresses,
 // cross-origin API_ORIGIN (see Task 5). kas is NOT imported from here — app.js already provides a
 // binding with that name (a duplicate 'kas' declaration in the module would be a SyntaxError); the
 // same kas serves both tabs.
-import { api, forgottenDealIds, unforgetDeal } from '/assets/escrow.js?v=40';
+import { api, forgottenDealIds, unforgetDeal } from '/assets/escrow.js?v=41';
 import { alertBox, confirmBox, promptPassword } from '/assets/dialog.js';
 // promptText — a new dialog.js export: namespace guard in case an old module is cached
 import * as dialogNs from '/assets/dialog.js';
@@ -483,7 +487,7 @@ async function renderSecurityHealth() {
     : syncVersion !== null ? syncCurrent ? `enabled · v${syncVersion}` : `v${syncVersion} · changes`
       : 'not synced';
   const syncDetails = syncEnabled
-    ? '<details class="sh-details"><summary>Sync &amp; backup details</summary><p>Forge Sync does not replace .age. Alarm, heir and arbiter keys stay on this device.</p></details>'
+    ? '<details class="sh-details"><summary>Sync &amp; backup details</summary><p>Forge Sync does not replace your encrypted .age backup. Safe alarm keys are never synced. To cancel a withdrawal on another device, import a current .age backup from the device holding the alarm key, or use its alarm card.</p></details>'
     : '';
   box.innerHTML = `<h3>Security health</h3>
     <div class="hint">Recovery · ${okN} of 2</div>
@@ -2126,7 +2130,6 @@ setInterval(async () => {
   } catch { /* profile locked (auto-lock) or offline — quietly skip the tick */ }
 }, 30000);
 </script>
-<script>if("serviceWorker" in navigator&&/^(kaspaforge\.org|kaspa\.officeforge\.co)$/.test(location.hostname))navigator.serviceWorker.register("/sw-forge.js");</script>
 <script src="/assets/kaspa-widget.js?v=4" defer></script>
 </body>
 </html>

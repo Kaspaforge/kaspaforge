@@ -1,15 +1,17 @@
 # Kaspa Forge — contracts, apps and recovery kit
 
-This is the public source mirror behind **Kaspa Forge — Safe + Escrow + Market + Desk**, built
-on Kaspa Toccata covenants.
+This is the public source mirror behind **Kaspa Forge — Safe + Escrow + Deposit + Market + Desk**,
+built on Kaspa Toccata covenants.
 
 - **[Safe](https://kaspaforge.org/safe.html)** — a vault for KAS. Every withdrawal waits out
   a delay you set and can be cancelled with a separate alarm key.
 - **[Escrow](https://kaspaforge.org/escrow-index.html)** — non-custodial escrow for P2P deals.
+- **[Deposit](https://kaspaforge.org/deposit-index.html)** — non-custodial security deposits with
+  a fixed term, a claim window and covenant-enforced settlement paths.
 - **[Market](https://kaspaforge.org/market.html)** — a marketplace powered by Kaspa payments
   and escrow.
 - **[Desk](https://kaspaforge.org/desk.html)** — the browser workspace for the wallet, safes,
-  deals, listings and opt-in encrypted profile sync.
+  escrow deals, deposits, listings and opt-in encrypted profile sync.
 
 ## What is recoverable without Kaspa Forge
 
@@ -31,8 +33,9 @@ This repository contains:
   in this revision.
 
 Recovery capability is intentionally stated narrowly: **Safe has a standalone recovery CLI.**
-For Escrow, the covenant and browser frontend are public, but a separately packaged party-side
-recovery CLI is not published yet. Do not rely on a cached or third-party `escrowctl` binary.
+For Escrow and Deposit, the covenant and browser frontend are public, but a separately packaged
+party-side recovery CLI is not published yet. Do not rely on a cached or third-party `escrowctl`
+binary.
 
 ## Keep an offline copy now
 
@@ -129,10 +132,13 @@ cargo run --release -- selftest
 The self-test executes all contract paths, including early completion, wrong-key, wrong-destination,
 premature-inheritance, one-key-migration and two-input-siphon attacks, in the Kaspa consensus VM.
 
-## Escrow recovery boundary
+## Escrow and Deposit recovery boundary
 
-[`contracts/escrow.sil`](contracts/escrow.sil) is the covenant behind Kaspa Escrow. Every allowed
-path sends funds only to the buyer, seller, their split, or the fixed service-fee address:
+[`contracts/escrow.sil`](contracts/escrow.sil) is the covenant behind both Kaspa Escrow and Kaspa
+Deposit. A Deposit maps the holder to the contract buyer and the depositor to the contract seller,
+so the same constrained settlement paths can enforce a return to the depositor, a holder claim or
+a split. Every allowed path sends funds only to the buyer, seller, their split, or the fixed
+service-fee address:
 
 - `release` / `refund` — amicable outcomes;
 - `autoRelease` — seller payout after the dispute window when no dispute was opened;

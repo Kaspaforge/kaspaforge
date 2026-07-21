@@ -102,7 +102,7 @@
       "description": "How Kaspa's GHOSTDAG protocol orders parallel blocks in a BlockDAG — and what it means for fast confirmations, time-lock covenants, and on-chain tooling.",
       "url": "https://kaspaforge.org/blog/kaspa-blockdag-ghostdag-explained.html",
       "datePublished": "2026-07-11",
-      "dateModified": "2026-07-11",
+      "dateModified": "2026-07-20",
       "inLanguage": "en",
       "image": "https://kaspaforge.org/assets/blog/kaspa-blockdag-ghostdag-explained.png",
       "author": {
@@ -289,7 +289,7 @@
   <p><b>Red blocks are second-class.</b> A transaction included in a red block is accepted, but red blocks don't contribute to blue-work security and receive reduced (or no) rewards. Miners in poorly connected geographies risk higher red rates — a mild centralization pressure, though far less severe than Bitcoin's orphan problem.</p>
   <p><b>DAA-score time-locks assume stable BPS.</b> Our covenant delays are specified in DAA units and resolved against a roughly constant block rate. A significant, sustained change in Kaspa's BPS would shift the wall-clock interpretation of these delays. At the current ~10 BPS, the mapping is straightforward — but it's an assumption, not a guarantee.</p>
   <p><b>Smart contract compute budgets are tight.</b> Kaspa's Toccata covenants operate under a compute budget (20 for standard vault transitions, 30 for migration paths, 40 for escrow contracts). This limits the complexity of on-chain logic — a deliberate design choice that keeps validation fast but restricts what covenants can express. The <a class="ln" href="https://wiki.kaspa.org/en/developers-knowledge-base">developers knowledge base</a> has further context on current opcode capabilities and the Toccata roadmap.</p>
-  <p><b>Kaspa Safe is in beta.</b> The vault contract (v3) is open-source and has self-tests against the node's VM. Treat it as beta software.</p>
+  <p><b>Kaspa Safe is live on mainnet and externally unaudited.</b> The vault contract (v3) is open source and has self-tests against the node's VM. Verify the code and size your use to the risk you understand.</p>
   <p>The DAG gives Kaspa its speed. GHOSTDAG gives that speed a deterministic order. And that order — measured in DAA ticks, resolvable in seconds, enforceable on-chain — is what makes the Kaspa Forge stack work.</p>
 
     <div class="faqwrap">

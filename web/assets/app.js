@@ -72,7 +72,6 @@ const DICT = {
     inh_mode_signed_info: 'The heir must actively claim the funds with their own key. Nothing moves on its own.',
     // create
     forging: 'forging…', lock_btn: 'Lock into vault', heir_err: 'Enter a valid heir address or turn inheritance off',
-    over_cap: '<b>Over 5,000 KAS.</b> That is above the beta cap — send less or continue at your own risk.',
     bot_soon: 'the bot (soon)', in_vault: 'in vault',
     // manage
     confirm_wd: (a) => `Withdraw to ${a}\nThe address is locked forever. Continue?`,
@@ -117,7 +116,6 @@ const DICT = {
     inh_mode_auto_info: 'Средства уйдут наследнику автоматически после срока — наследнику не нужен ни ключ, ни софт.',
     inh_mode_signed_info: 'Наследник должен сам забрать средства своим ключом. Само ничего не переведётся.',
     forging: 'куём…', lock_btn: 'Заложить в сейф', heir_err: 'Введите корректный адрес наследника или выключите наследование',
-    over_cap: '<b>Больше 5 000 KAS.</b> Это выше бета-лимита — уменьшите сумму или продолжайте на свой риск.',
     bot_soon: 'бота (скоро)', in_vault: 'в сейфе',
     confirm_wd: (a) => `Вывод на ${a}\nАдрес фиксируется навсегда. Продолжить?`,
     st_coins: 'монеты в сейфе', st_wd: 'идёт вывод (окно отмены)', st_empty: 'пусто', withdrawing: 'идёт вывод',
@@ -166,7 +164,7 @@ export function recoverySheet(d) {
     'Открытый код и офлайн-тулза vaultctl (лист подаётся как есть):',
     'https://github.com/Kaspaforge/kaspaforge', '',
     'ХРАНИ ТРЕВОЖНЫЙ КЛЮЧ ОТДЕЛЬНО ОТ ГОРЯЧЕГО.',
-    'Бета. Лимит здравого смысла — 5 000 KAS.',
+    'Без внешнего аудита, некостодиально — сейфом управляете только вы.',
   ] : [
     'KASPA SAFE — RECOVERY SHEET (THE ONLY COPY OF YOUR KEYS)',
     '='.repeat(60),
@@ -186,7 +184,7 @@ export function recoverySheet(d) {
     'Open source and the offline vaultctl tool (feed this sheet as is):',
     'https://github.com/Kaspaforge/kaspaforge', '',
     'KEEP THE ALARM KEY SEPARATE FROM THE HOT KEY.',
-    'Beta. Common-sense cap — 5,000 KAS.',
+    'Unaudited, non-custodial — you alone control this vault.',
   ]).join('\n');
 }
 
@@ -262,7 +260,7 @@ export async function utxosRaw(address) {
   return text;
 }
 export function utxosSum(rawText) {
-  const list = JSON.parse(rawText); // beta amounts < 2^53 — safe
+  const list = JSON.parse(rawText); // amounts < 2^53 — safe
   return list.reduce((s, u) => s + u.amount, 0);
 }
 export async function submitTx(builtJsonString) {

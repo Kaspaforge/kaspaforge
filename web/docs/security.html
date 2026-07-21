@@ -24,7 +24,7 @@
 <meta name="theme-color" content="#0E1116">
 <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/safe.css?v=14">
-<script src="/assets/nav.js?v=7" defer></script>
+<script src="/assets/nav.js?v=8" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"Private key security and encrypted Forge Sync","description":"How Kaspa Forge protects private keys in the browser, encrypts the Desk profile with age, signs transactions locally and syncs only encrypted data after explicit consent.","inLanguage":"en","url":"https://kaspaforge.org/docs/security.html","image":"https://kaspaforge.org/assets/og-forge.png","dateModified":"2026-07-13","isPartOf":{"@type":"WebSite","name":"Kaspa Forge","url":"https://kaspaforge.org/"},"publisher":{"@type":"Organization","name":"OfficeForge","url":"https://officeforge.co"}}
 </script>
@@ -43,7 +43,7 @@
     <img class="brand-k" src="/assets/brand/emblem-flat-header.png" alt="">
     <span class="brand-name">Kaspa <b>Forge</b></span>
   </a>
-  <nav><a class="cta" href="/desk.html">Open Desk</a></nav>
+  <nav><a class="cta" href="/desk">Open Desk</a></nav>
 </header>
 
 <main style="max-width:820px;margin:32px auto 0">
@@ -98,7 +98,7 @@
   <p class="hint">The safer default separates convenience keys from independent protection keys. Shared alarm-key storage is available as an explicit convenience trade-off, but Forge Sync still excludes protection keys from every uploaded projection.</p>
   <div style="margin-top:12px">
     <div class="kv"><span class="k" style="min-width:205px">Encrypted local profile</span><span class="v" style="text-align:left">Master seed, wallet private keys, Safe hot/funding keys, deal keys, listing keys, chat keys, contacts and working metadata. A vault alarm key is also here only if the owner chose shared storage at creation.</span></div>
-    <div class="kv"><span class="k" style="min-width:205px">Separate protection keys</span><span class="v" style="text-align:left">By default, vault alarm keys are kept only on their alarm cards. Heir and arbiter private keys are also independent roles. All three key types are excluded from Forge Sync even if one is present in the full local profile.</span></div>
+    <div class="kv"><span class="k" style="min-width:205px">Safe alarm keys</span><span class="v" style="text-align:left">By default, vault alarm keys are kept only on their alarm cards. Forge Sync never transfers them, even when one is stored in the full encrypted profile. As defense in depth, the projection also rejects any legacy or internal <span class="mono">heir_sk</span> and <span class="mono">arbiter_sk</span> fields; these are not ordinary user Desk keys.</span></div>
     <div class="kv"><span class="k" style="min-width:205px">Public server data</span><span class="v" style="text-align:left">Public keys, covenant parameters, addresses, status records and signed transactions that the platform needs to build, watch or broadcast public on-chain state.</span></div>
   </div>
   <p class="hint" style="margin-top:12px">The master seed derives future working keys locally using domain-separated paths. That is why an early independent key-file backup can rediscover later entities. A separate-storage alarm key is independent of the seed. An alarm key kept in the full profile still remains deliberately excluded from Forge Sync.</p>
@@ -124,7 +124,7 @@
   <div style="margin-top:12px">
     <div class="kv"><span class="k" style="min-width:205px">Server receives</span><span class="v" style="text-align:left">Opaque AES-GCM ciphertext, profile ID, public Ed25519 authentication key, ciphertext/profile hashes, version number, previous-version hash, timestamp and signature.</span></div>
     <div class="kv"><span class="k" style="min-width:205px">Server never receives</span><span class="v" style="text-align:left">Desk password, age decryption key, AES Sync secret, raw wallet anchor, master seed or readable private keys.</span></div>
-    <div class="kv"><span class="k" style="min-width:205px">Not present in the blob</span><span class="v" style="text-align:left">Alarm, heir and arbiter private keys. They are removed before the first encryption layer, not merely hidden by it.</span></div>
+    <div class="kv"><span class="k" style="min-width:205px">Not present in the blob</span><span class="v" style="text-align:left">Safe alarm private keys. A defense-in-depth denylist also rejects any fields named <span class="mono">heir_sk</span> or <span class="mono">arbiter_sk</span>. They are removed before the first encryption layer, not merely hidden by it.</span></div>
     <div class="kv"><span class="k" style="min-width:205px">Operational metadata</span><span class="v" style="text-align:left">The service necessarily processes network information such as IP address for abuse limits. It stores signed ciphertext versions, not a user account tied to an email or identity provider.</span></div>
   </div>
   <p class="hint" style="margin-top:12px">API reads and writes are signed with the dedicated Sync key and include fresh nonces and timestamps to resist replay. The service keeps a bounded version history so the browser can verify continuity. These controls protect integrity and rollback detection; confidentiality comes from the two client-side encryption layers.</p>
@@ -134,7 +134,7 @@
     <li><b>Forge Sync is not an independent backup.</b> Keep an offline <span class="mono">.age</span> export and its password separately. A new empty browser cannot find or decrypt the mirror from the password alone.</li>
     <li><b>Forge Sync never transfers a vault alarm key.</b> This also applies when you chose to keep that key in the shared encrypted profile. The Safe can sync to another device, but you cannot cancel a withdrawal on that device until you import a full <span class="mono">.age</span> copy exported from the device where the Safe was created (or provide the separate alarm card). Export a fresh copy after creating such a Safe.</li>
     <li><b>Copies must use the same Desk password.</b> If a remote age snapshot was encrypted under a different password, the Desk refuses it and leaves local data unchanged.</li>
-    <li><b>Device-level revoke is not available in this beta.</b> Copies of one profile share Sync credentials. A lost device that held a recoverable profile is a key-security incident; Sync cannot remotely erase or lock it.</li>
+    <li><b>Device-level revoke is not available right now.</b> Copies of one profile share Sync credentials. A lost device that held a recoverable profile is a key-security incident; Sync cannot remotely erase or lock it.</li>
     <li><b>Browser security still matters.</b> Malware, a malicious extension, a keylogger or injected code running while the Desk is unlocked may read what the legitimate page can read. Encryption at rest does not make a compromised active device safe.</li>
     <li><b>Phishing bypasses good cryptography.</b> Enter the Desk password only on <span class="mono">kaspaforge.org</span>. Kaspa Forge support will never ask for the password, seed, private key or complete key file.</li>
     <li><b>No password reset exists.</b> We cannot recover a forgotten password because we do not hold it or a decryption key. Test your offline recovery before storing meaningful funds.</li>

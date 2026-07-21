@@ -44,7 +44,7 @@ test('evidenceState marks tracking/file done from chat messages, others manual',
 test('visibleTemplates drops hidden, preserves order; getTemplate still resolves hidden', () => {
   const vis = visibleTemplates(catalog);
   assert.ok(vis.every((t) => !t.hidden));                                  // no hidden entries
-  assert.equal(vis.find((t) => t.id === 'design-3-stage'), undefined);     // beta-hidden
+  assert.equal(vis.find((t) => t.id === 'design-3-stage'), undefined);     // staged-hidden
   assert.ok(vis.some((t) => t.id === 'buy-goods'));                        // visible ones kept
   assert.deepEqual(vis.map((t) => t.id), catalog.templates.filter((t) => !t.hidden).map((t) => t.id)); // order
   assert.equal(getTemplate(catalog, 'design-3-stage').id, 'design-3-stage'); // still resolvable for existing deals

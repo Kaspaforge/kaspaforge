@@ -16,7 +16,7 @@
 <meta name="theme-color" content="#0E1116">
 <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/safe.css?v=14">
-<script src="/assets/nav.js?v=7" defer></script>
+<script src="/assets/nav.js?v=8" defer></script>
 </head>
 <body>
 <div class="wrap">
@@ -26,7 +26,7 @@
     <img class="brand-k" src="/assets/brand/emblem-flat-header.png" alt="">
     <span class="brand-name">Kaspa <b>Forge</b></span>
   </a>
-  <nav><a href="/escrow-index.html">Escrow</a><a href="/market.html">Market</a><a href="/docs/">Docs</a></nav>
+  <nav><a href="/escrow-index.html">Escrow</a><a href="/market.html">Market</a><a href="/deposit-index.html">Deposit</a><a href="/docs/">Docs</a></nav>
 </header>
 
 <div style="max-width:820px;margin:36px auto 0">
@@ -34,7 +34,7 @@
   <h1 style="font-size:clamp(28px,4vw,40px);margin:10px 0 8px">Security Center</h1>
   <p class="hint">Everything that decides whether Kaspa Forge can be trusted with your money, in one place — the real hashes, keys and test numbers, and how to check every one of them yourself. Kaspa Forge is <b>non-custodial</b>: the funds live in open-source on-chain covenants, and this page is our attempt to make that verifiable rather than a promise. <b>Last reviewed: July 13, 2026.</b> Security contact: <a href="mailto:kaspa@officeforge.co">kaspa@officeforge.co</a> · <a href="/.well-known/security.txt">security.txt</a>.</p>
 
-  <div class="note alarm" style="margin-top:20px"><b>Open beta.</b> Both covenants are open source and have passed our own on-chain and adversarial tests. Treat Kaspa Forge like beta software: keep vault balances and deals modest (suggested vault cap 5,000 KAS; deals run 50–10,000 KAS).</div>
+  <div class="note alarm" style="margin-top:20px">Both covenants are open source and unaudited — they have passed our own on-chain and adversarial tests, but no external audit yet. Non-custodial: we never hold your funds and no support desk can reverse a transaction, so use amounts you're comfortable trusting to code.</div>
 
   <nav aria-label="Contents" class="plate" style="line-height:1.9;margin-top:22px">
     <b>Contents</b><br>
@@ -52,7 +52,7 @@
 
   <div class="plate" id="model">
     <h2 style="font-size:20px">1. The trust model</h2>
-    <p>Kaspa Forge holds no custody of your coins. Money sits in a Kaspa on-chain covenant — a script enforced by Kaspa consensus, not by our server. Signing keys exist only in your browser/app: inside the encrypted Desk profile or, for separate-storage Safe alarm keys, on your alarm card. They are never sent to us. Forge Sync uploads only an end-to-end encrypted safe projection and always removes alarm, heir and arbiter private keys before encryption. What that buys you, stated as hard invariants:</p>
+    <p>Kaspa Forge holds no custody of your coins. Money sits in a Kaspa on-chain covenant — a script enforced by Kaspa consensus, not by our server. Signing keys exist only in your browser/app: inside the encrypted Desk profile or, for separate-storage Safe alarm keys, on your alarm card. They are never sent to us. Forge Sync uploads only an end-to-end encrypted safe projection and never includes Safe alarm keys — even when one is stored in the encrypted profile. What that buys you, stated as hard invariants:</p>
     <ul style="margin:10px 0 0;padding-left:20px;line-height:1.75;color:var(--ash)">
       <li><b>The server cannot steal.</b> No vault or escrow private keys, and no seed, ever live on the server. The keyless covenant paths (a vault's <span class="mono">complete</span> and <span class="mono">inheritAuto</span>; an escrow's <span class="mono">autoRelease</span> and <span class="mono">timeout</span>) hard-bind their output to a fixed recipient, so even our own watcher can only push funds where the contract already says they go.</li>
       <li><b>The arbiter cannot steal.</b> The escrow covenant has <b>no path to any third party</b> — every one of its 10 spend paths pays only the buyer, the seller, or the fixed service-fee address. A compromised or coerced arbiter still cannot express a theft as a valid transaction; the worst they can do is pick one of buyer / seller / split.</li>
@@ -134,7 +134,7 @@
     <h2 style="font-size:20px">7. Known limitations</h2>
     <p>Honesty is part of the security story. These are the real edges of the current design:</p>
     <ul style="margin:10px 0 0;padding-left:20px;line-height:1.75;color:var(--ash)">
-      <li><b>Open beta, capped amounts.</b> Suggested vault cap 5,000 KAS; escrow deals are enforced to 50–10,000 KAS.</li>
+      <li><b>Unaudited covenants.</b> The contracts are open source but have not had an external audit yet. Escrow deals are enforced to a 50 KAS minimum.</li>
       <li><b>Escrow needs an active buyer.</b> A dispute must be opened <i>within</i> the dispute window. If the window passes with no dispute, funds auto-release to the seller — the buyer must act in time.</li>
       <li><b>Lose your recovery material, lose access.</b> There are no accounts and no password reset. Keep a full encrypted <span class="mono">.age</span> export and its password separately; for a separate-storage Safe, keep its alarm card too. Forge Sync is not a replacement: it cannot bootstrap an empty device and never transfers <span class="mono">alarm_sk</span>.</li>
       <li><b>The service token is a capability.</b> The token in your key file authorizes management API calls for your vault/deal; anyone who obtains it can call those endpoints (it still cannot move funds outside the covenant's fixed paths). It is not rotated automatically. Detail in the <a href="/privacy.html">privacy policy</a>.</li>
@@ -205,6 +205,7 @@
       <a href="/safe.html">Safe</a>
       <a href="/escrow-index.html">Escrow</a>
       <a href="/market.html">Market</a>
+      <a href="/deposit-index.html">Deposit</a>
       <a href="/blog/">Blog</a>
       <a href="/docs/">Docs</a>
       <a href="/recover.html">Recovery</a>
@@ -218,6 +219,5 @@
 </footer>
 </div>
 <script src="/assets/kaspa-widget.js?v=4" defer></script>
-<script>if("serviceWorker" in navigator&&/(^|\.)kaspaforge\.org$|(^|\.)officeforge\.co$/.test(location.hostname))navigator.serviceWorker.register("/sw.js");</script>
 </body>
 </html>

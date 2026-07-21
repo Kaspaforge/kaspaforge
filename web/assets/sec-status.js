@@ -1,4 +1,4 @@
-/* Compact "Live security status" chip block — shared by index.html, escrow-index.html
+/* Shared "Live security status" telemetry rail — used by index.html, escrow-index.html
    and kaspa-forge.html (+ ru/). Fed by /assets/sec-status.json, a static file rebuilt
    by kaspa-safe/tools/refresh-sec-status.sh at release time (same facts security.html's
    Security Center reports — see that page for full context and how to verify them).

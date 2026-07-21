@@ -21,8 +21,9 @@ const T = RU ? {
   mg_title: 'Зашифруй свои ключи', mg_btn: 'Зашифровать',
   mg_hint: 'В этом браузере уже есть ключи. Задай пароль — зашифруем их. После этого файл ключей защищён.',
   ul_title: 'Введи пароль', ul_btn: 'Открыть', ul_hint: 'Разблокируй панель своим паролем.',
-  ul_forgot: 'Забыл пароль? Его не восстановить — но профиль можно вернуть из файла бэкапа (.age).',
-  rs_replace: 'Восстановление заменит профиль этого браузера файлом бэкапа. Всё, что появилось ПОСЛЕ бэкапа (новые сделки/чаты/свопы), из этого браузера исчезнет. Продолжить?',
+  ul_recovery: 'Забытый пароль нельзя сбросить. Для зашифрованного бэкапа .age тоже нужен пароль, с которым он был создан.',
+  replace: 'Заменить из бэкапа',
+  rs_replace: 'Замена восстановит профиль этого браузера из файла бэкапа. Всё, что появилось ПОСЛЕ бэкапа (новые сделки/чаты/свопы), из этого браузера исчезнет. Для зашифрованного бэкапа .age нужен его исходный пароль. Продолжить?',
   e_wrongpw: 'Неверный пароль',
   cf_title: 'Подтверди пароль', cf_ok: 'Подтвердить', cf_cancel: 'Отмена',
 } : {
@@ -39,8 +40,9 @@ const T = RU ? {
   mg_title: 'Encrypt your keys', mg_btn: 'Encrypt',
   mg_hint: 'This browser already has keys. Set a password to encrypt them — after that your key file is protected.',
   ul_title: 'Enter your password', ul_btn: 'Open', ul_hint: 'Unlock the panel with your password.',
-  ul_forgot: "Forgot it? It can't be recovered — but your profile can be restored from a backup file (.age).",
-  rs_replace: "Restoring replaces this browser's profile with the backup file. Anything created AFTER that backup (new deals/chats/swaps) will disappear from this browser. Continue?",
+  ul_recovery: 'Forgotten passwords cannot be reset. An encrypted .age backup still requires the password used to create it.',
+  replace: 'Replace from backup',
+  rs_replace: "Replacing restores this browser's profile from the backup file. Anything created AFTER that backup (new deals/chats/swaps) will disappear from this browser. An encrypted .age backup requires its original password. Continue?",
   e_wrongpw: 'Wrong password',
   cf_title: 'Confirm your password', cf_ok: 'Confirm', cf_cancel: 'Cancel',
 };
@@ -190,14 +192,13 @@ function migrateFlow(net, opts = {}) {
     } });
 }
 function unlockFlow(opts = {}) {
-  // "Forgot password" is not a dead end: the holder of a valid backup restores the profile
-  // right here (onboarding had the button, unlock didn't; UX review 2026-07-09). Restore replaces
-  // this browser's profile with the file wholesale — for someone who forgot the password, that's exactly the goal.
+  // Restore replaces a missing/stale local profile; it is not a password-reset path. An encrypted
+  // .age export can only be opened with the password that created it.
   return pwFlow({ title: T.ul_title, btn: T.ul_btn, twoFields: false, ...opts,
-    hint: `${T.ul_hint} ${T.ul_forgot}`,
+    hint: `${T.ul_hint} ${T.ul_recovery}`,
     onSubmit: (p1, _p2, err) => { if (session.unlock(p1)) return true; err(T.e_wrongpw); return false; },
     // unlike onboarding, a profile ALREADY exists here — warn that restore will replace it
-    secondary: { label: T.restore, run: async (ctx) => {
+    secondary: { label: T.replace, run: async (ctx) => {
       if (!await confirmBox(T.rs_replace, { danger: true })) return;
       return restoreFromBackup(undefined, ctx);
     } } });

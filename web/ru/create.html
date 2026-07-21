@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#0E1116">
 <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/safe.css?v=14">
-<script src="/assets/nav.js?v=7" defer></script>
+<script src="/assets/nav.js?v=8" defer></script>
 <script src="/assets/qrcode.min.js"></script>
 </head>
 <body>
@@ -31,7 +31,7 @@
   <div class="eyebrow">Новый сейф</div>
   <h1 style="font-size:clamp(28px,4vw,40px);margin:10px 0 8px">Куём сейф</h1>
   <p class="lead">Четыре шага. Всё криптографическое — в этом окне браузера; мы не видим и не храним твои ключи.</p>
-  <div class="note alarm" style="margin-top:16px"><b>Открытая бета.</b> Не кладите больше, чем готовы доверить бете (≤ 5 000 KAS). Контракт открыт.</div>
+  <div class="note alarm" style="margin-top:16px">Ковенант сейфа открыт и не проходил внешний аудит — проверяйте перед хранением. Некостодиально: никакая поддержка не может отменить транзакцию, поэтому используйте суммы, которые вы готовы доверить коду.</div>
   <div id="err" class="note alarm" style="display:none"></div>
 
   <div style="margin-top:34px">
@@ -73,7 +73,7 @@
     <div class="step" data-n="2" id="st2">
       <h3>Три ключа — два в key-file, один на карточке</h3>
       <div class="body">
-        <p class="note"><b>🔑 Recovery-лист сохранять не нужно.</b> Горячий ключ, ключ закладки и сам сейф автоматически сохраняются в зашифрованный <b>мастер key-file</b> — твой профиль в <a href="/ru/desk.html">Деске</a>. Сделай бэкап один раз в Деске («Экспорт файла ключей»). <b>Тревожный ключ — сознательное исключение:</b> он живёт на отдельной <b>тревожной карточке</b> ниже, отдельно от файла — чтобы кражи key-file с паролем никогда не хватало, чтобы опустошить сейф.</p>
+        <p class="note"><b>🔑 Recovery-лист сохранять не нужно.</b> Горячий ключ, ключ закладки и сам сейф автоматически сохраняются в зашифрованный <b>мастер key-file</b> — твой профиль в <a href="/desk">Деске</a>. Сделай бэкап один раз в Деске («Экспорт файла ключей»). <b>Тревожный ключ — сознательное исключение:</b> он живёт на отдельной <b>тревожной карточке</b> ниже, отдельно от файла — чтобы кражи key-file с паролем никогда не хватало, чтобы опустошить сейф.</p>
         <div class="keycard">
           <div class="kc-role"><span class="dot"></span>Горячий ключ — вывод и чекины</div>
           <code id="k-hot"></code>
@@ -132,7 +132,7 @@
         <p class="hint" style="margin-top:8px">🔑 Приватный ключ этого адреса — у тебя: он в твоём мастер key-file (профиль в Деске).</p>
         <div class="kv" style="margin-top:14px"><span class="k">Получено</span><span class="v" id="f-recv">ожидаем перевод…</span></div>
         <div id="swap-widget" style="margin-top:16px"></div>
-        <div class="note" id="beta-warn" style="display:none"></div>
+        <div class="note" id="risk-warn" style="display:none"></div>
         <div style="margin-top:14px"><button class="btn btn-kaspa" id="b3" disabled>Заложить в сейф</button></div>
       </div>
     </div>
@@ -186,6 +186,7 @@
       <a href="/ru/safe.html">Сейф</a>
       <a href="/ru/escrow-index.html">Гарант</a>
       <a href="/ru/market.html">Маркет</a>
+      <a href="/ru/deposit-index.html">Залог</a>
       <a href="/ru/blog/">Блог</a>
       <a href="/ru/docs/">Документы</a>
       <a href="/ru/recover.html">Восстановление</a>
@@ -523,9 +524,8 @@ async function enterStep3() {
         $('f-recv').textContent = kas(sum);
         $('f-recv').className = 'v ok';
         $('b3').disabled = false;
-        const w = $('beta-warn');
+        const w = $('risk-warn');
         const msgs = [];
-        if (sum > 5000e8) msgs.push(L('over_cap'));
         // a large amount with a short cancellation window
         if (net() === 'mainnet' && sum > 10000e8 && delay < 24 * 36000) msgs.push('⚠ ' + L('fund_high_delay'));
         if (msgs.length) { w.style.display = 'block'; w.innerHTML = msgs.join('<br>'); }
@@ -612,6 +612,5 @@ $('tg-btn').onclick = async () => {
 };
 </script>
 <script src="/assets/kaspa-widget.js?v=4" defer></script>
-<script>if("serviceWorker" in navigator&&/(^|\.)kaspaforge\.org$|(^|\.)officeforge\.co$/.test(location.hostname))navigator.serviceWorker.register("/sw.js");</script>
 </body>
 </html>

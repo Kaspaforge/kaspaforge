@@ -75,6 +75,23 @@
   </url>
 
   <url>
+    <loc>https://kaspaforge.org/deposit-index.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/deposit-index.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/deposit-index.html"/>
+    <lastmod>2026-07-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/ru/deposit-index.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/deposit-index.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/deposit-index.html"/>
+    <lastmod>2026-07-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
     <loc>https://kaspaforge.org/contracts.html</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/contracts.html"/>
     <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/contracts.html"/>
@@ -106,6 +123,38 @@
     <lastmod>2026-07-11</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://kaspaforge.org/boards.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/boards.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/boards.html"/>
+    <lastmod>2026-07-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/ru/boards.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/boards.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/boards.html"/>
+    <lastmod>2026-07-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://kaspaforge.org/boards/rules.html</loc>
+    <lastmod>2026-07-20</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/boards/rules.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/boards/rules.html"/>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/ru/boards/rules.html</loc>
+    <lastmod>2026-07-20</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/boards/rules.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/boards/rules.html"/>
+    <priority>0.3</priority>
   </url>
 
   <url>
@@ -498,6 +547,118 @@
     <lastmod>2026-07-14</lastmod>
     <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/blog/kaspa-deterministic-key-derivation-backup.html"/>
     <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/blog/kaspa-deterministic-key-derivation-backup.html"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/blog/kaspa-ai-agent-hackathon-developer-outreach.html</loc>
+    <lastmod>2026-07-15</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/blog/kaspa-ai-agent-hackathon-developer-outreach.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/blog/kaspa-ai-agent-hackathon-developer-outreach.html"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/ru/blog/kaspa-ai-agent-hackathon-developer-outreach.html</loc>
+    <lastmod>2026-07-15</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/blog/kaspa-ai-agent-hackathon-developer-outreach.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/blog/kaspa-ai-agent-hackathon-developer-outreach.html"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/blog/kaspa-daa-pruning-explained.html</loc>
+    <lastmod>2026-07-17</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/blog/kaspa-daa-pruning-explained.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/blog/kaspa-daa-pruning-explained.html"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/ru/blog/kaspa-daa-pruning-explained.html</loc>
+    <lastmod>2026-07-17</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/blog/kaspa-daa-pruning-explained.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/blog/kaspa-daa-pruning-explained.html"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/blog/pow-self-custody-trustless-tools.html</loc>
+    <lastmod>2026-07-18</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/blog/pow-self-custody-trustless-tools.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/blog/pow-self-custody-trustless-tools.html"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/ru/blog/pow-self-custody-trustless-tools.html</loc>
+    <lastmod>2026-07-18</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/blog/pow-self-custody-trustless-tools.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/blog/pow-self-custody-trustless-tools.html"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/blog/kaspa-forge-hd-key-derivation.html</loc>
+    <lastmod>2026-07-18</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/blog/kaspa-forge-hd-key-derivation.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/blog/kaspa-forge-hd-key-derivation.html"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/ru/blog/kaspa-forge-hd-key-derivation.html</loc>
+    <lastmod>2026-07-18</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/blog/kaspa-forge-hd-key-derivation.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/blog/kaspa-forge-hd-key-derivation.html"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/blog/kaspa-safe-watcher-off-chain-monitoring.html</loc>
+    <lastmod>2026-07-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/blog/kaspa-safe-watcher-off-chain-monitoring.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/blog/kaspa-safe-watcher-off-chain-monitoring.html"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/ru/blog/kaspa-safe-watcher-off-chain-monitoring.html</loc>
+    <lastmod>2026-07-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/blog/kaspa-safe-watcher-off-chain-monitoring.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/blog/kaspa-safe-watcher-off-chain-monitoring.html"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/blog/kaspa-blockdag-coinbase-rewards-explained.html</loc>
+    <lastmod>2026-07-20</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/blog/kaspa-blockdag-coinbase-rewards-explained.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/blog/kaspa-blockdag-coinbase-rewards-explained.html"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/ru/blog/kaspa-blockdag-coinbase-rewards-explained.html</loc>
+    <lastmod>2026-07-20</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/blog/kaspa-blockdag-coinbase-rewards-explained.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/blog/kaspa-blockdag-coinbase-rewards-explained.html"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/blog/kaspa-payments-xpub-utxo-watching.html</loc>
+    <lastmod>2026-07-20</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/blog/kaspa-payments-xpub-utxo-watching.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/blog/kaspa-payments-xpub-utxo-watching.html"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://kaspaforge.org/ru/blog/kaspa-payments-xpub-utxo-watching.html</loc>
+    <lastmod>2026-07-20</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaspaforge.org/blog/kaspa-payments-xpub-utxo-watching.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/blog/kaspa-payments-xpub-utxo-watching.html"/>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>

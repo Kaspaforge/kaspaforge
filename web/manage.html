@@ -22,7 +22,7 @@
   width:calc(100% - var(--p,0%));background:var(--iron);
   border-left:1px solid rgba(255,255,255,.16);transition:width .5s ease}
 </style>
-<script src="/assets/nav.js?v=7" defer></script>
+<script src="/assets/nav.js?v=8" defer></script>
 <script src="/assets/qrcode.min.js"></script>
 </head>
 <body>
@@ -55,7 +55,7 @@
     <h2 style="font-size:20px">No vaults in this profile</h2>
     <p class="hint">Vaults are managed through your encrypted Desk profile and master key file. Import or merge that file in Desk Settings, or create a new vault. The alarm key remains on its separate alarm card by design.</p>
     <div style="margin-top:16px;display:flex;gap:12px;flex-wrap:wrap">
-      <a class="btn btn-kaspa" href="/desk.html#settings">Open Desk Settings</a>
+      <a class="btn btn-kaspa" href="/desk#settings">Open Desk Settings</a>
       <a class="btn btn-ghost" href="/create.html">Create a vault</a>
     </div>
   </div>
@@ -82,7 +82,7 @@
            master key file is loaded, so the fallback points back to Desk import. -->
       <div id="i-hot-block" style="display:none">
         <label>Hot key</label><input type="password" id="i-hotsk" autocomplete="off">
-        <p class="hint">This browser's profile doesn't hold this vault's hot key — paste it, or import your master key file on the <a href="/desk.html">Desk</a>.</p>
+        <p class="hint">This browser's profile doesn't hold this vault's hot key — paste it, or import your master key file on the <a href="/desk">Desk</a>.</p>
       </div>
       <!-- per-deposit breakdown (covenant UTXOs): appears when there is more than one -->
       <div id="wd-breakdown" style="display:none;margin-top:14px"></div>
@@ -99,7 +99,7 @@
       <div class="ci-meter" id="c-meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="Vault age toward the inheritance window"></div>
       <div id="c-hot-block" style="display:none">
         <label>Hot key</label><input type="password" id="c-hotsk" autocomplete="off">
-        <p class="hint">This browser's profile doesn't hold this vault's hot key — paste it, or import your master key file on the <a href="/desk.html">Desk</a>.</p>
+        <p class="hint">This browser's profile doesn't hold this vault's hot key — paste it, or import your master key file on the <a href="/desk">Desk</a>.</p>
       </div>
       <div style="margin-top:14px"><button class="btn btn-kaspa" id="c-btn">Check in</button></div>
     </div>
@@ -138,7 +138,7 @@
       <div class="note alarm"><b>Didn't start this withdrawal?</b> Cancel it — the funds go back to the vault.</div>
       <div id="u-alarm-block" style="display:none">
         <label>Alarm key</label><input type="password" id="u-alarmsk" autocomplete="off">
-        <p class="hint">Enter the alarm key from your <b>alarm card</b> — it is kept apart from the key file by design (the "Alarm key" line on the card). For older vaults that stored it in the profile: paste it, or import your master key file on the <a href="/desk.html">Desk</a>.</p>
+        <p class="hint">Enter the alarm key from your <b>alarm card</b> — it is kept apart from the key file by design (the "Alarm key" line on the card). For older vaults that stored it in the profile: paste it, or import your master key file on the <a href="/desk">Desk</a>.</p>
       </div>
       <div style="margin-top:14px;display:flex;gap:12px;flex-wrap:wrap">
         <button class="btn btn-alarm" id="u-cancel">⛔ Cancel withdrawal</button>
@@ -164,7 +164,7 @@
           <button class="btn btn-kaspa" id="sub-pay-btn"><span>Pay <span class="sub-price">100</span> KAS from my desk wallet</span></button>
           <span id="sub-paid" class="hint" style="margin:0;display:none"></span>
         </div>
-        <p class="hint" style="margin-top:8px">Adds a year automatically. Short on KAS? Top up on the <a href="/desk.html">Desk</a> — SimpleSwap or any wallet.</p>
+        <p class="hint" style="margin-top:8px">Adds a year automatically. Short on KAS? Top up on the <a href="/desk">Desk</a> — SimpleSwap or any wallet.</p>
       </div>
       <div style="margin-top:14px;display:flex;gap:12px;flex-wrap:wrap">
         <button class="btn btn-ghost" id="tg-btn">Connect Telegram</button>
@@ -201,6 +201,7 @@
       <a href="/safe.html">Safe</a>
       <a href="/escrow-index.html">Escrow</a>
       <a href="/market.html">Market</a>
+      <a href="/deposit-index.html">Deposit</a>
       <a href="/blog/">Blog</a>
       <a href="/docs/">Docs</a>
       <a href="/recover.html">Recovery</a>
@@ -769,6 +770,5 @@ $('tg-btn').onclick = async () => {
 $('forget').onclick = async () => { if ($('forget').disabled) return; if (await confirmBox(L('forget_confirm'), { danger: true, ok: 'Forget' })) { clearVault(); location.reload(); } };
 </script>
 <script src="/assets/kaspa-widget.js?v=4" defer></script>
-<script>if("serviceWorker" in navigator&&/(^|\.)kaspaforge\.org$|(^|\.)officeforge\.co$/.test(location.hostname))navigator.serviceWorker.register("/sw.js");</script>
 </body>
 </html>

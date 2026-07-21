@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" href="/assets/icons-escrow/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/safe.css?v=14">
 <link rel="stylesheet" href="/assets/escrow.css?v=7">
-<script src="/assets/nav.js?v=7" defer></script>
+<script src="/assets/nav.js?v=8" defer></script>
 </head>
 <body>
 <div class="wrap">
@@ -49,7 +49,7 @@
   <!-- BLOCK 0: master key-file (primary path) -->
   <div class="plate" style="margin-top:28px;border-left:3px solid var(--kaspa)">
     <h2 style="font-size:20px">Восстановить из мастер key-file (простой способ)</h2>
-    <p class="hint">Каждая сделка, которую вы создаёте или к которой присоединяетесь, автоматически сохраняется в один зашифрованный <b>мастер key-file</b> — профиль Деска, вместе с сейфами и объявлениями. С любого устройства откройте <a href="/ru/desk.html"><b>Деск</b></a>, выберите <b>«Импорт / восстановить»</b> и загрузите <span class="mono">.age</span> с его паролем. Деск восстановит профиль и заново найдёт публичные записи сделок.</p>
+    <p class="hint">Каждая сделка, которую вы создаёте или к которой присоединяетесь, автоматически сохраняется в один зашифрованный <b>мастер key-file</b> — профиль Деска, вместе с сейфами и объявлениями. С любого устройства откройте <a href="/desk"><b>Деск</b></a>, выберите <b>«Импорт / восстановить»</b> и загрузите <span class="mono">.age</span> с его паролем. Деск восстановит профиль и заново найдёт публичные записи сделок.</p>
     <p class="hint" style="margin-top:8px"><b>Сделайте свежий бэкап сейчас:</b> Деск → Экспорт файла ключей. Forge Sync полезен как зашифрованное зеркало, но свежий офлайн-экспорт <span class="mono">.age</span> остаётся вашей независимой копией восстановления.</p>
   </div>
 
@@ -150,6 +150,7 @@
       <a href="/ru/safe.html">Сейф</a>
       <a href="/ru/escrow-index.html">Гарант</a>
       <a href="/ru/market.html">Маркет</a>
+      <a href="/ru/deposit-index.html">Залог</a>
       <a href="/ru/blog/">Блог</a>
       <a href="/ru/docs/">Документы</a>
       <a href="/ru/recover.html">Восстановление</a>
@@ -203,6 +204,5 @@ document.getElementById('dl-checklist').addEventListener('click', function () {
 });
 </script>
 <script src="/assets/kaspa-widget.js?v=4" defer></script>
-<script>if("serviceWorker" in navigator&&/(^|\.)kaspaforge\.org$|(^|\.)officeforge\.co$/.test(location.hostname))navigator.serviceWorker.register("/sw-escrow.js");</script>
 </body>
 </html>

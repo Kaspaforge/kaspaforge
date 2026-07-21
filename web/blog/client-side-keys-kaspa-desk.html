@@ -102,7 +102,7 @@
       "description": "How Kaspa Desk keeps private keys browser-only with WASM, age-encrypted profiles, and HD derivation — a non-custodial Kaspa wallet deep dive.",
       "url": "https://kaspaforge.org/blog/client-side-keys-kaspa-desk.html",
       "datePublished": "2026-07-13",
-      "dateModified": "2026-07-13",
+      "dateModified": "2026-07-20",
       "inLanguage": "en",
       "image": "https://kaspaforge.org/assets/blog/client-side-keys-kaspa-desk.png",
       "author": {
@@ -293,7 +293,7 @@ secretKey = derivedKey[0..32]      // first 32 bytes</code></pre>
   <p><b>Device-bound by default.</b> Your master seed lives in browser storage on one device. Lose the device without your <code>.age</code> backup and you lose access. There is no server-side recovery, no "forgot password" flow — that's the entire point, but it means <b>backup discipline is on you</b>.</p>
   <p><b>Single password protects everything.</b> The <code>.age</code> key-file is encrypted under one passphrase. A weak passphrase means a compromised backup exposes all derived keys. The scrypt parameters in <code>age</code> are deliberately expensive to slow brute-force, but the user still has to choose well.</p>
   <p><b>WASM snapshot fragmentation.</b> The browser loads different WASM builds for different pages: <code>app.js</code> (v3) for Safe, <code>escrow.js</code> (v5) for Escrow, <code>core6.js</code> (v6) for Desk crypto. A new build must be deployed to all three snapshot directories, or you get <code>"core.X is not a function"</code> on some pages. This is a deployment discipline issue, not a security issue, but it's a real operational footgun we've hit more than once.</p>
-  <p><b>Beta caps are in place.</b> Vault and escrow operations are currently limited to 50–10,000 KAS per contract. These limits protect against edge cases while the system is battle-tested under real conditions, but they're real constraints for larger holders.</p>
+  <p><b>There is no platform upper cap on escrow deals.</b> The minimum remains 50 KAS because the 5 KAS arbitration-fee floor would otherwise consume more than 10% of a small deal. Browser and server checks still reject values that cannot be represented as an exact integer number of sompi; that is a signing-integrity boundary, not a product limit.</p>
   <p><b>No hardware wallet integration yet.</b> The WASM core generates and manages keys in software. Hardware wallet support (Ledger, Trezor) would require a different signing path and is not shipped today.</p>
   <p><b>Alarm key separation is opt-in.</b> By default, both the hot key and the alarm key may live in the same browser session. You can store the alarm key on a separate device or a physical card (the <code>alarm_card:true</code> profile flag omits the alarm secret key from the profile entirely), but out of the box, disciplined separation requires a deliberate user action.</p>
   <h2>Summary</h2>

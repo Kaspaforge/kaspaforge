@@ -5,7 +5,7 @@
 //
 // IMPORTANT: import escrow.js at EXACTLY the version (?v=30) the desk loads — a different query
 // string would create a SECOND module instance and a second WASM init. Bumping escrow.js in desk.html — bump it here too.
-import { core, net, api, submitTx, utxosRaw, chatSupported, chatAddress, boot as bootEscrow } from '/assets/escrow.js?v=40';
+import { core, net, api, submitTx, utxosRaw, chatSupported, chatAddress, boot as bootEscrow } from '/assets/escrow.js?v=41';
 
 export { chatSupported, chatAddress };
 

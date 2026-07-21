@@ -30,7 +30,8 @@
 <meta name="theme-color" content="#0E1116">
 <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/safe.css?v=14">
-<script src="/assets/nav.js?v=7" defer></script>
+<link rel="stylesheet" href="/assets/status-rail.css?v=1">
+<script src="/assets/nav.js?v=8" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebApplication","name":"Kaspa Safe","url":"https://kaspaforge.org/","applicationCategory":"FinanceApplication","operatingSystem":"Web","inLanguage":"en","description":"Non-custodial vault for KAS with a withdrawal delay and cancel window, built on Kaspa Toccata covenants.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD","description":"On-chain vault operations are free; optional Telegram monitoring is 100 KAS/year, first 30 days free; Kaspa network fees apply (fractions of a KAS)"}}
 </script>
@@ -43,7 +44,7 @@
 {"@type":"Question","name":"How often do I have to check in for inheritance?","acceptedAnswer":{"@type":"Answer","text":"There's no separate schedule — the inheritance period you chose at creation is the deadline. Every check-in resets the timer to zero, so check in at least once within each period. With the alerts subscription, Telegram reminds you once ~80% of the period has passed; without it, watch the timer in the vault panel yourself."}},
 {"@type":"Question","name":"What if a thief gets both keys?","acceptedAnswer":{"@type":"Answer","text":"Then the window won't save you — that's why keeping the keys apart is the foundation. The hot key lives where you use it; the alarm key belongs on paper in a different place. A thief with just the hot key gets nothing."}},
 {"@type":"Question","name":"How is this different from a hardware wallet?","acceptedAnswer":{"@type":"Answer","text":"A hardware wallet protects the key, but a signed transaction is final. Kaspa Safe protects the coins themselves: even with a stolen key, every withdrawal waits out your delay and can be cancelled. The two work great together."}},
-{"@type":"Question","name":"How tested is it?","acceptedAnswer":{"@type":"Answer","text":"Beta. The contract passed our full on-chain cycle plus adversarial attacks on our test range. Don't store more than you'd trust to a beta — suggested cap 5,000 KAS."}},
+{"@type":"Question","name":"How tested is it?","acceptedAnswer":{"@type":"Answer","text":"The contract is unaudited but passed our full on-chain cycle plus adversarial attacks on our test range. Non-custodial — use amounts you're comfortable trusting to code."}},
 {"@type":"Question","name":"Which network?","acceptedAnswer":{"@type":"Answer","text":"Kaspa mainnet, Toccata covenants (active since June 30, 2026). No tokens, no bridges — plain KAS in a covenant script."}}
 ]}
 </script>
@@ -64,25 +65,33 @@
   </nav>
 </header>
 
-<div class="netstat" id="netstat">
-  <span class="ns-item"><span class="ns-l">Network</span><span class="ns-v" id="ns-net">…</span></span>
-  <span class="ns-item"><span class="ns-l">DAA score</span><span class="ns-v ns-daa" id="ns-daa">…</span></span>
-  <span class="ns-item"><span class="ns-l">Node status</span><span class="ns-v"><span class="ns-dot" id="ns-dot"></span><span id="ns-status">…</span></span></span>
+<div class="status-rail status-rail--network" id="netstat" aria-label="Live Kaspa network status">
+  <div class="status-rail__inner">
+    <span class="status-metric"><span class="status-label">network</span><b class="status-value status-value--live" id="ns-net">checking</b></span>
+    <span class="status-metric"><span class="status-label">DAA</span><b class="status-value ns-daa" id="ns-daa">checking</b></span>
+    <span class="status-metric"><span class="status-label">node</span><b class="status-value status-value--live"><span class="ns-dot" id="ns-dot"></span><span id="ns-status">checking</span></b></span>
+    <span class="status-metric"><span class="status-label">covenants</span><b class="status-value">Toccata</b></span>
+    <span class="status-metric"><span class="status-label">keys</span><b class="status-value">local</b></span>
+    <span class="status-metric"><span class="status-label">custody</span><b class="status-value status-value--live">none</b></span>
+    <span class="status-metric"><span class="status-label">status</span><b class="status-value status-value--live">mainnet</b></span>
+  </div>
 </div>
 <script src="/assets/netstat.js?v=1" defer></script>
 
-<div class="netstat" id="secstat" style="display:none">
-  <span class="ns-item"><span class="ns-l">Contracts</span><span class="ns-v" id="sec-contracts">…</span></span>
-  <span class="ns-item"><span class="ns-l">Tests</span><span class="ns-v" id="sec-tests">…</span></span>
-  <span class="ns-item"><span class="ns-l">Verified</span><span class="ns-v" id="sec-verified">…</span></span>
-  <span class="ns-item"><a class="ns-v" href="/security.html" id="sec-link" style="color:var(--kaspa)">Security ▸</a></span>
-  <span class="ns-item"><a class="ns-v" href="https://github.com/Kaspaforge/kaspaforge" id="sec-github" target="_blank" rel="noopener" style="color:var(--kaspa)">GitHub</a></span>
+<div class="status-rail status-rail--security" id="secstat" style="display:none" aria-label="Verified Kaspa Forge security status">
+  <div class="status-rail__inner">
+    <span class="status-metric"><span class="status-label">contracts</span><b class="status-value" id="sec-contracts">checking</b></span>
+    <span class="status-metric"><span class="status-label">tests</span><b class="status-value status-value--live" id="sec-tests">checking</b></span>
+    <span class="status-metric"><span class="status-label">verified</span><b class="status-value" id="sec-verified">checking</b></span>
+    <span class="status-metric status-metric--push"><a class="status-action" href="/security.html" id="sec-link">Security ▸</a></span>
+    <span class="status-metric"><a class="status-action" href="https://github.com/Kaspaforge/kaspaforge" id="sec-github" target="_blank" rel="noopener">GitHub</a></span>
+  </div>
 </div>
 <script src="/assets/sec-status.js?v=4" defer></script>
 
 <div class="hero">
   <div class="txt">
-    <div class="eyebrow">Non-custodial · Toccata covenants · mainnet beta</div>
+    <div class="eyebrow">Non-custodial · Toccata covenants · mainnet</div>
     <h1 style="margin-top:12px">A stolen key isn't<br>stolen coins yet</h1>
     <p class="lead" style="margin-top:16px">
       Kaspa Safe is a vault for KAS right on the blockchain. Every withdrawal starts
@@ -138,7 +147,7 @@
     <div class="tick" style="left:99%"></div><div class="lbl end">coins at destination</div>
   </div>
   <div style="margin-top:14px;font-size:12px;color:var(--ash2)">
-    <span>Open beta — <a href="/security.html">security &middot; verification</a></span>
+    <span>Mainnet · <a href="/security.html">security &middot; verification</a></span>
   </div>
 </section>
 
@@ -257,7 +266,7 @@
     </details>
     <details>
       <summary>How tested is it?</summary>
-      <p>Beta. The contract passed our full on-chain cycle plus adversarial attacks on our test range. Don't store more than you'd trust to a beta — suggested cap 5,000 KAS.</p>
+      <p>The contract is unaudited but passed our full on-chain cycle plus adversarial attacks on our test range. Non-custodial — use amounts you're comfortable trusting to code.</p>
     </details>
     <details>
       <summary>Which network?</summary>
@@ -265,8 +274,8 @@
     </details>
   </div>
   <div class="note alarm" style="margin-top:26px">
-    <b>Beta.</b> The contract passed our test range (full on-chain cycle + adversarial attacks).
-    Don't store more than you'd trust to a beta. Suggested cap — 5,000 KAS.
+    The contract passed our test range (full on-chain cycle + adversarial attacks).
+    Open source and unaudited — non-custodial, so use amounts you're comfortable trusting to code.
   </div>
 </section>
 
@@ -281,6 +290,7 @@
       <a href="/safe.html">Safe</a>
       <a href="/escrow-index.html">Escrow</a>
       <a href="/market.html">Market</a>
+      <a href="/deposit-index.html">Deposit</a>
       <a href="/blog/">Blog</a>
       <a href="/docs/">Docs</a>
       <a href="/recover.html">Recovery</a>
@@ -301,6 +311,5 @@
         .catch(() => { $('net-badge').textContent = 'node unavailable'; });
 </script>
 <script src="/assets/kaspa-widget.js?v=4" defer></script>
-<script>if("serviceWorker" in navigator&&/(^|\.)kaspaforge\.org$|(^|\.)officeforge\.co$/.test(location.hostname))navigator.serviceWorker.register("/sw.js");</script>
 </body>
 </html>

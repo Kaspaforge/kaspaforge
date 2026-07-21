@@ -29,8 +29,9 @@
 <meta name="theme-color" content="#0E1116">
 <link rel="manifest" href="/manifest-escrow.json">
 <link rel="apple-touch-icon" href="/assets/icons-escrow/apple-touch-icon.png">
-<script src="/assets/nav.js?v=7" defer></script>
+<script src="/assets/nav.js?v=8" defer></script>
 <link rel="stylesheet" href="/assets/safe.css?v=14">
+<link rel="stylesheet" href="/assets/status-rail.css?v=1">
 <style>
 /* ── escrow landing: covenant diagram (signature visual) + dispute stepper + comparison ── */
 .cov { width: min(430px, 92vw); }
@@ -107,7 +108,7 @@
 {"@type":"Question","name":"What if your site disappears mid-deal?","acceptedAnswer":{"@type":"Answer","text":"The deal is an on-chain contract with an emergency timeout: if the arbiter never rules by the contract deadline, funds go to the default side by themselves. The contract and offline tools are open source — the deal outlives the website."}},
 {"@type":"Question","name":"What does it cost?","acceptedAnswer":{"@type":"Answer","text":"Creating a deal is free. A normal resolution — release, refund or mutual settlement — is 0.5% (min 1.2 KAS). Arbitration is 2% (min 5 KAS). The service fee is enforced by the covenant on every one of these paths; the only path with no service fee is the emergency timeout (the arbiter never ruled). The exact fee is shown before you confirm."}},
 {"@type":"Question","name":"Who sees our chat?","acceptedAnswer":{"@type":"Answer","text":"Only the two of you. The deal chat is on-chain messaging on the Kaspa BlockDAG (Kasia protocol): every message is an end-to-end encrypted transaction, anchored on-chain — the thread can't be silently forged or backdated. The server relays only ciphertext. The arbiter can read it only if one side deliberately reveals it during a dispute — and the decrypted copy is wiped when the deal closes."}},
-{"@type":"Question","name":"How tested is it?","acceptedAnswer":{"@type":"Answer","text":"Open beta. The contract passed a full on-chain cycle and adversarial attacks on our test range (52/52 in the VM), plus live mainnet dispute runs. Deals run from 50 to 10,000 KAS."}}
+{"@type":"Question","name":"How tested is it?","acceptedAnswer":{"@type":"Answer","text":"The contract is unaudited but passed a full on-chain cycle and adversarial attacks on our test range (52/52 in the VM), plus live mainnet dispute runs. Deals start at 50 KAS."}}
 ]}
 </script>
 </head>
@@ -129,25 +130,33 @@
   </nav>
 </header>
 
-<div class="netstat" id="netstat">
-  <span class="ns-item"><span class="ns-l">Network</span><span class="ns-v" id="ns-net">…</span></span>
-  <span class="ns-item"><span class="ns-l">DAA score</span><span class="ns-v ns-daa" id="ns-daa">…</span></span>
-  <span class="ns-item"><span class="ns-l">Node status</span><span class="ns-v"><span class="ns-dot" id="ns-dot"></span><span id="ns-status">…</span></span></span>
+<div class="status-rail status-rail--network" id="netstat" aria-label="Live Kaspa network status">
+  <div class="status-rail__inner">
+    <span class="status-metric"><span class="status-label">network</span><b class="status-value status-value--live" id="ns-net">checking</b></span>
+    <span class="status-metric"><span class="status-label">DAA</span><b class="status-value ns-daa" id="ns-daa">checking</b></span>
+    <span class="status-metric"><span class="status-label">node</span><b class="status-value status-value--live"><span class="ns-dot" id="ns-dot"></span><span id="ns-status">checking</span></b></span>
+    <span class="status-metric"><span class="status-label">covenants</span><b class="status-value">Toccata</b></span>
+    <span class="status-metric"><span class="status-label">keys</span><b class="status-value">local</b></span>
+    <span class="status-metric"><span class="status-label">custody</span><b class="status-value status-value--live">none</b></span>
+    <span class="status-metric"><span class="status-label">status</span><b class="status-value status-value--live">mainnet</b></span>
+  </div>
 </div>
 <script src="/assets/netstat.js?v=1" defer></script>
 
-<div class="netstat" id="secstat" style="display:none">
-  <span class="ns-item"><span class="ns-l">Contracts</span><span class="ns-v" id="sec-contracts">…</span></span>
-  <span class="ns-item"><span class="ns-l">Tests</span><span class="ns-v" id="sec-tests">…</span></span>
-  <span class="ns-item"><span class="ns-l">Verified</span><span class="ns-v" id="sec-verified">…</span></span>
-  <span class="ns-item"><a class="ns-v" href="/security.html" id="sec-link" style="color:var(--kaspa)">Security ▸</a></span>
-  <span class="ns-item"><a class="ns-v" href="https://github.com/Kaspaforge/kaspaforge" id="sec-github" target="_blank" rel="noopener" style="color:var(--kaspa)">GitHub</a></span>
+<div class="status-rail status-rail--security" id="secstat" style="display:none" aria-label="Verified Kaspa Forge security status">
+  <div class="status-rail__inner">
+    <span class="status-metric"><span class="status-label">contracts</span><b class="status-value" id="sec-contracts">checking</b></span>
+    <span class="status-metric"><span class="status-label">tests</span><b class="status-value status-value--live" id="sec-tests">checking</b></span>
+    <span class="status-metric"><span class="status-label">verified</span><b class="status-value" id="sec-verified">checking</b></span>
+    <span class="status-metric status-metric--push"><a class="status-action" href="/security.html" id="sec-link">Security ▸</a></span>
+    <span class="status-metric"><a class="status-action" href="https://github.com/Kaspaforge/kaspaforge" id="sec-github" target="_blank" rel="noopener">GitHub</a></span>
+  </div>
 </div>
 <script src="/assets/sec-status.js?v=4" defer></script>
 
 <div class="hero">
   <div class="txt">
-    <div class="eyebrow">Non-custodial · Kaspa covenants · mainnet beta</div>
+    <div class="eyebrow">Non-custodial · Kaspa covenants · mainnet</div>
     <h1 style="margin-top:12px">An escrow that<br>physically can't steal</h1>
     <p class="lead" style="margin-top:16px">
       Escrow for KAS deals without a money-holding middleman. The money sits in an
@@ -252,7 +261,7 @@
     </div>
   </div>
   <div style="margin-top:14px;font-size:12px;color:var(--ash2)">
-    <span>Open beta — <a href="/security.html">security &middot; verification</a></span>
+    <span>Mainnet · <a href="/security.html">security &middot; verification</a></span>
   </div>
 </section>
 
@@ -379,13 +388,13 @@
     </details>
     <details>
       <summary>How tested is it?</summary>
-      <p>Open beta. The contract passed a full on-chain cycle and adversarial attacks on our test range (52/52 in the VM), plus live mainnet dispute runs. Deals run from 50 to 10,000 KAS.</p>
+      <p>The contract is unaudited but passed a full on-chain cycle and adversarial attacks on our test range (52/52 in the VM), plus live mainnet dispute runs. Deals start at 50 KAS.</p>
     </details>
   </div>
 
   <div class="note alarm" style="margin-top:26px">
-    <b>Open beta.</b> Keep deals within the 50–10,000 KAS range and don't
-    escrow more than you'd trust to a beta. Every spend path in the covenant pays a party of the deal — the operator can't
+    Non-custodial: we never hold your funds. The escrow covenant is open source and unaudited — verify before you send. Minimum deal 50 KAS.
+    Every spend path in the covenant pays a party of the deal — the operator can't
     redirect funds; the fairness of a verdict is the arbiter's judgement on the evidence you provide. This is a tool, not financial or legal advice.
   </div>
 </section>
@@ -401,6 +410,7 @@
       <a href="/safe.html">Safe</a>
       <a href="/escrow-index.html">Escrow</a>
       <a href="/market.html">Market</a>
+      <a href="/deposit-index.html">Deposit</a>
       <a href="/blog/">Blog</a>
       <a href="/docs/">Docs</a>
       <a href="/recover.html">Recovery</a>
@@ -432,6 +442,5 @@ fetch('/api/safe/info').then(function(r){return r.json()}).then(function(i){
 })();
 </script>
 <script src="/assets/kaspa-widget.js?v=4" defer></script>
-<script>if("serviceWorker" in navigator&&/(^|\.)kaspaforge\.org$|(^|\.)officeforge\.co$/.test(location.hostname))navigator.serviceWorker.register("/sw-escrow.js");</script>
 </body>
 </html>

@@ -29,8 +29,9 @@
 <meta name="theme-color" content="#0E1116">
 <link rel="manifest" href="/manifest-escrow.json">
 <link rel="apple-touch-icon" href="/assets/icons-escrow/apple-touch-icon.png">
-<script src="/assets/nav.js?v=7" defer></script>
+<script src="/assets/nav.js?v=8" defer></script>
 <link rel="stylesheet" href="/assets/safe.css?v=14">
+<link rel="stylesheet" href="/assets/status-rail.css?v=1">
 <style>
 /* ── эскроу-лендинг: схема ковенанта (подпись-визуал) + степпер спора + сравнение ── */
 .cov { width: min(430px, 92vw); }
@@ -107,7 +108,7 @@
 {"@type":"Question","name":"А если ваш сайт исчезнет посреди сделки?","acceptedAnswer":{"@type":"Answer","text":"Сделка — ончейн-контракт с аварийным таймаутом: если арбитр не вынес вердикт к контрактному дедлайну, средства сами уходят стороне по умолчанию. Контракт и офлайн-инструменты открыты — сделка переживёт сайт."}},
 {"@type":"Question","name":"Сколько это стоит?","acceptedAnswer":{"@type":"Answer","text":"Создание сделки бесплатно. Нормальный исход — релиз, возврат или взаимная договорённость — 0.5% (мин 1.2 KAS). Арбитраж — 2% (мин 5 KAS). Комиссия сервиса взимается ковенантом на каждом из этих путей; единственный путь без комиссии — аварийный таймаут (арбитр не вынес вердикт). Точная сумма видна до подтверждения."}},
 {"@type":"Question","name":"Кто видит нашу переписку?","acceptedAnswer":{"@type":"Answer","text":"Только вы двое. Чат сделки — ончейн-общение в BlockDAG Kaspa (протокол Kasia): каждое сообщение — сквозно зашифрованная транзакция, заякоренная ончейн — тред нельзя незаметно подделать или дописать задним числом. Сервер видит только шифртекст. Арбитр читает переписку, только если сторона осознанно раскрыла её в споре — а после закрытия сделки расшифрованная копия стирается."}},
-{"@type":"Question","name":"Насколько это проверено?","acceptedAnswer":{"@type":"Answer","text":"Открытая бета. Контракт прошёл полный ончейн-цикл и адверсариальные атаки на нашем полигоне (52/52 в VM) плюс живые прогоны споров на mainnet. Сделки от 50 до 10 000 KAS."}}
+{"@type":"Question","name":"Насколько это проверено?","acceptedAnswer":{"@type":"Answer","text":"Контракт не проходил внешний аудит, но прошёл полный ончейн-цикл и адверсариальные атаки на нашем полигоне (52/52 в VM) плюс живые прогоны споров на mainnet. Сделки от 50 KAS."}}
 ]}
 </script>
 </head>
@@ -128,25 +129,33 @@
   </nav>
 </header>
 
-<div class="netstat" id="netstat">
-  <span class="ns-item"><span class="ns-l">Сеть</span><span class="ns-v" id="ns-net">…</span></span>
-  <span class="ns-item"><span class="ns-l">DAA score</span><span class="ns-v ns-daa" id="ns-daa">…</span></span>
-  <span class="ns-item"><span class="ns-l">Нода</span><span class="ns-v"><span class="ns-dot" id="ns-dot"></span><span id="ns-status">…</span></span></span>
+<div class="status-rail status-rail--network" id="netstat" aria-label="Живой статус сети Kaspa">
+  <div class="status-rail__inner">
+    <span class="status-metric"><span class="status-label">сеть</span><b class="status-value status-value--live" id="ns-net">проверка</b></span>
+    <span class="status-metric"><span class="status-label">DAA</span><b class="status-value ns-daa" id="ns-daa">проверка</b></span>
+    <span class="status-metric"><span class="status-label">нода</span><b class="status-value status-value--live"><span class="ns-dot" id="ns-dot"></span><span id="ns-status">проверка</span></b></span>
+    <span class="status-metric"><span class="status-label">ковенанты</span><b class="status-value">Toccata</b></span>
+    <span class="status-metric"><span class="status-label">ключи</span><b class="status-value">локально</b></span>
+    <span class="status-metric"><span class="status-label">кастодия</span><b class="status-value status-value--live">нет</b></span>
+    <span class="status-metric"><span class="status-label">статус</span><b class="status-value status-value--live">mainnet</b></span>
+  </div>
 </div>
 <script src="/assets/netstat.js?v=1" defer></script>
 
-<div class="netstat" id="secstat" style="display:none">
-  <span class="ns-item"><span class="ns-l">Контракты</span><span class="ns-v" id="sec-contracts">…</span></span>
-  <span class="ns-item"><span class="ns-l">Тесты</span><span class="ns-v" id="sec-tests">…</span></span>
-  <span class="ns-item"><span class="ns-l">Проверено</span><span class="ns-v" id="sec-verified">…</span></span>
-  <span class="ns-item"><a class="ns-v" href="/ru/security.html" id="sec-link" style="color:var(--kaspa)">Безопасность ▸</a></span>
-  <span class="ns-item"><a class="ns-v" href="https://github.com/Kaspaforge/kaspaforge" id="sec-github" target="_blank" rel="noopener" style="color:var(--kaspa)">GitHub</a></span>
+<div class="status-rail status-rail--security" id="secstat" style="display:none" aria-label="Проверенный статус безопасности Kaspa Forge">
+  <div class="status-rail__inner">
+    <span class="status-metric"><span class="status-label">контракты</span><b class="status-value" id="sec-contracts">проверка</b></span>
+    <span class="status-metric"><span class="status-label">тесты</span><b class="status-value status-value--live" id="sec-tests">проверка</b></span>
+    <span class="status-metric"><span class="status-label">проверено</span><b class="status-value" id="sec-verified">проверка</b></span>
+    <span class="status-metric status-metric--push"><a class="status-action" href="/ru/security.html" id="sec-link">Безопасность ▸</a></span>
+    <span class="status-metric"><a class="status-action" href="https://github.com/Kaspaforge/kaspaforge" id="sec-github" target="_blank" rel="noopener">GitHub</a></span>
+  </div>
 </div>
 <script src="/assets/sec-status.js?v=4" defer></script>
 
 <div class="hero">
   <div class="txt">
-    <div class="eyebrow">Non-custodial · ковенанты Kaspa · mainnet-бета</div>
+    <div class="eyebrow">Non-custodial · ковенанты Kaspa · mainnet</div>
     <h1 style="margin-top:12px">Гарант, который физически<br>не может украсть</h1>
     <p class="lead" style="margin-top:16px">
       Гарант для сделок KAS, который не держит деньги. Деньги лежат в ковенанте
@@ -251,7 +260,7 @@
     </div>
   </div>
   <div style="margin-top:14px;font-size:12px;color:var(--ash2)">
-    <span>Открытая бета — <a href="/ru/security.html">безопасность &middot; проверка</a></span>
+    <span>Mainnet · <a href="/ru/security.html">безопасность &middot; проверка</a></span>
   </div>
 </section>
 
@@ -378,13 +387,13 @@
     </details>
     <details>
       <summary>Насколько это проверено?</summary>
-      <p>Открытая бета. Контракт прошёл полный ончейн-цикл и адверсариальные атаки на нашем полигоне (52/52 в VM) плюс живые прогоны споров на mainnet. Сделки от 50 до 10 000 KAS.</p>
+      <p>Контракт не проходил внешний аудит, но прошёл полный ончейн-цикл и адверсариальные атаки на нашем полигоне (52/52 в VM) плюс живые прогоны споров на mainnet. Сделки от 50 KAS.</p>
     </details>
   </div>
 
   <div class="note alarm" style="margin-top:26px">
-    <b>Открытая бета.</b> Держите сделки в диапазоне 50–10 000 KAS и не
-    доверяйте бете больше, чем готовы. Каждый путь траты в ковенанте платит стороне сделки — оператор не может
+    Некостодиально: мы никогда не держим ваши средства. Ковенант эскроу открыт и не проходил внешний аудит — проверяйте перед отправкой. Минимальная сделка — 50 KAS.
+    Каждый путь траты в ковенанте платит стороне сделки — оператор не может
     перенаправить средства; справедливость вердикта — решение арбитра по представленным доказательствам. Это инструмент, а не финансовый или юридический совет.
   </div>
 </section>
@@ -400,6 +409,7 @@
       <a href="/ru/safe.html">Сейф</a>
       <a href="/ru/escrow-index.html">Гарант</a>
       <a href="/ru/market.html">Маркет</a>
+      <a href="/ru/deposit-index.html">Залог</a>
       <a href="/ru/blog/">Блог</a>
       <a href="/ru/docs/">Документы</a>
       <a href="/ru/recover.html">Восстановление</a>
@@ -430,6 +440,5 @@ fetch('/api/safe/info').then(function(r){return r.json()}).then(function(i){
 })();
 </script>
 <script src="/assets/kaspa-widget.js?v=4" defer></script>
-<script>if("serviceWorker" in navigator&&/(^|\.)kaspaforge\.org$|(^|\.)officeforge\.co$/.test(location.hostname))navigator.serviceWorker.register("/sw-escrow.js");</script>
 </body>
 </html>

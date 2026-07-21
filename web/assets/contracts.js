@@ -19,7 +19,7 @@ export function getTemplate(catalog, id) {
 }
 
 // Templates to show in browse/pick surfaces (catalog page, escrow picker). Drops `hidden`
-// entries (beta gate) while preserving catalog order. getTemplate() is intentionally NOT
+// entries (staging gate) while preserving catalog order. getTemplate() is intentionally NOT
 // filtered — an existing deal on a hidden template must still resolve its metadata for display.
 export function visibleTemplates(catalog) {
   const list = catalog && Array.isArray(catalog.templates) ? catalog.templates : [];

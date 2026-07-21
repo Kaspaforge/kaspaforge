@@ -285,7 +285,7 @@
   <p>The contract itself is consensus logic. Turning it into a usable product requires several layers.</p>
   <h3>Browser-side key management (WASM core)</h3>
   <p>Kaspa Safe's WASM crate embeds the same <code>vault.sil</code> source and compiles it client-side. All seven transaction builders — <code>build_initiate_tx</code>, <code>build_cancel_tx</code>, <code>build_complete_tx</code>, and so on — execute entirely in the browser. The server receives only signed transactions and public parameters.</p>
-  <p>The <a class="ln" href="/desk.html">Kaspa Forge desk</a> (encrypted HD profile) derives vault keys from a master seed using:</p>
+  <p>The <a class="ln" href="/desk">Kaspa Forge desk</a> (encrypted HD profile) derives vault keys from a master seed using:</p>
   <pre><code>HMAC-SHA512(key=seed, msg=&quot;kaspaforge/v1/vault/&lt;index&gt;&quot;)</code></pre>
   <p>The first 32 bytes of the HMAC output become the secret key. A single <code>.age</code> key-file backup (scrypt-encrypted, ASCII-armored, compatible with the upstream <code>age -d</code> CLI) covers all current and future vaults.</p>
   <h3>The watcher and alerting layer</h3>

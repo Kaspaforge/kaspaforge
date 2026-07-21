@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#0E1116">
 <link rel="manifest" href="/manifest-escrow.json">
 <link rel="apple-touch-icon" href="/assets/icons-escrow/apple-touch-icon.png">
-<script src="/assets/nav.js?v=7" defer></script>
+<script src="/assets/nav.js?v=8" defer></script>
 <link rel="stylesheet" href="/assets/safe.css?v=14">
 <link rel="stylesheet" href="/assets/escrow.css?v=7">
 <script src="/assets/qrcode.min.js"></script>
@@ -39,7 +39,7 @@
   <div class="eyebrow">New escrow deal</div>
   <h1 style="font-size:clamp(28px,4vw,40px);margin:10px 0 8px">Escrow a deal</h1>
   <p class="lead">A guarantor that <b>physically can't run off with the money</b>. The arbiter can settle a dispute — buyer, seller, or a split — but the covenant makes sure the coins can only ever reach the buyer or the seller.</p>
-  <div class="note alarm" style="margin-top:16px"><b>Open beta.</b> Keep deals small (cap 10,000 KAS). Non-custodial: we never hold your funds.</div>
+  <div class="note alarm" style="margin-top:16px">Non-custodial: we never hold your funds. The escrow covenant is open source and unaudited — verify before you send. Minimum deal 50 KAS.</div>
   <div id="err" class="note alarm" style="display:none" role="alert"></div>
 
   <div style="margin-top:30px">
@@ -86,7 +86,7 @@
         </div>
         <div class="hint" id="win-hint" style="margin-top:4px"></div>
         <label for="amount" style="margin-top:16px">Amount the seller receives (KAS)</label>
-        <input type="number" id="amount" min="50" max="10000" step="0.01" placeholder="100" inputmode="decimal">
+        <input type="number" id="amount" min="50" step="0.01" placeholder="100" inputmode="decimal">
         <div class="hint" id="cap-hint" style="margin-top:4px"></div>
         <div id="fund-summary" style="display:none;margin-top:6px;font-family:var(--mono);font-size:12.5px;color:var(--ash)"></div>
         <table class="fee-tbl" aria-live="polite">
@@ -132,7 +132,7 @@
     <div class="step" id="st2" data-n="2">
       <h3>Your key & invite</h3>
       <div class="body">
-        <p class="note"><b>🔑 No recovery sheet to save.</b> Your key and this deal are saved automatically to your encrypted <b>master key file</b> — your profile in the <a href="/desk.html">Desk</a>. Back it up once from the Desk ("Export key file"); one file covers every deal, vault and listing.</p>
+        <p class="note"><b>🔑 No recovery sheet to save.</b> Your key and this deal are saved automatically to your encrypted <b>master key file</b> — your profile in the <a href="/desk">Desk</a>. Back it up once from the Desk ("Export key file"); one file covers every deal, vault and listing.</p>
         <div class="keycard">
           <div class="kc-role"><span class="dot"></span><span id="key-label"></span></div>
           <code id="k-key"></code>
@@ -174,6 +174,7 @@
       <a href="/safe.html">Safe</a>
       <a href="/escrow-index.html">Escrow</a>
       <a href="/market.html">Market</a>
+      <a href="/deposit-index.html">Deposit</a>
       <a href="/blog/">Blog</a>
       <a href="/docs/">Docs</a>
       <a href="/recover.html">Recovery</a>
@@ -189,7 +190,7 @@
 
 <script type="module">
 import { boot, core, net, api, usdStr, genToken, L, $, copyText, qrInto, showErr, hideErr,
-         saveDeal, chatSupported, otcMethods, otcAddrOk, otcAddrKind } from '/assets/escrow.js?v=40';
+         saveDeal, chatSupported, otcMethods, otcAddrOk, otcAddrKind } from '/assets/escrow.js?v=41';
 import { requireUnlock } from '/assets/lock-ui.js';
 import * as session from '/assets/session.js';
 import { loadCatalog, getTemplate, classOf, loc, visibleTemplates } from '/assets/contracts.js';
@@ -371,7 +372,7 @@ $('b1').onclick = async () => {
   try {
     hideErr(err);
     const amt = Number($('amount').value);
-    if (!(amt >= 50 && amt <= 10000)) { showErr(err, new Error(L('amount_err'))); return; }
+    if (!(amt >= 50)) { showErr(err, new Error(L('amount_err'))); return; }
     if (tpl === 'otc' && role === 'buyer' && $('otc-method').value && $('otc-method').value !== 'other-crypto'
         && $('otc-addr').value.trim() && !(await validateOtcAddr())) {
       showErr(err, new Error(L('otc_leg_addr_bad').replace('{net}', 'the selected network'))); return;
@@ -431,6 +432,5 @@ function lang2() { return document.documentElement.lang === 'ru' ? 'ru/' : ''; }
 updateFee();
 </script>
 <script src="/assets/kaspa-widget.js?v=4" defer></script>
-<script>if("serviceWorker" in navigator&&/(^|\.)kaspaforge\.org$|(^|\.)officeforge\.co$/.test(location.hostname))navigator.serviceWorker.register("/sw-escrow.js");</script>
 </body>
 </html>

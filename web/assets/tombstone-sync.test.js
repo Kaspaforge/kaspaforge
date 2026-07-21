@@ -15,11 +15,10 @@ test('Safe and Escrow removals persist synced profile tombstones', () => {
 
 test('automatic recovery skips tombstones while explicit key-file import revives them', () => {
   const restore = read('./restore.js');
-  const desk = read('../desk.html');
-  const deskRu = read('../ru/desk.html');
+  const desk = read('../desk-legacy.html');
   assert.match(restore, /Object\.keys\(profile\.tombstones\?\.vaults \|\| \{\}\)/);
   assert.match(restore, /Object\.keys\(profile\.tombstones\?\.deals \|\| \{\}\)/);
-  for (const page of [desk, deskRu]) {
+  for (const page of [desk]) {
     assert.match(page, /reviveProfileRecords\(mergeProfile\(local, imported\), imported\)/);
   }
 });

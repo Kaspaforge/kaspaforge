@@ -30,7 +30,8 @@
 <meta name="theme-color" content="#0E1116">
 <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/safe.css?v=14">
-<script src="/assets/nav.js?v=7" defer></script>
+<link rel="stylesheet" href="/assets/status-rail.css?v=1">
+<script src="/assets/nav.js?v=8" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebApplication","name":"Kaspa Safe","url":"https://kaspaforge.org/ru/","applicationCategory":"FinanceApplication","operatingSystem":"Web","inLanguage":"ru","description":"Non-custodial сейф для KAS с задержкой вывода и окном отмены на ковенантах Kaspa Toccata.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD","description":"Ончейн-операции сейфа бесплатны; опциональный Telegram-мониторинг — 100 KAS/год, первые 30 дней бесплатно; применяется сетевая комиссия Kaspa (доли KAS)"}}
 </script>
@@ -43,7 +44,7 @@
 {"@type":"Question","name":"Как часто нужно делать чекин при наследовании?","acceptedAnswer":{"@type":"Answer","text":"Отдельного расписания нет — дедлайн задаёт сам срок наследования, выбранный при создании. Каждый чекин обнуляет таймер: достаточно отметиться хотя бы раз за срок. С подпиской на алерты Telegram напомнит, когда пройдёт ~80% срока; без неё следи за таймером в панели сейфа сам."}},
 {"@type":"Question","name":"А если вор получит оба ключа?","acceptedAnswer":{"@type":"Answer","text":"Тогда окно не спасёт — поэтому раздельное хранение ключей и есть фундамент. Горячий ключ живёт там, где ты им пользуешься; тревожному место на бумаге в другом месте. Вор с одним горячим ключом получает ноль."}},
 {"@type":"Question","name":"Чем это отличается от аппаратного кошелька?","acceptedAnswer":{"@type":"Answer","text":"Аппаратник защищает ключ, но подписанная транзакция необратима. Kaspa Safe защищает сами монеты: даже с украденным ключом любой вывод выдерживает твою задержку и может быть отменён. Вместе они отлично работают в паре."}},
-{"@type":"Question","name":"Насколько это проверено?","acceptedAnswer":{"@type":"Answer","text":"Бета. Контракт прошёл наш полный ончейн-цикл и адверсариальные атаки на тест-полигоне. Не храни больше, чем готов доверить бете — рекомендуемый потолок 5 000 KAS."}},
+{"@type":"Question","name":"Насколько это проверено?","acceptedAnswer":{"@type":"Answer","text":"Контракт не проходил внешний аудит, но прошёл наш полный ончейн-цикл и адверсариальные атаки на тест-полигоне. Некостодиально — используйте суммы, которые вы готовы доверить коду."}},
 {"@type":"Question","name":"Какая сеть?","acceptedAnswer":{"@type":"Answer","text":"Kaspa mainnet, ковенанты Toccata (активны с 30 июня 2026). Никаких токенов и мостов — обычные KAS в ковенант-скрипте."}}
 ]}
 </script>
@@ -64,25 +65,33 @@
   </nav>
 </header>
 
-<div class="netstat" id="netstat">
-  <span class="ns-item"><span class="ns-l">Сеть</span><span class="ns-v" id="ns-net">…</span></span>
-  <span class="ns-item"><span class="ns-l">DAA score</span><span class="ns-v ns-daa" id="ns-daa">…</span></span>
-  <span class="ns-item"><span class="ns-l">Нода</span><span class="ns-v"><span class="ns-dot" id="ns-dot"></span><span id="ns-status">…</span></span></span>
+<div class="status-rail status-rail--network" id="netstat" aria-label="Живой статус сети Kaspa">
+  <div class="status-rail__inner">
+    <span class="status-metric"><span class="status-label">сеть</span><b class="status-value status-value--live" id="ns-net">проверка</b></span>
+    <span class="status-metric"><span class="status-label">DAA</span><b class="status-value ns-daa" id="ns-daa">проверка</b></span>
+    <span class="status-metric"><span class="status-label">нода</span><b class="status-value status-value--live"><span class="ns-dot" id="ns-dot"></span><span id="ns-status">проверка</span></b></span>
+    <span class="status-metric"><span class="status-label">ковенанты</span><b class="status-value">Toccata</b></span>
+    <span class="status-metric"><span class="status-label">ключи</span><b class="status-value">локально</b></span>
+    <span class="status-metric"><span class="status-label">кастодия</span><b class="status-value status-value--live">нет</b></span>
+    <span class="status-metric"><span class="status-label">статус</span><b class="status-value status-value--live">mainnet</b></span>
+  </div>
 </div>
 <script src="/assets/netstat.js?v=1" defer></script>
 
-<div class="netstat" id="secstat" style="display:none">
-  <span class="ns-item"><span class="ns-l">Контракты</span><span class="ns-v" id="sec-contracts">…</span></span>
-  <span class="ns-item"><span class="ns-l">Тесты</span><span class="ns-v" id="sec-tests">…</span></span>
-  <span class="ns-item"><span class="ns-l">Проверено</span><span class="ns-v" id="sec-verified">…</span></span>
-  <span class="ns-item"><a class="ns-v" href="/ru/security.html" id="sec-link" style="color:var(--kaspa)">Безопасность ▸</a></span>
-  <span class="ns-item"><a class="ns-v" href="https://github.com/Kaspaforge/kaspaforge" id="sec-github" target="_blank" rel="noopener" style="color:var(--kaspa)">GitHub</a></span>
+<div class="status-rail status-rail--security" id="secstat" style="display:none" aria-label="Проверенный статус безопасности Kaspa Forge">
+  <div class="status-rail__inner">
+    <span class="status-metric"><span class="status-label">контракты</span><b class="status-value" id="sec-contracts">проверка</b></span>
+    <span class="status-metric"><span class="status-label">тесты</span><b class="status-value status-value--live" id="sec-tests">проверка</b></span>
+    <span class="status-metric"><span class="status-label">проверено</span><b class="status-value" id="sec-verified">проверка</b></span>
+    <span class="status-metric status-metric--push"><a class="status-action" href="/ru/security.html" id="sec-link">Безопасность ▸</a></span>
+    <span class="status-metric"><a class="status-action" href="https://github.com/Kaspaforge/kaspaforge" id="sec-github" target="_blank" rel="noopener">GitHub</a></span>
+  </div>
 </div>
 <script src="/assets/sec-status.js?v=4" defer></script>
 
 <div class="hero">
   <div class="txt">
-    <div class="eyebrow">Non-custodial · ковенанты Toccata · mainnet бета</div>
+    <div class="eyebrow">Non-custodial · ковенанты Toccata · mainnet</div>
     <h1 style="margin-top:12px">Украденный ключ —<br>ещё не украденные монеты</h1>
     <p class="lead" style="margin-top:16px">
       Kaspa Safe — сейф для KAS прямо на блокчейне. Любой вывод стартует с задержкой,
@@ -138,7 +147,7 @@
     <div class="tick" style="left:99%"></div><div class="lbl end">монеты у получателя</div>
   </div>
   <div style="margin-top:14px;font-size:12px;color:var(--ash2)">
-    <span>Открытая бета — <a href="/ru/security.html">безопасность &middot; проверка</a></span>
+    <span>Mainnet · <a href="/ru/security.html">безопасность &middot; проверка</a></span>
   </div>
 </section>
 
@@ -257,7 +266,7 @@
     </details>
     <details>
       <summary>Насколько это проверено?</summary>
-      <p>Бета. Контракт прошёл наш полный ончейн-цикл и адверсариальные атаки на тест-полигоне. Не храни больше, чем готов доверить бете — рекомендуемый потолок 5 000 KAS.</p>
+      <p>Контракт не проходил внешний аудит, но прошёл наш полный ончейн-цикл и адверсариальные атаки на тест-полигоне. Некостодиально — используйте суммы, которые вы готовы доверить коду.</p>
     </details>
     <details>
       <summary>Какая сеть?</summary>
@@ -265,8 +274,8 @@
     </details>
   </div>
   <div class="note alarm" style="margin-top:26px">
-    <b>Beta.</b> Контракт прошёл наш тест-полигон (полный цикл ончейн + атаки).
-    Не кладите больше, чем готовы доверить бете. Рекомендуемый максимум — 5 000 KAS.
+    Контракт прошёл наш тест-полигон (полный цикл ончейн + атаки).
+    Открыт и не проходил внешний аудит — некостодиально, поэтому используйте суммы, которые вы готовы доверить коду.
   </div>
 </section>
 
@@ -281,6 +290,7 @@
       <a href="/ru/safe.html">Сейф</a>
       <a href="/ru/escrow-index.html">Гарант</a>
       <a href="/ru/market.html">Маркет</a>
+      <a href="/ru/deposit-index.html">Залог</a>
       <a href="/ru/blog/">Блог</a>
       <a href="/ru/docs/">Документы</a>
       <a href="/ru/recover.html">Восстановление</a>
@@ -301,6 +311,5 @@
         .catch(() => { $('net-badge').textContent = 'нода недоступна'; });
 </script>
 <script src="/assets/kaspa-widget.js?v=4" defer></script>
-<script>if("serviceWorker" in navigator&&/(^|\.)kaspaforge\.org$|(^|\.)officeforge\.co$/.test(location.hostname))navigator.serviceWorker.register("/sw.js");</script>
 </body>
 </html>

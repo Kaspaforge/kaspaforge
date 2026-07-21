@@ -27,9 +27,11 @@ test('every Kaspa Forge website link uses the canonical GitHub repository', () =
 test('public mirror README presents Kaspa Forge without distributing the retired APK', () => {
   const readme = readFileSync(PUBLIC_README, 'utf8');
   assert.match(readme, /^# Kaspa Forge\b/m);
-  assert.match(readme, /Safe \+ Escrow \+ Market \+ Desk/);
+  assert.match(readme, /Safe \+ Escrow \+ Deposit \+ Market \+ Desk/);
+  assert.match(readme, /https:\/\/kaspaforge\.org\/deposit-index\.html/);
+  assert.match(readme, /covenant behind both Kaspa Escrow and Kaspa\s+Deposit/);
   assert.match(readme, /https:\/\/kaspaforge\.org/);
-  assert.match(readme, /prebuilt Android package is currently distributed/i);
+  assert.match(readme, /prebuilt Android package is\s+currently distributed/i);
   assert.doesNotMatch(readme, /KaspaSafe\.apk|github\.com\/Kaspaforge\/kaspaforge\/releases|release-apk/);
   assert.doesNotMatch(readme, /safe\.officeforge\.co|escrow\.officeforge\.co|pcdoctormsk-ctrl\/kaspa-safe/);
 });

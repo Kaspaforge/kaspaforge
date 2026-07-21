@@ -4,7 +4,7 @@
    anymore; the default for any visitor = EN. Russian is just an OPTION: an explicit RU/EN
    switcher in the services bar (kf-nav below) on pages that have a mirror. */
 // pages that have a RU mirror (needed by the switcher in kf-nav)
-var KF_RU_MIRROR = /^\/(|index\.html|safe\.html|create\.html|manage\.html|desk\.html|escrow-index\.html|escrow\.html|deal\.html|market\.html|listing-new\.html|recover\.html|recover-escrow\.html|privacy\.html|privacy-escrow\.html|kaspa-forge\.html|agents\/?|docs\/([a-z-]+\.html)?|blog\/([a-z0-9-]+\.html)?)$/;
+var KF_RU_MIRROR = /^\/(|index\.html|safe\.html|create\.html|manage\.html|desk\.html|escrow-index\.html|escrow\.html|deal\.html|market\.html|deposit-index\.html|listing-new\.html|boards\.html|recover\.html|recover-escrow\.html|privacy\.html|privacy-escrow\.html|kaspa-forge\.html|agents\/?|docs\/([a-z-]+\.html)?|blog\/([a-z0-9-]+\.html)?)$/;
 
 /* Kaspa Forge — single-origin service navigation: a "workbench" bar above the header on EVERY
    page (Forge/Desk/Safe/Escrow/Market/Docs/Recovery). The active tab is a teal "hallmark"
@@ -47,10 +47,12 @@ var KF_RU_MIRROR = /^\/(|index\.html|safe\.html|create\.html|manage\.html|desk\.
   var p = ru ? '/ru' : '';
   var links = [
     [ru ? '/ru/' : '/', '⚒ Forge'],
-    [p + '/desk.html', ru ? 'Деск' : 'Desk'],
+    ['/desk', ru ? 'Деск' : 'Desk'],   // no RU mirror (stage 6): the desk is EN-only
     [p + '/safe.html', ru ? 'Сейф' : 'Safe'],
     [p + '/escrow-index.html', ru ? 'Эскроу' : 'Escrow'],
     [p + '/market.html', ru ? 'Маркет' : 'Market'],
+    [p + '/deposit-index.html', ru ? 'Залог' : 'Deposit'],
+    [p + '/boards.html', 'BOARDS'],
     [p + '/agents/', ru ? 'Агенты' : 'Agents'],
     [p + '/blog/', ru ? 'Блог' : 'Blog'],
     [p + '/docs/', ru ? 'Доки' : 'Docs'],
@@ -65,7 +67,7 @@ var KF_RU_MIRROR = /^\/(|index\.html|safe\.html|create\.html|manage\.html|desk\.
     a.href = links[i][0];
     a.textContent = links[i][1];
     a.className = 'kf-tab';
-    if (links[i][0] === p + '/desk.html') {
+    if (links[i][0] === '/desk') {
       a.className += ' kf-tab--desk';
       a.setAttribute('aria-label', ru ? 'Вернуться в Деск' : 'Back to Desk');
     }

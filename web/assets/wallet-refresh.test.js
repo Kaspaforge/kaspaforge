@@ -4,8 +4,7 @@ import { readFileSync } from 'node:fs';
 
 const wallet = readFileSync(new URL('./wallet.js', import.meta.url), 'utf8');
 const desks = [
-  readFileSync(new URL('../desk.html', import.meta.url), 'utf8'),
-  readFileSync(new URL('../ru/desk.html', import.meta.url), 'utf8'),
+  readFileSync(new URL('../desk-legacy.html', import.meta.url), 'utf8'),
 ];
 
 test('portfolio balance can query saved addresses without waiting for seed discovery', () => {

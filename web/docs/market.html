@@ -24,7 +24,7 @@
 <meta name="theme-color" content="#0E1116">
 <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/safe.css?v=14">
-<script src="/assets/nav.js?v=7" defer></script>
+<script src="/assets/nav.js?v=8" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"How the Kaspa Marketplace works — listings with escrow built in","description":"Every purchase opens a covenant escrow deal, so the seller can't be paid until the buyer confirms. Listing types, moderation, shipping geography, fees and security.","inLanguage":"en","url":"https://kaspaforge.org/docs/market.html","image":"https://kaspaforge.org/assets/og-market.png","dateModified":"2026-07-10","isPartOf":{"@type":"WebSite","name":"Kaspa Forge","url":"https://kaspaforge.org/"},"publisher":{"@type":"Organization","name":"OfficeForge","url":"https://officeforge.co"}}
 </script>
@@ -64,7 +64,7 @@
     <li><b>Receive</b> the goods or service, talking to the seller in the deal's <a href="/docs/escrow.html">end-to-end encrypted on-chain chat</a> (it becomes the case file if anything goes wrong).</li>
     <li><b>Release</b> when satisfied — only then can the seller be paid. A problem goes to a dispute and the arbiter, exactly like any escrow deal; if everyone goes silent, the deal still terminates by the covenant's own timers.</li>
   </ol>
-  <p class="hint" style="margin-top:10px">Everything about the money — fees (0.5% release, 2% arbitration), limits (50–10&nbsp;000 KAS), dispute windows, timeout guarantees — is literally the escrow's mechanics: read <a href="/docs/escrow.html">how Kaspa Escrow works</a>. The Marketplace adds a storefront on top; it does not add a single new way for funds to move.</p>
+  <p class="hint" style="margin-top:10px">Everything about the money — fees (0.5% release, 2% arbitration), limits (from 50 KAS), dispute windows, timeout guarantees — is literally the escrow's mechanics: read <a href="/docs/escrow.html">how Kaspa Escrow works</a>. The Marketplace adds a storefront on top; it does not add a single new way for funds to move.</p>
 
   <h2 style="margin-top:32px">Selling: listings</h2>
   <div style="margin-top:12px">
@@ -82,7 +82,7 @@
     <li><b>No reputation games.</b> The same on-chain script guards a first-time seller and a veteran equally; you don't need to evaluate anyone's karma — the money can't go anywhere the covenant doesn't allow.</li>
     <li><b>Disputes are real.</b> The encrypted deal chat can't be forged or backdated; an AI mediator proposes, a human arbiter decides, the covenant caps every outcome to buyer / seller / split. See <a href="/docs/escrow.html">the dispute rail</a>.</li>
     <li><b>What the server holds:</b> the public listing (that's the point of a storefront), encrypted deal traffic, and moderation records. Your keys stay in your browser. Details: <a href="/privacy-escrow.html">Escrow &amp; Marketplace privacy</a>.</li>
-    <li><b>Beta honesty.</b> Same status as the escrow: our full test cycle passed, deals capped at 50–10&nbsp;000 KAS.</li>
+    <li><b>Honest boundaries.</b> Same status as the escrow: our full test cycle passed, deals start at 50 KAS.</li>
   </ol>
 
   <p class="hint" style="margin-top:24px">See also: <a href="/market.html">browse the market</a> · <a href="/docs/escrow.html">how Kaspa Escrow works</a> · <a href="/docs/desk.html">the Desk &amp; your keys</a></p>

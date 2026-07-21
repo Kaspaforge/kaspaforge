@@ -5,8 +5,7 @@ import { readFileSync } from 'node:fs';
 const page = (path) => readFileSync(new URL(path, import.meta.url), 'utf8');
 
 for (const [lang, desk, manage, selectLabel, selectedLabel, walletLabel] of [
-  ['EN', page('../desk.html'), page('../manage.html'), 'Choose a safe', 'Withdraw selected', 'To my wallet'],
-  ['RU', page('../ru/desk.html'), page('../ru/manage.html'), 'Выбери сейф', 'Вывести выбранные', 'На мой кошелёк'],
+  ['EN', page('../desk-legacy.html'), page('../manage.html'), 'Choose a safe', 'Withdraw selected', 'To my wallet'],
 ]) {
   test(`${lang} wallet exposes a persistent safe target selector`, () => {
     assert.match(desk, /id="w-safe-target"/);

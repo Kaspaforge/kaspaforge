@@ -40,7 +40,7 @@
     <nav aria-label="Kaspa Forge">
       <a href="/safe.html">Safe</a><a href="/escrow-index.html">Escrow</a><a href="/market.html">Market</a>
       <a class="nav-current" href="/agents/" aria-current="page">Agents</a><a href="/blog/">Blog</a><a href="/docs/">Docs</a>
-      <a href="/ru/agents/" lang="ru" hreflang="ru">RU</a><a class="btn btn-kaspa btn-sm" href="/desk.html">Open Desk</a>
+      <a href="/ru/agents/" lang="ru" hreflang="ru">RU</a><a class="btn btn-kaspa btn-sm" href="/desk">Open Desk</a>
     </nav>
     <button class="burger" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
   </div>
@@ -169,7 +169,7 @@
 
 <script>
 (function(){var top=document.getElementById('top'),btn=top.querySelector('.burger');function set(open){top.classList.toggle('open',open);btn.setAttribute('aria-expanded',open?'true':'false')}btn.addEventListener('click',function(e){e.stopPropagation();set(!top.classList.contains('open'))});document.addEventListener('click',function(e){if(top.classList.contains('open')&&!top.contains(e.target))set(false)});document.addEventListener('keydown',function(e){if(e.key==='Escape')set(false)});})();
-if('serviceWorker' in navigator&&/^(kaspaforge\.org|kaspa\.officeforge\.co)$/.test(location.hostname))navigator.serviceWorker.register('/sw-forge.js');
+
 </script>
 <script src="/assets/kaspa-widget.js?v=4" defer></script>
 </body>

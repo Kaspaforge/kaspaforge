@@ -40,7 +40,7 @@
     {
       "id": "design-3-stage", "class": "service",
       "hidden": true,
-      "_hidden_note": "Beta: hidden from the catalog page + escrow picker until the staged next-stage flow (§6.4) ships with tests. Client-only flag; server ignores it (serde), no rebuild needed. Remove to re-enable.",
+      "_hidden_note": "Staged: hidden from the catalog page + escrow picker until the next-stage flow (§6.4) ships with tests. Client-only flag; server ignores it (serde), no rebuild needed. Remove to re-enable.",
       "title": { "en": "3-stage design", "ru": "Дизайн в 3 этапа" },
       "goal": { "en": "Design work in three checkpoints; one escrow per stage recommended.", "ru": "Дизайн в три контрольные точки; рекомендуется по эскроу на этап." },
       "roles": { "buyer": { "en": "Client", "ru": "Заказчик" }, "seller": { "en": "Designer", "ru": "Дизайнер" } },
@@ -177,7 +177,7 @@
       "stages": [],
       "renewal_note": { "en": "", "ru": "" },
       "default_outcome_note": { "en": "No dispute within the window auto-releases to the seller.", "ru": "Отсутствие спора в окне авто-релизит продавцу." },
-      "dispute_guidance": { "en": "Arbiter checks delivery proof (file hash / access) in the chat thread.", "ru": "Арбитр проверяет пруф выдачи (хэш файла / доступ) в треде чата." },
+      "dispute_guidance": { "en": "Check electronic delivery after funding against the promised format, version, license and acceptance criteria. A link, hash or key proves transmission, not automatically conformity or usability. Do not use shipping or tracking evidence and do not claim access to private links or unsupported files.", "ru": "Проверь электронную выдачу после funding по обещанным формату, версии, лицензии и критериям приёмки. Ссылка, хэш или ключ доказывают передачу, но не автоматически соответствие и работоспособность. Не используй географию/трек и не выдумывай доступ к приватным ссылкам или неподдерживаемым файлам." },
       "descr_scaffold": { "en": "Item: \nDelivery method: \nLicense terms: \nFile hash: ", "ru": "Товар: \nСпособ выдачи: \nУсловия лицензии: \nХэш файла: " }
     }
   ]

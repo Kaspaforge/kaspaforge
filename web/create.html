@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#0E1116">
 <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/safe.css?v=14">
-<script src="/assets/nav.js?v=7" defer></script>
+<script src="/assets/nav.js?v=8" defer></script>
 <script src="/assets/qrcode.min.js"></script>
 </head>
 <body>
@@ -31,7 +31,7 @@
   <div class="eyebrow">New vault</div>
   <h1 style="font-size:clamp(28px,4vw,40px);margin:10px 0 8px">Forge a vault</h1>
   <p class="lead">Four steps. Everything cryptographic happens in this browser tab — we never see or store your keys.</p>
-  <div class="note alarm" style="margin-top:16px"><b>Open beta.</b> Don't store more than you'd trust to a beta (we suggest ≤ 5,000 KAS). The contract is open source.</div>
+  <div class="note alarm" style="margin-top:16px">The vault covenant is open source and unaudited — verify before you store. Non-custodial: no support desk can reverse a transaction, so use amounts you're comfortable trusting to code.</div>
   <div id="err" class="note alarm" style="display:none"></div>
 
   <div style="margin-top:34px">
@@ -73,7 +73,7 @@
     <div class="step" data-n="2" id="st2">
       <h3>Three keys — two in your key file, one on a card</h3>
       <div class="body">
-        <p class="note"><b>🔑 No recovery sheet to save.</b> The hot and funding keys and this vault are saved automatically to your encrypted <b>master key file</b> — your profile in the <a href="/desk.html">Desk</a>. Back it up once from the Desk ("Export key file"). <b>The alarm key is the deliberate exception:</b> it lives on a separate <b>alarm card</b> below, apart from the file — so that stealing your key file and password is never enough to empty the vault.</p>
+        <p class="note"><b>🔑 No recovery sheet to save.</b> The hot and funding keys and this vault are saved automatically to your encrypted <b>master key file</b> — your profile in the <a href="/desk">Desk</a>. Back it up once from the Desk ("Export key file"). <b>The alarm key is the deliberate exception:</b> it lives on a separate <b>alarm card</b> below, apart from the file — so that stealing your key file and password is never enough to empty the vault.</p>
         <div class="keycard">
           <div class="kc-role"><span class="dot"></span>Hot key — starts withdrawals and check-ins</div>
           <code id="k-hot"></code>
@@ -132,7 +132,7 @@
         <p class="hint" style="margin-top:8px">🔑 The private key to this address is yours — it's saved in your master key file (your Desk profile).</p>
         <div class="kv" style="margin-top:14px"><span class="k">Received</span><span class="v" id="f-recv">waiting for transfer…</span></div>
         <div id="swap-widget" style="margin-top:16px"></div>
-        <div class="note" id="beta-warn" style="display:none"></div>
+        <div class="note" id="risk-warn" style="display:none"></div>
         <div style="margin-top:14px"><button class="btn btn-kaspa" id="b3" disabled>Lock into vault</button></div>
       </div>
     </div>
@@ -186,6 +186,7 @@
       <a href="/safe.html">Safe</a>
       <a href="/escrow-index.html">Escrow</a>
       <a href="/market.html">Market</a>
+      <a href="/deposit-index.html">Deposit</a>
       <a href="/blog/">Blog</a>
       <a href="/docs/">Docs</a>
       <a href="/recover.html">Recovery</a>
@@ -522,9 +523,8 @@ async function enterStep3() {
         $('f-recv').textContent = kas(sum);
         $('f-recv').className = 'v ok';
         $('b3').disabled = false;
-        const w = $('beta-warn');
+        const w = $('risk-warn');
         const msgs = [];
-        if (sum > 5000e8) msgs.push(L('over_cap'));
         // large amount with a short cancel window
         if (net() === 'mainnet' && sum > 10000e8 && delay < 24 * 36000) msgs.push('⚠ ' + L('fund_high_delay'));
         if (msgs.length) { w.style.display = 'block'; w.innerHTML = msgs.join('<br>'); }
@@ -611,6 +611,5 @@ $('tg-btn').onclick = async () => {
 };
 </script>
 <script src="/assets/kaspa-widget.js?v=4" defer></script>
-<script>if("serviceWorker" in navigator&&/(^|\.)kaspaforge\.org$|(^|\.)officeforge\.co$/.test(location.hostname))navigator.serviceWorker.register("/sw.js");</script>
 </body>
 </html>

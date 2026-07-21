@@ -41,7 +41,10 @@ test('tampering, rollback, fork and history gap are rejected', async () => {
   const mirror = await createMirrorIdentity(100);
   const p = { ...profile(), mirror };
   const one = await createSnapshot('AGE one', p, mirror, null, 102);
-  const tampered = { ...one, ciphertext: one.ciphertext.slice(0, -1) + (one.ciphertext.endsWith('A') ? 'B' : 'A') };
+  // Mutate a significant base64url sextet. Changing the final character is flaky because, for
+  // some encoded lengths, it only changes unused padding bits and decodes to identical bytes.
+  const first = one.ciphertext[0];
+  const tampered = { ...one, ciphertext: (first === 'A' ? 'B' : 'A') + one.ciphertext.slice(1) };
   await assert.rejects(() => verifySnapshot(tampered, mirror), /hash mismatch/);
   await assert.rejects(() => verifySnapshot(one, mirror, { version: 2, blob_hash: 'f'.repeat(64) }), /rollback/);
   await assert.rejects(() => verifySnapshot(one, mirror, { version: 1, blob_hash: 'f'.repeat(64) }), /fork/);

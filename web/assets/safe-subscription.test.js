@@ -76,7 +76,7 @@ test("the API and every Safe subscription surface use delivery-aware status", ()
   assert.match(api, /"delivery_configured"/);
   assert.match(api, /"delivery_active"/);
 
-  for (const relative of ["../desk.html", "../ru/desk.html", "../manage.html", "../ru/manage.html"]) {
+  for (const relative of ["../desk-legacy.html", "../manage.html", "../ru/manage.html"]) {
     const html = readFileSync(new URL(relative, import.meta.url), "utf8");
     assert.match(html, /safe-subscription\.js\?v=2/);
     assert.match(html, /subscriptionView\(s,/);

@@ -16,7 +16,7 @@
 <meta name="theme-color" content="#0E1116">
 <link rel="apple-touch-icon" href="/assets/icons-escrow/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/safe.css?v=14">
-<script src="/assets/nav.js?v=7" defer></script>
+<script src="/assets/nav.js?v=8" defer></script>
 </head>
 <body>
 <div class="wrap">
@@ -89,7 +89,7 @@
 
   <div class="plate">
     <h2 style="font-size:20px">Disputes: reveal & what the arbiter sees</h2>
-    <p>Until a dispute, the server holds only ciphertext and no one can read your chat. In a dispute, resolution needs evidence, so a party may <b>deliberately reveal their chat key</b> (sent to <code>/dispute/reveal</code>) — this is the only time a key leaves your device, and a chat key can never move funds. On reveal, the server decrypts that side's thread and stores the plaintext transcript <b>for the arbiter only</b>, alongside media the arbiter can decrypt with the keys carried inside the revealed messages. The AI mediator reads this to propose a non-binding outcome; a human arbiter reads it only if the case escalates. <b>The revealed transcript is erased when the deal closes</b>, and encrypted media blobs are deleted on a retention timer after closing. The on-chain ciphertext remains (it is the tamper-evident record), but without a revealed key it is unreadable.</p>
+    <p>Until a dispute, the server holds only ciphertext and no one can read your chat. In a dispute, resolution needs evidence, so a party may <b>deliberately reveal their chat key</b> (sent to <code>/dispute/reveal</code>) — this is the only time a key leaves your device, and a chat key can never move funds. On reveal, the server decrypts that side's thread and stores the plaintext transcript <b>for the arbiter only</b>, alongside media the arbiter can decrypt with the keys carried inside the revealed messages. The AI mediator reads this to propose a non-binding outcome; a human arbiter reads it only if the case escalates. <b>The revealed transcript is erased when the deal closes</b>, and encrypted media blobs are deleted 24 hours after the deal closes. The on-chain ciphertext remains (it is the tamper-evident record), but without a revealed key it is unreadable.</p>
   </div>
 
   <div class="plate">
@@ -104,7 +104,7 @@
 
   <div class="plate">
     <h2 style="font-size:20px">Retention & deletion</h2>
-    <p>A deal's records exist so the deal can run and be watched. The revealed chat transcript is wiped at close; media blobs are deleted on a retention timer after close. To delete a deal's remaining records (including any Telegram link), write to <a href="mailto:kaspa@officeforge.co">kaspa@officeforge.co</a> naming the deal. On-chain data cannot be deleted by anyone — that is the nature of a blockchain.</p>
+    <p>A deal's records exist so the deal can run and be watched. The revealed chat transcript is wiped at close; media blobs are deleted 24 hours after close — save anything you need, including a purchase you received, before then. To delete a deal's remaining records (including any Telegram link), write to <a href="mailto:kaspa@officeforge.co">kaspa@officeforge.co</a> naming the deal. On-chain data cannot be deleted by anyone — that is the nature of a blockchain.</p>
   </div>
 
   <div class="plate">
@@ -113,9 +113,8 @@
   </div>
 </div>
 
-<footer><div class="row wrap"><a class="foot-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="OfficeForge"><img src="/assets/logo.png" alt="OfficeForge"></a><span>Kaspa Escrow · non-custodial beta · <a href="https://officeforge.co">OfficeForge</a> · feedback: kaspa@officeforge.co · <a href="/privacy-escrow.html">Privacy</a> · <a href="/terms.html">Terms</a> &middot; <a href="/security.html">Security</a></span></div></footer>
+<footer><div class="row wrap"><a class="foot-ofs" href="https://officeforge.co" target="_blank" rel="noopener" aria-label="OfficeForge"><img src="/assets/logo.png" alt="OfficeForge"></a><span>Kaspa Escrow · non-custodial · <a href="https://officeforge.co">OfficeForge</a> · feedback: kaspa@officeforge.co · <a href="/privacy-escrow.html">Privacy</a> · <a href="/terms.html">Terms</a> &middot; <a href="/security.html">Security</a></span></div></footer>
 </div>
 <script src="/assets/kaspa-widget.js?v=4" defer></script>
-<script>if("serviceWorker" in navigator&&/(^|\.)kaspaforge\.org$|(^|\.)officeforge\.co$/.test(location.hostname))navigator.serviceWorker.register("/sw-escrow.js");</script>
 </body>
 </html>

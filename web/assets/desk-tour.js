@@ -31,7 +31,7 @@ const COPY = {
       { view: 'chats', sel: '#tab-chats', title: 'Chats',
         text: 'Talk to buyers and sellers inside the relevant listing or deal. Unread badges bring new messages to the front without exposing your key file.' },
       { view: 'settings', sel: '.desk-utils', title: 'Back up before you leave',
-        text: 'Export the encrypted .age key file and keep it apart from your password. Forge Sync connects devices holding copies of the same profile, even copies made before Sync existed; alarm, heir, and arbiter keys stay only on their current device.' },
+        text: 'Export the encrypted .age key file and keep it apart from your password. Forge Sync connects devices holding copies of the same profile, even copies made before Sync existed. Safe alarm keys are never synced; another device needs a current .age backup from the device holding the key, or the alarm card, to cancel a withdrawal.' },
     ],
   },
   ru: {
@@ -57,7 +57,7 @@ const COPY = {
       { view: 'chats', sel: '#tab-chats', title: 'Чаты',
         text: 'Общайся с покупателями и продавцами внутри объявления или сделки. Бейджи непрочитанных выводят новые сообщения на первый план, не раскрывая файл ключей.' },
       { view: 'settings', sel: '.desk-utils', title: 'Сделай бэкап перед выходом',
-        text: 'Экспортируй зашифрованный файл ключей .age и храни его отдельно от пароля. Forge Sync связывает устройства с копиями одного профиля, даже сделанными до появления Sync; alarm, heir и arbiter keys остаются только на своём устройстве.' },
+        text: 'Экспортируй зашифрованный файл ключей .age и храни его отдельно от пароля. Forge Sync связывает устройства с копиями одного профиля, но тревожные ключи сейфов не синхронизирует. Для отмены вывода на другом устройстве импортируй актуальный .age-файл с устройства, где есть тревожный ключ, или используй alarm-карточку.' },
     ],
   },
 };

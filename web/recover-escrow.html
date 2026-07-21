@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" href="/assets/icons-escrow/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/safe.css?v=14">
 <link rel="stylesheet" href="/assets/escrow.css?v=7">
-<script src="/assets/nav.js?v=7" defer></script>
+<script src="/assets/nav.js?v=8" defer></script>
 </head>
 <body>
 <div class="wrap">
@@ -49,7 +49,7 @@
   <!-- BLOCK 0: master key file (primary path) -->
   <div class="plate" style="margin-top:28px;border-left:3px solid var(--kaspa)">
     <h2 style="font-size:20px">Recover from your master key file (the simple way)</h2>
-    <p class="hint">Every deal you create or join is saved automatically into one encrypted <b>master key file</b> — your Desk profile, together with your vaults and listings. On any device, open your <a href="/desk.html"><b>Desk</b></a>, choose <b>Import / restore</b> and load the <span class="mono">.age</span> file with its password. The Desk restores the profile and re-discovers its public deal records.</p>
+    <p class="hint">Every deal you create or join is saved automatically into one encrypted <b>master key file</b> — your Desk profile, together with your vaults and listings. On any device, open your <a href="/desk"><b>Desk</b></a>, choose <b>Import / restore</b> and load the <span class="mono">.age</span> file with its password. The Desk restores the profile and re-discovers its public deal records.</p>
     <p class="hint" style="margin-top:8px"><b>Back up the current file now:</b> Desk → Export key file. Forge Sync is useful for an encrypted mirror, but a fresh offline <span class="mono">.age</span> export remains the recovery copy you control.</p>
   </div>
 
@@ -150,6 +150,7 @@
       <a href="/safe.html">Safe</a>
       <a href="/escrow-index.html">Escrow</a>
       <a href="/market.html">Market</a>
+      <a href="/deposit-index.html">Deposit</a>
       <a href="/blog/">Blog</a>
       <a href="/docs/">Docs</a>
       <a href="/recover.html">Recovery</a>
@@ -203,6 +204,5 @@ document.getElementById('dl-checklist').addEventListener('click', function () {
 });
 </script>
 <script src="/assets/kaspa-widget.js?v=4" defer></script>
-<script>if("serviceWorker" in navigator&&/(^|\.)kaspaforge\.org$|(^|\.)officeforge\.co$/.test(location.hostname))navigator.serviceWorker.register("/sw-escrow.js");</script>
 </body>
 </html>

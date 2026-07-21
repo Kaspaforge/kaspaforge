@@ -29,7 +29,7 @@
 <meta name="theme-color" content="#0E1116">
 <link rel="manifest" href="/manifest-escrow.json">
 <link rel="apple-touch-icon" href="/assets/icons-escrow/apple-touch-icon.png">
-<script src="/assets/nav.js?v=7" defer></script>
+<script src="/assets/nav.js?v=8" defer></script>
 <link rel="stylesheet" href="/assets/safe.css?v=14">
 <style>
 /* Forge Contracts — сетка каталога (стили только для этой страницы; safe.css шарится 15+
@@ -77,6 +77,7 @@
   <nav>
     <a href="/ru/escrow-index.html">Как работает</a>
     <a href="/ru/market.html">Маркет</a>
+    <a href="/ru/deposit-index.html">Залог</a>
     <a class="cta" href="/ru/escrow.html">Создать сделку</a>
   </nav>
 </header>
@@ -123,6 +124,5 @@ try {
   grid.innerHTML = '<p>Не удалось загрузить каталог. <a href="/ru/escrow.html">Создать свою сделку.</a></p>';
 }
 </script>
-<script>if("serviceWorker" in navigator&&/(^|\.)kaspaforge\.org$|(^|\.)officeforge\.co$/.test(location.hostname))navigator.serviceWorker.register("/sw-escrow.js");</script>
 </body>
 </html>

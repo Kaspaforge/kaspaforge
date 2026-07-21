@@ -12,7 +12,7 @@
 <meta name="theme-color" content="#0E1116">
 <link rel="manifest" href="/manifest-escrow.json">
 <link rel="apple-touch-icon" href="/assets/icons-escrow/apple-touch-icon.png">
-<script src="/assets/nav.js?v=7" defer></script>
+<script src="/assets/nav.js?v=8" defer></script>
 <link rel="stylesheet" href="/assets/safe.css?v=14">
 <link rel="stylesheet" href="/assets/escrow.css?v=7">
 <script src="/assets/qrcode.min.js"></script>
@@ -67,8 +67,10 @@
     <div class="kv"><span class="k" id="j-type-lbl">Type</span><span class="v" id="j-type"></span></div>
     <div class="kv"><span class="k" id="j-amount-lbl">Amount</span><span class="v" id="j-amount"></span></div>
     <div class="kv"><span class="k" id="j-window-lbl">Window</span><span class="v" id="j-window"></span></div>
+    <div class="kv" id="j-rep-row" style="display:none"><span class="k">Seller rating</span><span class="v" id="j-rep"></span></div>
     <div class="kv"><span class="k" id="j-descr-lbl">Conditions</span><span class="v" id="j-descr" style="text-align:left;max-width:100%;white-space:pre-wrap;font-family:var(--body)"></span></div>
     <p class="hint" id="j-fee" style="margin-top:10px"></p>
+    <p class="hint" id="j-digital-hint" style="display:none">Electronic delivery only. The seller delivers through the encrypted deal chat after escrow is funded; check the item before the dispute window ends.</p>
     <!-- OTC counter-leg (Task 7): shown only when the joiner is the buyer and the address wasn't set at create -->
     <div id="join-otc-wrap" style="display:none;margin-top:10px">
       <label for="join-otc-addr" id="join-otc-lbl"></label>
@@ -94,6 +96,8 @@
       <div class="kv"><span class="k" id="s-addr-lbl"></span><span class="v" id="s-addr"></span></div>
       <div class="kv"><span class="k" id="s-descr-lbl"></span><span class="v" id="s-descr" style="text-align:left;max-width:100%;white-space:pre-wrap;font-family:var(--body)"></span></div>
     </div>
+
+    <div class="note" id="digital-delivery-hint" style="display:none"></div>
 
     <!-- Forge Contracts: evidence checklist + stages for the deal's template (hidden when the deal has no template_id) -->
     <div class="plate" id="evidence-plate" style="display:none"><div id="evidence-checklist" data-deal-id=""></div></div>
@@ -234,10 +238,11 @@
           <button class="attach-btn" id="chat-track" type="button" style="display:none">📦</button>
           <button class="attach-btn" id="chat-payto" type="button" style="display:none">🏦</button>
           <button class="attach-btn" id="chat-pay" type="button" style="display:none">💸</button>
-          <input type="file" id="chat-file" accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,application/pdf" style="display:none">
+          <input type="file" id="chat-file" accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,application/pdf,application/zip,application/x-zip-compressed,application/x-7z-compressed,application/gzip,application/x-gzip,audio/mpeg,audio/wav,audio/x-wav,audio/ogg,audio/flac" style="display:none">
           <textarea id="chat-input" rows="2" placeholder=""></textarea>
           <button class="btn btn-kaspa" id="chat-send-btn"></button>
         </div>
+        <p class="hint" id="chat-retention-note" style="margin-top:6px">Attachments live only while the deal is open — 24 hours after it closes they are permanently deleted from the server. Save anything you need, including a purchase you received, before then.</p>
         <!-- tracking-number form (seller, goods): carrier + number → an E2E track message -->
         <div id="track-form" style="display:none;margin-top:10px;padding:12px;background:var(--iron);border:1px solid var(--bd-soft);border-radius:8px">
           <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
@@ -323,6 +328,7 @@
       <a href="/safe.html">Safe</a>
       <a href="/escrow-index.html">Escrow</a>
       <a href="/market.html">Market</a>
+      <a href="/deposit-index.html">Deposit</a>
       <a href="/blog/">Blog</a>
       <a href="/docs/">Docs</a>
       <a href="/recover.html">Recovery</a>
@@ -346,7 +352,7 @@ import { boot, core, net, api, kas, usdStr, genToken, L, $, esc, copyText, qrInt
          CARRIERS, carrierLabel, normTrackCode, looksLikeS10, s10Valid, sendTrackMsg, parseTrackMsg,
          PAY_METHODS, payMethodLabel, sendPayToMsg, sendPayMsg, parsePayToMsg, parsePayMsg, otcPay, otcDetect,
          mutualSupported, disputeState, escalateDispute, notifyWithdrawn, sendClaim, revealChat, postMutualSig, getMutualSigs,
-         parseClaim, fmtHM, splitAmounts, otcAddrOk, otcAddrKind } from '/assets/escrow.js?v=40';
+         parseClaim, fmtHM, splitAmounts, otcAddrOk, otcAddrKind } from '/assets/escrow.js?v=41';
 import { mountSwapWidget } from '/assets/swap-widget.js?v=5';
 import { loadCatalog, getTemplate, evidenceState, loc } from '/assets/contracts.js';
 import { requireUnlock, confirmPassword, wireCrypto } from '/assets/lock-ui.js';
@@ -356,6 +362,7 @@ import * as session from '/assets/session.js';
 const err = $('err');
 const params = new URLSearchParams(location.search);
 let deal = null, cfg = null, timer = null, st = null;
+const dealTypeLabel = (template, templateId) => templateId === 'digital-goods' ? 'Digital item' : templateLabel(template);
 // dispute-flow state (Phase 2) — before routing: startPanel synchronously calls resetDispute
 let ds = null;             // the latest /dispute/state
 let dispKey = '';          // key of the rendered stage
@@ -398,7 +405,7 @@ try {
     deal = id ? loadDeal(id) : null;
     if (deal) { setActiveDeal(deal.id); startPanel(); }
     else if (params.get('id')) freshDevice(Number(params.get('id')));
-    else { location.href = '/desk.html'; }
+    else { location.href = '/desk'; }
   }
 } catch (e) { showErr(err, e); }
 
@@ -547,11 +554,19 @@ async function joinFlow(code) {
     $('join-plate').style.display = 'block';
     $('title').textContent = L('invite_title');
     $('join-head').innerHTML = L('you_are')(esc(L('noun_' + inv.your_role)));
-    $('j-type').textContent = templateLabel(inv.template);
+    $('j-type').textContent = dealTypeLabel(inv.template, inv.template_id);
     $('j-amount').textContent = kas(inv.amount) + usdStr(inv.amount);
     $('j-window').textContent = daaLeftHuman(inv.dispute_window);
     $('j-descr').textContent = inv.descr || '—';
+    // Seller rating (opt-in): only marketplace deals carry it; server-computed numbers.
+    if (inv.your_role === 'buyer') {
+      $('j-rep-row').style.display = '';
+      $('j-rep').textContent = inv.rep
+        ? `${inv.rep.successful} successful · ${inv.rep.disputes.total} disputes · since ${new Date(inv.rep.since * 1000).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}`
+        : 'not enabled by the seller';
+    }
     if (inv.fee_resolve) $('j-fee').innerHTML = L('fee_line')(kas(inv.fee_resolve), kas(inv.fee_dispute));
+    $('j-digital-hint').style.display = inv.template_id === 'digital-goods' ? 'block' : 'none';
     $('join-btn').textContent = L('join_btn');
     $('join-note').textContent = L('join_note');
     // OTC counter-leg (Task 7): the joiner is the buyer and the creator (seller) didn't set the
@@ -667,7 +682,7 @@ function startPanel() {
   $('title').textContent = L('deal_title')(deal.id);
   $('s-role').textContent = L('noun_' + deal.role);
   $('s-amount').textContent = kas(deal.amount) + usdStr(deal.amount);
-  $('s-type').textContent = templateLabel(deal.template);
+  $('s-type').textContent = dealTypeLabel(deal.template, deal.template_id);
   $('s-descr').textContent = deal.descr || '—';
   cfg = deal.cfg || null;
   // chat: headings; the plate itself is enabled in refresh (after funded)
@@ -701,6 +716,12 @@ async function refresh() {
     $('s-addr').textContent = st.escrow_addr || '(pending)';
     $('s-state').textContent = L('st_' + st.state) || st.state;
     $('s-state').className = 'v ' + (st.state === 'disputed' ? 'warn' : st.state === 'closed' ? '' : 'ok');
+    const digital = (st.template_id || deal.template_id) === 'digital-goods';
+    $('s-type').textContent = dealTypeLabel(deal.template, st.template_id || deal.template_id);
+    $('digital-delivery-hint').style.display = digital && st.state === 'funded' ? 'block' : 'none';
+    if (digital && st.state === 'funded') $('digital-delivery-hint').textContent = deal.role === 'seller'
+      ? 'Electronic delivery only: send a private link, key or access through this encrypted deal chat. Attachments: images, video, PDF, archives (zip / 7z / gz) and audio, up to 50 MB — send anything larger, or in another format, as a private link. For a file, state its name, version and SHA-256.'
+      : 'Check the delivered file, key or access before the dispute window ends, and save it — attachments are deleted 24 hours after the deal closes. If it does not match the listing terms, open a dispute before auto-release.';
     renderTimeline(st.state);
     // Forge Contracts: resolve the template (once) + (re-)render the checklist/stages; cheap, display-only.
     await resolveDealTemplate(st);
@@ -1750,7 +1771,7 @@ $('chat-file').addEventListener('change', async () => {
   if (!file || !peerChatPk || !deal.chat_sk) return;
   hideErr(err);
   let kindLbl;
-  try { const kind = checkMediaFile(file); kindLbl = kind === 'img' ? L('m_photo') : kind === 'vid' ? L('m_video') : L('m_doc'); }
+  try { const kind = checkMediaFile(file); kindLbl = kind === 'img' ? L('m_photo') : kind === 'vid' ? L('m_video') : kind === 'file' ? L('m_file') : L('m_doc'); }
   catch (e) { showErr(err, e); return; }
 
   // a temporary progress bubble: NOT a message render (polling will show it), only an indicator
@@ -1989,7 +2010,6 @@ $('forget').onclick = () => {
   location.href = location.pathname; // a reload without ?id → opens the active/first deal or an empty state
 };
 </script>
-<script>if("serviceWorker" in navigator&&/(^|\.)kaspaforge\.org$|(^|\.)officeforge\.co$/.test(location.hostname))navigator.serviceWorker.register("/sw-escrow.js");</script>
 <script src="/assets/kaspa-widget.js?v=4" defer></script>
 </body>
 </html>

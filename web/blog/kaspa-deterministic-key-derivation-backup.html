@@ -102,7 +102,7 @@
       "description": "Learn how Kaspa Forge's deterministic key derivation works — one master seed, one .age backup, every vault and deal restored with a gap-scan.",
       "url": "https://kaspaforge.org/blog/kaspa-deterministic-key-derivation-backup.html",
       "datePublished": "2026-07-14",
-      "dateModified": "2026-07-14",
+      "dateModified": "2026-07-20",
       "inLanguage": "en",
       "image": "https://kaspaforge.org/assets/blog/kaspa-deterministic-key-derivation-backup.png",
       "author": {
@@ -298,7 +298,7 @@
   <p><b>Single point of compromise.</b> If someone obtains your master seed, they can derive every key you own: vaults, escrow deals, wallet addresses. This is the fundamental trade-off of deterministic derivation. One seed means one thing to protect, but also one thing to lose. Physical security of the <code>.age</code> backup and the strength of your passphrase become critical.</p>
   <p><b>Passphrase is the real lock.</b> The <code>.age</code> file uses scrypt-based encryption, which is intentionally slow to resist brute-force. But a weak passphrase — a short dictionary word, a birthday — undermines the protection. There is no server-side recovery; forget the passphrase and the backup is inert.</p>
   <p><b>Gap-scan needs a cooperating node.</b> Restore queries a Kaspa node for UTXO existence. Kaspa Forge's public node front at <code>node.kaspaforge.org</code> works out of the box. Offline, you can point the open-source <code>vaultctl</code> CLI at your own node (<code>--node grpc://...</code>). But without any node access at all, the scan stalls — the seed is valid, but you cannot discover which indices are in use.</p>
-  <p><b>Beta limitations.</b> The desk profile lives in a single browser's <code>localStorage</code> with no built-in multi-device sync. Moving to a new device means importing the <code>.age</code> file manually. The derivation paths are versioned (<code>v1</code>); a future scheme change would require explicit migration handling. Known-vector tests pin the current scheme against accidental drift, but they cannot guarantee the absence of subtle implementation bugs — the scheme's security rests on HMAC-SHA512 being a well-studied primitive and the domain separation being logically sound.</p>
+  <p><b>Current boundaries.</b> The working Desk profile lives encrypted in browser storage. Forge Sync can manually mirror an additional encrypted projection between opted-in devices, but deliberately excludes independent alarm, heir, and arbiter private keys; a full <code>.age</code> key-file remains the recovery backup. Derivation paths are versioned (<code>v1</code>), so a future scheme change requires explicit migration handling. Known-vector tests pin the current scheme against accidental drift, but cannot guarantee the absence of subtle implementation bugs.</p>
   <p><b>No isolated key rotation.</b> You cannot swap a single hot key without creating a new vault or using the <code>migrate</code> path (which requires both hot and alarm signatures). This is a deliberate trade-off for backup simplicity — per-key flexibility is exchanged for one-backup coverage.</p>
   <h2>The Bottom Line</h2>
   <p>Self-custody is a backup problem. Kaspa Forge reduces it to one seed, one <code>.age</code> file, one passphrase — and a gap-scan that discovers the rest. The derivation code is auditable in the open-source repository, the encryption uses a standard tool (<code>age</code>), and recovery works without the service being alive (<code>vaultctl</code> + any Kaspa v2+ node).</p>

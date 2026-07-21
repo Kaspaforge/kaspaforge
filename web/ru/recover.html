@@ -16,7 +16,7 @@
 <meta name="theme-color" content="#0E1116">
 <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/safe.css?v=14">
-<script src="/assets/nav.js?v=7" defer></script>
+<script src="/assets/nav.js?v=8" defer></script>
 </head>
 <body>
 <div class="wrap">
@@ -63,7 +63,7 @@
   <!-- BLOCK 0: master key-file (primary path) -->
   <div class="plate" style="margin-top:28px;border-left:3px solid var(--kaspa)">
     <h2 style="font-size:20px">Восстановить из мастер key-file (простой способ)</h2>
-    <p class="hint">Твои сейфы, сделки и объявления живут в одном зашифрованном <b>мастер key-file</b> — твоём профиле Деска. С любого устройства открой свой <a href="/ru/desk.html"><b>Деск</b></a>, выбери <b>«Импорт / восстановить»</b> и загрузи мастер key-file (<span class="mono">.age</span>) с его паролем — профиль вернётся разом. Рабочие ключи для созданного <b>после</b> раннего экспорта выводятся из мастер-seed, а публичные записи Деск находит на сервере. Тревожные ключи — исключение ниже: выбрав общее хранение для сейфа, сделай свежий полный экспорт с этого устройства.</p>
+    <p class="hint">Твои сейфы, сделки и объявления живут в одном зашифрованном <b>мастер key-file</b> — твоём профиле Деска. С любого устройства открой свой <a href="/desk"><b>Деск</b></a>, выбери <b>«Импорт / восстановить»</b> и загрузи мастер key-file (<span class="mono">.age</span>) с его паролем — профиль вернётся разом. Рабочие ключи для созданного <b>после</b> раннего экспорта выводятся из мастер-seed, а публичные записи Деск находит на сервере. Тревожные ключи — исключение ниже: выбрав общее хранение для сейфа, сделай свежий полный экспорт с этого устройства.</p>
     <p class="hint" style="margin-top:8px"><b>Место хранения тревожного ключа зависит от выбора при создании каждого сейфа.</b> В более безопасном раздельном режиме ключ живёт только на <b>тревожной карточке</b>, а Деск помечает сейф «alarm: карточка»; отмена кражи и migrate попросят ключ с неё. Если ты выбрал более удобное общее хранение, тревожный ключ находится внутри полной зашифрованной копии мастер key-file с устройства создания. <b>Forge Sync сознательно исключает все тревожные ключи</b>: на втором устройстве сейф появится, но отменить вывод будет невозможно, пока не импортируешь эту полную копию <span class="mono">.age</span>.</p>
     <p class="hint" style="margin-top:8px"><b>Нужно достать сырые ключи из файла — даже если этот сайт исчезнет?</b>
       <a href="/keyfile-decrypt.html" download="kaspa-keyfile-decrypt.html">Скачай офлайн-дешифратор файла ключей</a>
@@ -81,7 +81,7 @@
       <div class="kv"><span class="k" style="min-width:130px">Режим «авто»</span><span class="v" style="text-align:left">Делать ничего не нужно. После срока монеты сами придут на твой Kaspa-адрес — тот, который владелец указал при создании. Просто следи за своим кошельком.</span></div>
     </div>
     <div style="margin-top:10px">
-      <div class="kv"><span class="k" style="min-width:130px">Режим «ручной»</span><span class="v" style="text-align:left">Импортируй зашифрованный мастер key-file владельца в <a href="/ru/desk.html">Деске</a>, затем открой сейф в <a href="/ru/manage.html">«Мой сейф»</a>. Когда срок истечёт, появится блок <b>«Наследство»</b>: введи приватный ключ <i>своего</i> адреса (экспортируй из своего кошелька — Kaspium и kaspa-ng это умеют) и нажми «Забрать наследство». Монеты уйдут строго на твой адрес — контракт не позволит иначе.</span></div>
+      <div class="kv"><span class="k" style="min-width:130px">Режим «ручной»</span><span class="v" style="text-align:left">Импортируй зашифрованный мастер key-file владельца в <a href="/desk">Деске</a>, затем открой сейф в <a href="/ru/manage.html">«Мой сейф»</a>. Когда срок истечёт, появится блок <b>«Наследство»</b>: введи приватный ключ <i>своего</i> адреса (экспортируй из своего кошелька — Kaspium и kaspa-ng это умеют) и нажми «Забрать наследство». Монеты уйдут строго на твой адрес — контракт не позволит иначе.</span></div>
     </div>
     <p class="hint" style="margin-top:10px">Сколько осталось до открытия — видно в панели (строка «Таймер») или командой <span class="mono">vaultctl status</span>. Наши разрешения не нужны: правила исполняет блокчейн. Сайт недоступен — то же самое делает <span class="mono">vaultctl inherit</span> (блок ниже).</p>
   </div>
@@ -160,6 +160,7 @@
       <a href="/ru/safe.html">Сейф</a>
       <a href="/ru/escrow-index.html">Гарант</a>
       <a href="/ru/market.html">Маркет</a>
+      <a href="/ru/deposit-index.html">Залог</a>
       <a href="/ru/blog/">Блог</a>
       <a href="/ru/docs/">Документы</a>
       <a href="/ru/recover.html">Восстановление</a>
@@ -174,6 +175,5 @@
 </div>
 
 <script src="/assets/kaspa-widget.js?v=4" defer></script>
-<script>if("serviceWorker" in navigator&&/(^|\.)kaspaforge\.org$|(^|\.)officeforge\.co$/.test(location.hostname))navigator.serviceWorker.register("/sw.js");</script>
 </body>
 </html>

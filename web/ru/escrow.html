@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#0E1116">
 <link rel="manifest" href="/manifest-escrow.json">
 <link rel="apple-touch-icon" href="/assets/icons-escrow/apple-touch-icon.png">
-<script src="/assets/nav.js?v=7" defer></script>
+<script src="/assets/nav.js?v=8" defer></script>
 <link rel="stylesheet" href="/assets/safe.css?v=14">
 <link rel="stylesheet" href="/assets/escrow.css?v=7">
 <script src="/assets/qrcode.min.js"></script>
@@ -39,7 +39,7 @@
   <div class="eyebrow">Новая эскроу-сделка</div>
   <h1 style="font-size:clamp(28px,4vw,40px);margin:10px 0 8px">Сделка под гаранта</h1>
   <p class="lead">Гарант, который <b>физически не может сбежать с деньгами</b>. Арбитр может решить спор — покупателю, продавцу или разделом, — но ковенант гарантирует: монеты уйдут только покупателю или продавцу.</p>
-  <div class="note alarm" style="margin-top:16px"><b>Открытая бета.</b> Держите сделки небольшими (лимит 10 000 KAS). Некостодиально: мы никогда не держим ваши средства.</div>
+  <div class="note alarm" style="margin-top:16px">Некостодиально: мы никогда не держим ваши средства. Ковенант эскроу открыт и не проходил внешний аудит — проверяйте перед отправкой. Минимальная сделка — 50 KAS.</div>
   <div id="err" class="note alarm" style="display:none" role="alert"></div>
 
   <div style="margin-top:30px">
@@ -86,7 +86,7 @@
         </div>
         <div class="hint" id="win-hint" style="margin-top:4px"></div>
         <label for="amount" style="margin-top:16px">Сумма, которую получит продавец (KAS)</label>
-        <input type="number" id="amount" min="50" max="10000" step="0.01" placeholder="100" inputmode="decimal">
+        <input type="number" id="amount" min="50" step="0.01" placeholder="100" inputmode="decimal">
         <div class="hint" id="cap-hint" style="margin-top:4px"></div>
         <div id="fund-summary" style="display:none;margin-top:6px;font-family:var(--mono);font-size:12.5px;color:var(--ash)"></div>
         <table class="fee-tbl" aria-live="polite">
@@ -132,7 +132,7 @@
     <div class="step" id="st2" data-n="2">
       <h3>Ключ и инвайт</h3>
       <div class="body">
-        <p class="note"><b>🔑 Recovery-лист сохранять не нужно.</b> Твой ключ и эта сделка автоматически сохраняются в зашифрованный <b>мастер key-file</b> — твой профиль в <a href="/ru/desk.html">Деске</a>. Сделай бэкап один раз в Деске («Экспорт файла ключей»); один файл покрывает все сделки, сейфы и объявления.</p>
+        <p class="note"><b>🔑 Recovery-лист сохранять не нужно.</b> Твой ключ и эта сделка автоматически сохраняются в зашифрованный <b>мастер key-file</b> — твой профиль в <a href="/desk">Деске</a>. Сделай бэкап один раз в Деске («Экспорт файла ключей»); один файл покрывает все сделки, сейфы и объявления.</p>
         <div class="keycard">
           <div class="kc-role"><span class="dot"></span><span id="key-label"></span></div>
           <code id="k-key"></code>
@@ -174,6 +174,7 @@
       <a href="/ru/safe.html">Сейф</a>
       <a href="/ru/escrow-index.html">Гарант</a>
       <a href="/ru/market.html">Маркет</a>
+      <a href="/ru/deposit-index.html">Залог</a>
       <a href="/ru/blog/">Блог</a>
       <a href="/ru/docs/">Документы</a>
       <a href="/ru/recover.html">Восстановление</a>
@@ -189,7 +190,7 @@
 
 <script type="module">
 import { boot, core, net, api, usdStr, genToken, L, $, copyText, qrInto, showErr, hideErr,
-         saveDeal, chatSupported, otcMethods, otcAddrOk, otcAddrKind } from '/assets/escrow.js?v=40';
+         saveDeal, chatSupported, otcMethods, otcAddrOk, otcAddrKind } from '/assets/escrow.js?v=41';
 import { requireUnlock } from '/assets/lock-ui.js';
 import * as session from '/assets/session.js';
 import { loadCatalog, getTemplate, classOf, loc, visibleTemplates } from '/assets/contracts.js';
@@ -370,7 +371,7 @@ $('b1').onclick = async () => {
   try {
     hideErr(err);
     const amt = Number($('amount').value);
-    if (!(amt >= 50 && amt <= 10000)) { showErr(err, new Error(L('amount_err'))); return; }
+    if (!(amt >= 50)) { showErr(err, new Error(L('amount_err'))); return; }
     if (tpl === 'otc' && role === 'buyer' && $('otc-method').value && $('otc-method').value !== 'other-crypto'
         && $('otc-addr').value.trim() && !(await validateOtcAddr())) {
       showErr(err, new Error(L('otc_leg_addr_bad').replace('{net}', 'выбранной сети'))); return;
@@ -430,6 +431,5 @@ function lang2() { return document.documentElement.lang === 'ru' ? 'ru/' : ''; }
 updateFee();
 </script>
 <script src="/assets/kaspa-widget.js?v=4" defer></script>
-<script>if("serviceWorker" in navigator&&/(^|\.)kaspaforge\.org$|(^|\.)officeforge\.co$/.test(location.hostname))navigator.serviceWorker.register("/sw-escrow.js");</script>
 </body>
 </html>

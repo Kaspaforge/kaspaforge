@@ -22,7 +22,7 @@
   width:calc(100% - var(--p,0%));background:var(--iron);
   border-left:1px solid rgba(255,255,255,.16);transition:width .5s ease}
 </style>
-<script src="/assets/nav.js?v=7" defer></script>
+<script src="/assets/nav.js?v=8" defer></script>
 <script src="/assets/qrcode.min.js"></script>
 </head>
 <body>
@@ -55,7 +55,7 @@
     <h2 style="font-size:20px">В этом профиле нет сейфов</h2>
     <p class="hint">Сейфы управляются через единый зашифрованный профиль Деска и master key file. Импортируй или объедини этот файл в настройках Деска либо создай новый сейф. Тревожный ключ по замыслу остаётся отдельно — на alarm card.</p>
     <div style="margin-top:16px;display:flex;gap:12px;flex-wrap:wrap">
-      <a class="btn btn-kaspa" href="/ru/desk.html#settings">Открыть настройки Деска</a>
+      <a class="btn btn-kaspa" href="/desk#settings">Открыть настройки Деска</a>
       <a class="btn btn-ghost" href="/ru/create.html">Создать сейф</a>
     </div>
   </div>
@@ -82,7 +82,7 @@
            неполный master key file, поэтому fallback ведёт обратно к импорту в Деске. -->
       <div id="i-hot-block" style="display:none">
         <label>Горячий ключ</label><input type="password" id="i-hotsk" autocomplete="off">
-        <p class="hint">В профиле этого браузера нет горячего ключа этого сейфа — вставь его или импортируй мастер key-file в <a href="/ru/desk.html">Деске</a>.</p>
+        <p class="hint">В профиле этого браузера нет горячего ключа этого сейфа — вставь его или импортируй мастер key-file в <a href="/desk">Деске</a>.</p>
       </div>
       <!-- deposit breakdown (covenant-UTXO): shown when there's more than one -->
       <div id="wd-breakdown" style="display:none;margin-top:14px"></div>
@@ -99,7 +99,7 @@
       <div class="ci-meter" id="c-meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="Возраст сейфа до окна наследования"></div>
       <div id="c-hot-block" style="display:none">
         <label>Горячий ключ</label><input type="password" id="c-hotsk" autocomplete="off">
-        <p class="hint">В профиле этого браузера нет горячего ключа этого сейфа — вставь его или импортируй мастер key-file в <a href="/ru/desk.html">Деске</a>.</p>
+        <p class="hint">В профиле этого браузера нет горячего ключа этого сейфа — вставь его или импортируй мастер key-file в <a href="/desk">Деске</a>.</p>
       </div>
       <div style="margin-top:14px"><button class="btn btn-kaspa" id="c-btn">Отметиться</button></div>
     </div>
@@ -138,7 +138,7 @@
       <div class="note alarm"><b>Не ты запускал вывод?</b> Отмени — средства вернутся в сейф.</div>
       <div id="u-alarm-block" style="display:none">
         <label>Тревожный ключ</label><input type="password" id="u-alarmsk" autocomplete="off">
-        <p class="hint">Введи тревожный ключ со своей <b>тревожной карточки</b> — он сознательно хранится отдельно от key-file (строка «Тревожный ключ» на карточке). Для старых сейфов, державших его в профиле: вставь ключ или импортируй мастер key-file в <a href="/ru/desk.html">Деске</a>.</p>
+        <p class="hint">Введи тревожный ключ со своей <b>тревожной карточки</b> — он сознательно хранится отдельно от key-file (строка «Тревожный ключ» на карточке). Для старых сейфов, державших его в профиле: вставь ключ или импортируй мастер key-file в <a href="/desk">Деске</a>.</p>
       </div>
       <div style="margin-top:14px;display:flex;gap:12px;flex-wrap:wrap">
         <button class="btn btn-alarm" id="u-cancel">⛔ Отменить вывод</button>
@@ -164,7 +164,7 @@
           <button class="btn btn-kaspa" id="sub-pay-btn"><span>Оплатить <span class="sub-price">100</span> KAS с desk-кошелька</span></button>
           <span id="sub-paid" class="hint" style="margin:0;display:none"></span>
         </div>
-        <p class="hint" style="margin-top:8px">Год добавится автоматически. Не хватает KAS? Пополни в <a href="/ru/desk.html">Деске</a> — SimpleSwap или с любого кошелька.</p>
+        <p class="hint" style="margin-top:8px">Год добавится автоматически. Не хватает KAS? Пополни в <a href="/desk">Деске</a> — SimpleSwap или с любого кошелька.</p>
       </div>
       <div style="margin-top:14px;display:flex;gap:12px;flex-wrap:wrap">
         <button class="btn btn-ghost" id="tg-btn">Подключить Telegram</button>
@@ -201,6 +201,7 @@
       <a href="/ru/safe.html">Сейф</a>
       <a href="/ru/escrow-index.html">Гарант</a>
       <a href="/ru/market.html">Маркет</a>
+      <a href="/ru/deposit-index.html">Залог</a>
       <a href="/ru/blog/">Блог</a>
       <a href="/ru/docs/">Документы</a>
       <a href="/ru/recover.html">Восстановление</a>
@@ -767,6 +768,5 @@ $('tg-btn').onclick = async () => {
 $('forget').onclick = async () => { if ($('forget').disabled) return; if (await confirmBox(L('forget_confirm'), { danger: true, ok: 'Забыть' })) { clearVault(); location.reload(); } };
 </script>
 <script src="/assets/kaspa-widget.js?v=4" defer></script>
-<script>if("serviceWorker" in navigator&&/(^|\.)kaspaforge\.org$|(^|\.)officeforge\.co$/.test(location.hostname))navigator.serviceWorker.register("/sw.js");</script>
 </body>
 </html>

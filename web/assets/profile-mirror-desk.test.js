@@ -5,8 +5,7 @@ import { readFileSync } from 'node:fs';
 const page = (path) => readFileSync(new URL(path, import.meta.url), 'utf8');
 
 for (const [lang, desk] of [
-  ['EN', page('../desk.html')],
-  ['RU', page('../ru/desk.html')],
+  ['EN', page('../desk-legacy.html')],
 ]) {
   test(`${lang} Desk redraws profile-backed views after Forge Sync merge`, () => {
     assert.match(desk, /function refreshProfileViewsAfterSync\(\)/);
