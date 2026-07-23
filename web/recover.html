@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Recovery — Kaspa Safe</title>
-<meta name="description" content="Kaspa Safe emergency page: cancel a thief's withdrawal with your alarm key, restore the encrypted Desk profile, claim an inheritance, and recover without the website via vaultctl.">
+<title>Recovery — Kaspa Forge</title>
+<meta name="description" content="Recover Kaspa Safe vaults, Escrow deals and Deposits independently with an encrypted Desk backup, vaultctl or the public dealctl recovery kit.">
 <link rel="canonical" href="https://kaspaforge.org/recover.html">
 <link rel="alternate" hreflang="en" href="https://kaspaforge.org/recover.html">
 <link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/recover.html">
@@ -24,15 +24,15 @@
 <header class="top">
   <a class="brand" href="/">
     <img class="brand-k" src="/assets/brand/emblem-flat-header.png" alt="">
-    <span class="brand-name">Kaspa <b>Safe</b></span>
+    <span class="brand-name">Kaspa <b>Forge</b></span>
   </a>
   <!-- no menu of its own: navigation (Desk/Safe/Docs/…) is provided by the nav.js tab strip above the header -->
 </header>
 
 <div style="max-width:780px;margin:32px auto 0">
   <div class="eyebrow">Recovery</div>
-  <h1 style="font-size:clamp(28px,4vw,40px);margin:10px 0 6px">Get your coins back</h1>
-  <p class="lead">Find your situation below and follow the steps. Take your time — nothing bad is happening while you read.</p>
+  <h1 style="font-size:clamp(28px,4vw,40px);margin:10px 0 6px">Recover your funds independently</h1>
+  <p class="lead">Safe uses <span class="mono">vaultctl</span>; Escrow and Deposit use the public <span class="mono">dealctl</span> recovery kit. Both work from source against a Kaspa node without a Kaspa Forge API.</p>
 
   <!-- EMERGENCY -->
   <div class="emergency">
@@ -92,7 +92,7 @@
     <p class="hint">Kaspa Safe doesn't depend on us: the vault is an on-chain contract, and it checks only your keys and time. The open-source <span class="mono">vaultctl</span> tool does everything the site does, from a terminal, against any Kaspa v2+ node (running with <span class="mono">--utxoindex</span>). The code is published: <a href="https://github.com/Kaspaforge/kaspaforge" target="_blank" rel="noopener"><span class="mono">github.com/Kaspaforge/kaspaforge</span></a> — keep a copy (Code → Download ZIP) and you won't depend even on GitHub.</p>
     <div class="cmd"><pre><span class="c"># once: build it (needs Rust from rustup.rs, protobuf-compiler, clang)</span>
 <span class="p">git clone</span> https://github.com/Kaspaforge/kaspaforge
-<span class="p">cd</span> kaspa-safe/vaultctl && <span class="p">cargo build --release</span>
+<span class="p">cd</span> kaspaforge/vaultctl && <span class="p">cargo build --release</span>
 
 <span class="c"># decrypt with web/keyfile-decrypt.html offline, or use standard age:</span>
 <span class="c"># decrypt it once, then pull out the vault you need — vaultctl reads JSON too:</span>
@@ -125,7 +125,36 @@
     <p class="hint" style="margin-top:10px">Useful flags: <span class="mono">--node grpc://your-node:16110</span> — any Kaspa v2+ node with <span class="mono">--utxoindex</span> (defaults to the public OfficeForge node <span class="mono">grpc://node.kaspaforge.org:16110</span> — or run your own); <span class="mono">--dry-run</span> — build and sign the transaction, print its txid, but do NOT broadcast (try this first). To verify the contract itself: <span class="mono">vaultctl selftest</span> — 25 checks of every path and attack inside the node VM.</p>
   </div>
 
-  <!-- BLOCK 4: lost key -->
+  <!-- BLOCK 4: dealctl offline -->
+  <div class="plate" style="border-left:3px solid var(--kaspa)">
+    <h2 style="font-size:20px">Escrow and Deposit — hosted-independent recovery with dealctl</h2>
+    <p class="hint">The public <a href="https://github.com/Kaspaforge/kaspaforge/tree/main/recovery-kit" target="_blank" rel="noopener"><span class="mono">recovery-kit/</span></a> contains the shared Rust transaction core, <span class="mono">dealctl</span>, <span class="mono">escrow.sil</span>, versioned schemas, deterministic vectors, EN/RU guides, the offline <span class="mono">.age</span> decryptor and a checksum manifest. It deliberately contains no hosted server, chat/media layer, moderation, Telegram or operator/admin API.</p>
+    <div class="cmd"><pre><span class="c"># verify and build the published source</span>
+<span class="p">git clone</span> https://github.com/Kaspaforge/kaspaforge
+<span class="p">cd</span> kaspaforge/recovery-kit
+<span class="p">sha256sum -c</span> RECOVERY-SHA256SUMS
+<span class="p">cargo build --release --locked -p dealctl</span>
+
+<span class="c"># OFFLINE: decrypt the Desk backup, extract and verify one deal</span>
+<span class="p">age --decrypt -o</span> profile.json your-backup.age
+<span class="p">./target/release/dealctl extract</span> --profile profile.json --deal ID --output deal.recovery.json
+<span class="p">./target/release/dealctl verify</span> --recovery deal.recovery.json
+
+<span class="c"># OFFLINE: make a PUBLIC watch file — it contains no private key</span>
+<span class="p">./target/release/dealctl watch</span> --recovery deal.recovery.json --output watch.json
+
+<span class="c"># ONLINE: query any Kaspa v2+ node with --utxoindex</span>
+<span class="p">dealctl prepare</span> --watch watch.json --node grpc://YOUR_NODE:16110 --output lines.json
+
+<span class="c"># OFFLINE: sign an allowed path; the line package is bound to this deal</span>
+<span class="p">dealctl escrow release</span> --recovery deal.recovery.json --line lines.json --output release.tx.json
+
+<span class="c"># ONLINE: submit the already-signed transaction; no key is needed here</span>
+<span class="p">dealctl submit</span> --tx release.tx.json --node grpc://YOUR_NODE:16110</pre></div>
+    <p class="hint" style="margin-top:10px"><b>The private recovery record stays offline.</b> Only <span class="mono">watch.json</span>, <span class="mono">lines.json</span> and the signed transaction cross to the online machine; none contains a private key. <span class="mono">dealctl</span> also supports refund, dispute, mutual settlement, keyless auto-release/timeout and the matching Deposit aliases. Read <a href="https://github.com/Kaspaforge/kaspaforge/blob/main/recovery-kit/recovery/README.md" target="_blank" rel="noopener">the complete guide</a> before moving funds.</p>
+  </div>
+
+  <!-- BLOCK 5: lost key -->
   <div class="plate">
     <h2 style="font-size:20px">If a key is lost</h2>
     <div style="margin-top:6px">
@@ -139,7 +168,7 @@
     </div>
   </div>
 
-  <!-- BLOCK 5: never ask -->
+  <!-- BLOCK 6: never ask -->
   <div class="never" style="margin-top:16px">
     <h2 style="margin-bottom:8px">What we will never ask for</h2>
     <p class="big">If anyone asks you to send a <b>private key</b>, a <b>seed phrase</b>, your <b>Desk password</b>, your <b>master key file</b> or your <b>alarm card</b> — it's a scammer.</p>

@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Восстановление — Kaspa Safe</title>
-<meta name="description" content="Экстренная страница Kaspa Safe: отменить чужой вывод тревожным ключом, восстановить зашифрованный профиль Деска, забрать наследство и восстановиться без сайта через vaultctl.">
+<title>Восстановление — Kaspa Forge</title>
+<meta name="description" content="Независимое восстановление Kaspa Safe, сделок Гаранта и Залогов из зашифрованного бэкапа через vaultctl или публичный recovery-kit dealctl.">
 <link rel="canonical" href="https://kaspaforge.org/ru/recover.html">
 <link rel="alternate" hreflang="en" href="https://kaspaforge.org/recover.html">
 <link rel="alternate" hreflang="ru" href="https://kaspaforge.org/ru/recover.html">
@@ -24,15 +24,15 @@
 <header class="top">
   <a class="brand" href="/ru/">
     <img class="brand-k" src="/assets/brand/emblem-flat-header.png" alt="">
-    <span class="brand-name">Kaspa <b>Safe</b></span>
+    <span class="brand-name">Kaspa <b>Forge</b></span>
   </a>
   <!-- no own menu: navigation (Desk/Safe/Docs/…) is carried by the nav.js tab strip above the header -->
 </header>
 
 <div style="max-width:780px;margin:32px auto 0">
   <div class="eyebrow">Восстановление</div>
-  <h1 style="font-size:clamp(28px,4vw,40px);margin:10px 0 6px">Вернуть свои монеты</h1>
-  <p class="lead">Найди свою ситуацию ниже и следуй шагам. Не спеши — пока ты читаешь, ничего плохого не происходит.</p>
+  <h1 style="font-size:clamp(28px,4vw,40px);margin:10px 0 6px">Восстановить средства независимо</h1>
+  <p class="lead">Для Сейфа есть <span class="mono">vaultctl</span>; для Гаранта и Залога — публичный recovery-kit <span class="mono">dealctl</span>. Оба собираются из исходника и работают через Kaspa-ноду без API Kaspa Forge.</p>
 
   <!-- EMERGENCY -->
   <div class="emergency">
@@ -92,7 +92,7 @@
     <p class="hint">Kaspa Safe не зависит от нас: сейф — ончейн-контракт, и он проверяет только твои ключи и время. Открытая утилита <span class="mono">vaultctl</span> делает всё то же, что сайт, из терминала против любой ноды Kaspa v2+ (запущенной с <span class="mono">--utxoindex</span>). Код опубликован: <a href="https://github.com/Kaspaforge/kaspaforge" target="_blank" rel="noopener"><span class="mono">github.com/Kaspaforge/kaspaforge</span></a> — сохрани себе копию (кнопка Code → Download ZIP), тогда не будешь зависеть даже от GitHub.</p>
     <div class="cmd"><pre><span class="c"># один раз: собрать (нужны Rust с rustup.rs, protobuf-compiler, clang)</span>
 <span class="p">git clone</span> https://github.com/Kaspaforge/kaspaforge
-<span class="p">cd</span> kaspa-safe/vaultctl && <span class="p">cargo build --release</span>
+<span class="p">cd</span> kaspaforge/vaultctl && <span class="p">cargo build --release</span>
 
 <span class="c"># расшифруй офлайн через web/keyfile-decrypt.html или стандартный age:</span>
 <span class="c"># расшифруй его один раз и вытащи нужный сейф — vaultctl понимает и JSON:</span>
@@ -125,7 +125,36 @@
     <p class="hint" style="margin-top:10px">Полезные флаги: <span class="mono">--node grpc://твоя-нода:16110</span> — любая нода Kaspa v2+ с <span class="mono">--utxoindex</span> (по умолчанию публичная нода OfficeForge <span class="mono">grpc://node.kaspaforge.org:16110</span> — или подними свою); <span class="mono">--dry-run</span> — собрать и подписать транзакцию, показать txid, но НЕ отправлять (попробуй сначала так). Проверить сам контракт: <span class="mono">vaultctl selftest</span> — 25 проверок всех путей и атак в VM ноды.</p>
   </div>
 
-  <!-- BLOCK 4: key lost -->
+  <!-- BLOCK 4: dealctl offline -->
+  <div class="plate" style="border-left:3px solid var(--kaspa)">
+    <h2 style="font-size:20px">Гарант и Залог — независимое восстановление через dealctl</h2>
+    <p class="hint">Публичный <a href="https://github.com/Kaspaforge/kaspaforge/tree/main/recovery-kit" target="_blank" rel="noopener"><span class="mono">recovery-kit/</span></a> содержит общее Rust-ядро транзакций, <span class="mono">dealctl</span>, <span class="mono">escrow.sil</span>, версионированные схемы, детерминированные векторы, гайды EN/RU, офлайн-дешифратор <span class="mono">.age</span> и манифест контрольных сумм. Hosted-сервера, чата/медиа, модерации, Telegram и operator/admin API внутри нет.</p>
+    <div class="cmd"><pre><span class="c"># проверь и собери опубликованный исходник</span>
+<span class="p">git clone</span> https://github.com/Kaspaforge/kaspaforge
+<span class="p">cd</span> kaspaforge/recovery-kit
+<span class="p">sha256sum -c</span> RECOVERY-SHA256SUMS
+<span class="p">cargo build --release --locked -p dealctl</span>
+
+<span class="c"># ОФЛАЙН: расшифруй бэкап Деска, извлеки и проверь одну сделку</span>
+<span class="p">age --decrypt -o</span> profile.json your-backup.age
+<span class="p">./target/release/dealctl extract</span> --profile profile.json --deal ID --output deal.recovery.json
+<span class="p">./target/release/dealctl verify</span> --recovery deal.recovery.json
+
+<span class="c"># ОФЛАЙН: создай ПУБЛИЧНЫЙ watch-файл — приватных ключей в нём нет</span>
+<span class="p">./target/release/dealctl watch</span> --recovery deal.recovery.json --output watch.json
+
+<span class="c"># ОНЛАЙН: запроси любую Kaspa-ноду v2+ с --utxoindex</span>
+<span class="p">dealctl prepare</span> --watch watch.json --node grpc://ТВОЯ_НОДА:16110 --output lines.json
+
+<span class="c"># ОФЛАЙН: подпиши разрешённый путь; пакет линий привязан к этой сделке</span>
+<span class="p">dealctl escrow release</span> --recovery deal.recovery.json --line lines.json --output release.tx.json
+
+<span class="c"># ОНЛАЙН: отправь готовую подпись; приватный ключ здесь не нужен</span>
+<span class="p">dealctl submit</span> --tx release.tx.json --node grpc://ТВОЯ_НОДА:16110</pre></div>
+    <p class="hint" style="margin-top:10px"><b>Приватная recovery-запись остаётся офлайн.</b> На сетевую машину переходят только <span class="mono">watch.json</span>, <span class="mono">lines.json</span> и подписанная транзакция; приватных ключей в них нет. <span class="mono">dealctl</span> также поддерживает возврат, спор, взаимный расчёт, keyless auto-release/timeout и соответствующие команды Залога. Перед движением средств прочитай <a href="https://github.com/Kaspaforge/kaspaforge/blob/main/recovery-kit/recovery/README-RU.md" target="_blank" rel="noopener">полный гайд</a>.</p>
+  </div>
+
+  <!-- BLOCK 5: key lost -->
   <div class="plate">
     <h2 style="font-size:20px">Если потерян ключ</h2>
     <div style="margin-top:6px">
@@ -139,7 +168,7 @@
     </div>
   </div>
 
-  <!-- BLOCK 5: never ask -->
+  <!-- BLOCK 6: never ask -->
   <div class="never" style="margin-top:16px">
     <h2 style="margin-bottom:8px">Что мы никогда не попросим</h2>
     <p class="big">Если кто-то просит прислать <b>приватный ключ</b>, <b>seed-фразу</b>, <b>пароль от Деска</b>, <b>мастер key-file</b> или <b>тревожную карточку</b> — это мошенник.</p>
