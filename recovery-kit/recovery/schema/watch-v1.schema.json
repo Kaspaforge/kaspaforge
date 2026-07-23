@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kaspaforge.org/schema/watch-v1.schema.json",
+  "title": "Kaspa Forge public deal watch record (v1)",
+  "description": "A secret-free view used by online status/prepare commands. It contains no private key.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "schema_version", "network", "product", "deal_id", "active", "disputed"],
+  "properties": {
+    "schema": { "const": "kaspa-forge-watch" },
+    "schema_version": { "const": 1 },
+    "network": { "enum": ["mainnet", "testnet", "simnet"] },
+    "product": { "enum": ["escrow", "deposit"] },
+    "deal_id": { "type": "integer", "minimum": 0 },
+    "active": { "type": "string", "minLength": 1 },
+    "disputed": { "type": "string", "minLength": 1 }
+  }
+}

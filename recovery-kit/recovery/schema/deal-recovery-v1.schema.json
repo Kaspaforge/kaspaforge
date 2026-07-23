@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kaspaforge.org/schema/deal-recovery-v1.schema.json",
+  "title": "Kaspa Forge deal recovery record (v1)",
+  "description": "The minimal party-side record needed to independently recover an Escrow or Deposit deal. Contains the party signing key and public constructor parameters and NOTHING else.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "schema_version", "product", "deal_id", "network", "contract", "role", "party_sk", "party_pk", "params", "addresses"],
+  "properties": {
+    "schema": { "const": "kaspa-forge-deal-recovery" },
+    "schema_version": { "const": 1 },
+    "product": { "enum": ["escrow", "deposit"] },
+    "deal_id": { "type": "integer", "minimum": 0 },
+    "network": { "enum": ["mainnet", "testnet", "simnet"] },
+    "contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["family", "version", "source_sha256", "silverscript_revision", "rusty_kaspa_tag"],
+      "properties": {
+        "family": { "const": "escrow" },
+        "version": { "type": "integer", "minimum": 1 },
+        "source_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "silverscript_revision": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "rusty_kaspa_tag": { "type": "string" }
+      }
+    },
+    "role": { "enum": ["buyer", "seller"] },
+    "party_sk": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "party_pk": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "funding": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["sk", "pk", "address"],
+      "properties": {
+        "sk": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "pk": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "address": { "type": "string" }
+      }
+    },
+    "params": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["buyer_pk", "seller_pk", "arbiter_pk", "dispute_window", "arbiter_deadline", "timeout_to", "fee_pk", "fee_resolve", "fee_dispute", "fee_budget"],
+      "properties": {
+        "buyer_pk": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "seller_pk": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "arbiter_pk": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "dispute_window": { "type": "integer", "minimum": 0 },
+        "arbiter_deadline": { "type": "integer", "minimum": 0 },
+        "timeout_to": { "type": "integer", "enum": [0, 1] },
+        "fee_pk": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "fee_resolve": { "type": "integer", "minimum": 0 },
+        "fee_dispute": { "type": "integer", "minimum": 0 },
+        "fee_budget": { "type": "integer", "minimum": 1, "maximum": 10000000 }
+      }
+    },
+    "addresses": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["active", "disputed"],
+      "properties": {
+        "active": { "type": "string" },
+        "disputed": { "type": "string" }
+      }
+    }
+  }
+}

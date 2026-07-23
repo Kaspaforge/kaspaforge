@@ -99,13 +99,14 @@
   <!-- BLOCK 4: offline -->
   <div class="plate">
     <h2 style="font-size:20px">If the site is unavailable — the deal is still on-chain</h2>
-    <p class="hint">The escrow is a public Kaspa covenant, and the contract is open source: <a href="https://github.com/Kaspaforge/kaspaforge" target="_blank" rel="noopener"><span class="mono">github.com/Kaspaforge/kaspaforge</span></a> (Code → Download ZIP to keep a copy). What you can do without our website today:</p>
+    <p class="hint">The escrow is a public Kaspa covenant, and the contract plus the independent recovery CLI are open source: <a href="https://github.com/Kaspaforge/kaspaforge/tree/main/recovery-kit" target="_blank" rel="noopener"><span class="mono">github.com/Kaspaforge/kaspaforge/recovery-kit</span></a> (Code → Download ZIP to keep a copy). What you can do without our website today:</p>
     <ul class="need">
       <li><b>Watch the escrow</b> — paste the escrow address into <span class="mono">kaspa.stream</span>; balance and every move are public.</li>
       <li><b>Verify the contract</b> — the escrow covenant <span class="mono">escrow.sil</span> is open source: its rules are enforced on-chain by Kaspa consensus, independent of us.</li>
+      <li><b>Act independently</b> — build <span class="mono">dealctl</span> from the published source to release, refund, dispute, mutually settle, auto-release or timeout through any Kaspa v2+ node with <span class="mono">--utxoindex</span>.</li>
       <li><b>Emergency timeout</b> — if a dispute is open and the deadline passes, the covenant's timeout path returns funds to the default side on its own; it needs no key and no website.</li>
     </ul>
-    <div class="note" style="margin-top:12px"><b>Honest status:</b> this repository currently publishes the covenant, the browser frontend and the offline <span class="mono">.age</span> decryptor. It does <b>not</b> yet publish a standalone party-side CLI for release, refund or dispute. While the site is available, importing the encrypted profile restores those actions in Desk. If the site disappears, the on-chain auto-release and timeout paths still apply, but do not install an unofficial <span class="mono">escrowctl</span> from a cache or third party.</div>
+    <div class="note" style="margin-top:12px"><b>Independent recovery is published:</b> the hosted-free <span class="mono">recovery-kit/</span> contains the shared Rust transaction core, <span class="mono">dealctl</span>, schemas, vectors, checksums and EN/RU guide. Its air-gapped flow keeps the private recovery record offline: only a public watch file, covenant-line package and signed transaction cross to the online machine. Build from source and verify <span class="mono">recovery-kit/RECOVERY-SHA256SUMS</span>; do not install an unofficial binary.</div>
     <p class="hint" style="margin-top:10px">The covenant guarantees your funds can only ever reach the buyer, the seller or the fee address regardless — so a lost website never means lost money, only a wait for the timeout at worst.</p>
   </div>
 
@@ -187,8 +188,8 @@ document.getElementById('dl-checklist').addEventListener('click', function () {
     'IF THE SITE IS DOWN:',
     '  - Watch: escrow address on kaspa.stream.',
     '  - Verify contract: escrow.sil is open source (github), enforced on-chain.',
-    '  - No standalone party-side escrow CLI is published today.',
-    '  - Do not install unofficial escrowctl binaries from third parties.',
+    '  - Build recovery-kit/dealctl from the public source for party and keyless paths.',
+    '  - Verify recovery-kit/RECOVERY-SHA256SUMS; do not install unofficial binaries.',
     '',
     'IF YOU LOSE THE .age BACKUP:',
     '  You cant act on your side, but funds are NOT stolen - they follow the deal',

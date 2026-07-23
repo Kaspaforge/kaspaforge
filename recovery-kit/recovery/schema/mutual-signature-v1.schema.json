@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kaspaforge.org/schema/mutual-signature-v1.schema.json",
+  "title": "Kaspa Forge mutual settlement signature package (v1)",
+  "description": "One party's signature over a mutual settlement. Two packages, one buyer and one seller, over the SAME unsigned transaction (bound by unsigned_txid), combine into a submit-ready mutual transaction.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "schema_version", "network", "product", "deal_id", "mode", "outpoint", "covenant_id", "to_buyer", "to_seller", "unsigned_txid", "signer_role", "signature"],
+  "properties": {
+    "schema": { "const": "kaspa-forge-mutual-signature" },
+    "schema_version": { "const": 1 },
+    "network": { "enum": ["mainnet", "testnet", "simnet"] },
+    "product": { "enum": ["escrow", "deposit"] },
+    "deal_id": { "type": "integer", "minimum": 0 },
+    "mode": { "type": "integer", "enum": [0, 1] },
+    "outpoint": { "type": "string" },
+    "covenant_id": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "to_buyer": { "type": "integer", "minimum": 0 },
+    "to_seller": { "type": "integer", "minimum": 0 },
+    "unsigned_txid": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "signer_role": { "enum": ["buyer", "seller"] },
+    "signature": { "type": "string", "pattern": "^[0-9a-f]+$" }
+  }
+}

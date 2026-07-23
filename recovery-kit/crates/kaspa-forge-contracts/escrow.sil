@@ -1,0 +1,190 @@
+pragma silverscript ^0.1.0;
+
+// Kaspa Safe "Garant" — escrow covenant v1.
+// State { mode }: 0 = ACTIVE (dispute window is running), 1 = DISPUTED (awaiting the arbiter).
+// Paths:
+//   release  (buyer):          -> seller (+feeResolve) — "goods received", from any mode;
+//   refund   (seller):         -> buyer (+feeResolve) — "I cancel the deal", from any mode
+//                              (a concession is allowed even during a dispute);
+//   mutual   (buyer+seller):   free outputs, but the fee output is MANDATORY (anti-leak K1);
+//   dispute  (buyer):          ACTIVE -> DISPUTED — mutes autoRelease, summons the arbiter;
+//                              the transition recreates the UTXO => this.age resets, the
+//                              arbiterDeadline timer starts automatically;
+//   autoRelease (no signature): ACTIVE and age >= disputeWindow -> seller (+feeResolve) —
+//                              optimistic auto-release (killer feature #1, sent by the watcher);
+//   arbitrateToBuyer/ToSeller (arbiter): DISPUTED -> 100% to one side (+feeDispute),
+//                              binary verdicts, dust-safe;
+//   arbitrateSplit (arbiter):  DISPUTED -> split ONLY between the parties, both outputs
+//                              >= MIN_OUT (+feeDispute) — compromise verdicts;
+//   timeoutToBuyer/ToSeller (no signature): DISPUTED and age >= arbiterDeadline ->
+//                              the side named by timeoutTo, WITHOUT fee — emergency "arbiter died" exit
+//                              (branching over a pair of paths gated by a parameter — the inheritAuto pattern).
+// Key property: NO path can send funds to anyone other than the buyer, the seller and the
+// service fee address. The arbiter physically cannot steal.
+// TOOLING GOTCHAS (spike/API-NOTES.md): spk is version-prefixed, 36 bytes; this.age = DAA blocks;
+// when spending age-gated paths the input must set sequence >= the threshold.
+// SINGLE-INPUT INVARIANT: every path binds outputs to tx.inputs[this.activeInputIndex]; a P2SH
+// address can carry several UTXOs, so without a guard two UTXOs spent together share one output
+// and the smaller input's excess leaks to the network fee (multi-UTXO siphon, proven by
+// `escrowctl multi-utxo`). Every entrypoint asserts require(tx.inputs.length == 1). A stray plain
+// top-up on the escrow address is swept separately, one input at a time.
+
+contract Escrow(
+    pubkey buyer,
+    pubkey seller,
+    pubkey arbiter,
+    int disputeWindow,    // DAA: dispute window from the moment of funding (ACTIVE)
+    int arbiterDeadline,  // DAA: how long DISPUTED waits for the arbiter before timeout
+    int timeoutTo,        // 0 = buyer, 1 = seller — emergency outcome (from the deal template)
+    byte[36] feeSpk,      // service fee address (version-prefixed P2PK spk)
+    int feeResolve,       // fixed-min fee for happy paths, sompi (UI: max(0.2 KAS, 0.5% of amount))
+    int feeDispute,       // fixed-min fee for arbitration, sompi (UI: max(5 KAS, 2% of amount))
+    int initMode,
+    int feeBudget         // network fee budget for a transition tx, sompi — CONSTRUCTOR PARAM
+                          // (was `int constant FEE`): a future network-cost bump changes only new
+                          // deals' default without re-issuing the contract; bindings gate it to
+                          // [1_000_000, 10_000_000] (floor = proven budget, cap = griefing limit).
+) {
+    int mode = initMode;
+
+    int constant MIN_OUT = 100000000; // 1 KAS — dust guard for arbitrateSplit outputs (KIP-9)
+    int constant MAX_FEE_BUDGET = 10000000; // 0.1 KAS — cap on per-transition fee budget (griefing-guard, audit 11.07)
+
+    // Path 1: buyer confirms receipt — everything to the seller, fixed fee to the service
+    entrypoint function release(sig buyerSig) {
+        require(tx.inputs.length == 1); // single-input invariant (multi-UTXO anti-siphon)
+        require(feeBudget > 0 && feeBudget <= MAX_FEE_BUDGET); // griefing-cap (audit 11.07)
+        require(checkSig(buyerSig, buyer));
+        byte[] sellerSpk = new ScriptPubKeyP2PK(seller);
+        require(tx.outputs[0].scriptPubKey == sellerSpk);
+        require(tx.outputs[0].value >= tx.inputs[this.activeInputIndex].value - feeResolve - feeBudget);
+        require(tx.outputs[1].scriptPubKey == byte[](feeSpk));
+        require(tx.outputs[1].value >= feeResolve);
+    }
+
+    // Path 2: seller cancels the deal — everything to the buyer (works from DISPUTED too: a concession)
+    entrypoint function refund(sig sellerSig) {
+        require(tx.inputs.length == 1); // single-input invariant (multi-UTXO anti-siphon)
+        require(feeBudget > 0 && feeBudget <= MAX_FEE_BUDGET); // griefing-cap (audit 11.07)
+        require(checkSig(sellerSig, seller));
+        byte[] buyerSpk = new ScriptPubKeyP2PK(buyer);
+        require(tx.outputs[0].scriptPubKey == buyerSpk);
+        require(tx.outputs[0].value >= tx.inputs[this.activeInputIndex].value - feeResolve - feeBudget);
+        require(tx.outputs[1].scriptPubKey == byte[](feeSpk));
+        require(tx.outputs[1].value >= feeResolve);
+    }
+
+    // Path 3: both signatures = full authority of the parties; outputs are free, but the fee
+    // output is mandatory — otherwise mutual would be a free superset of release/refund (anti-leak)
+    entrypoint function mutual(sig buyerSig, sig sellerSig) {
+        require(tx.inputs.length == 1); // single-input invariant (multi-UTXO anti-siphon)
+        require(feeBudget > 0 && feeBudget <= MAX_FEE_BUDGET); // griefing-cap (audit 11.07)
+        require(checkSig(buyerSig, buyer));
+        require(checkSig(sellerSig, seller));
+        // fee must be strictly positive, else `>= feeResolve` is trivially met and mutual degenerates
+        // into a free 2-sig path (a superset of release/refund with no service fee) — audit finding.
+        require(feeResolve > 0);
+        require(tx.outputs[0].scriptPubKey == byte[](feeSpk));
+        require(tx.outputs[0].value >= feeResolve);
+    }
+
+    // Path 4: dispute — buyer only (the seller is protected by the autoRelease default);
+    // the amount is preserved, the covenant line continues in DISPUTED
+    entrypoint function dispute(sig buyerSig) {
+        require(tx.inputs.length == 1); // single-input invariant (multi-UTXO anti-siphon)
+        require(feeBudget > 0 && feeBudget <= MAX_FEE_BUDGET); // griefing-cap (audit 11.07)
+        require(mode == 0);
+        require(checkSig(buyerSig, buyer));
+        validateOutputState(0, { mode: 1 });
+        require(tx.outputs[0].value >= tx.inputs[this.activeInputIndex].value - feeBudget);
+    }
+
+    // Path 5: optimistic auto-release — the dispute window passed with no dispute, money to the seller.
+    // No signature needed: the output is hard-bound to P2PK(seller) (the inheritAuto pattern)
+    entrypoint function autoRelease() {
+        require(tx.inputs.length == 1); // single-input invariant (multi-UTXO anti-siphon)
+        require(feeBudget > 0 && feeBudget <= MAX_FEE_BUDGET); // griefing-cap (audit 11.07)
+        require(mode == 0);
+        require(this.age >= disputeWindow);
+        byte[] sellerSpk = new ScriptPubKeyP2PK(seller);
+        require(tx.outputs[0].scriptPubKey == sellerSpk);
+        require(tx.outputs[0].value >= tx.inputs[this.activeInputIndex].value - feeResolve - feeBudget);
+        require(tx.outputs[1].scriptPubKey == byte[](feeSpk));
+        require(tx.outputs[1].value >= feeResolve);
+    }
+
+    // Path 6: verdict "everything to the buyer" (a common binary outcome, dust-safe)
+    entrypoint function arbitrateToBuyer(sig arbSig) {
+        require(tx.inputs.length == 1); // single-input invariant (multi-UTXO anti-siphon)
+        require(feeBudget > 0 && feeBudget <= MAX_FEE_BUDGET); // griefing-cap (audit 11.07)
+        require(mode == 1);
+        require(checkSig(arbSig, arbiter));
+        byte[] buyerSpk = new ScriptPubKeyP2PK(buyer);
+        require(tx.outputs[0].scriptPubKey == buyerSpk);
+        require(tx.outputs[0].value >= tx.inputs[this.activeInputIndex].value - feeDispute - feeBudget);
+        require(tx.outputs[1].scriptPubKey == byte[](feeSpk));
+        require(tx.outputs[1].value >= feeDispute);
+        // Explicit total-value invariant (audit finding). Belt-and-suspenders: the two bounds above
+        // already imply it (out0 >= in-fd-feeBudget, out1 >= fd  ⟹  out0+out1 >= in-feeBudget), so the
+        // network fee is already capped at feeBudget — the arbiter cannot inflate it. Stated directly here.
+        require(tx.outputs[0].value + tx.outputs[1].value >= tx.inputs[this.activeInputIndex].value - feeBudget);
+    }
+
+    // Path 7: verdict "everything to the seller"
+    entrypoint function arbitrateToSeller(sig arbSig) {
+        require(tx.inputs.length == 1); // single-input invariant (multi-UTXO anti-siphon)
+        require(feeBudget > 0 && feeBudget <= MAX_FEE_BUDGET); // griefing-cap (audit 11.07)
+        require(mode == 1);
+        require(checkSig(arbSig, arbiter));
+        byte[] sellerSpk = new ScriptPubKeyP2PK(seller);
+        require(tx.outputs[0].scriptPubKey == sellerSpk);
+        require(tx.outputs[0].value >= tx.inputs[this.activeInputIndex].value - feeDispute - feeBudget);
+        require(tx.outputs[1].scriptPubKey == byte[](feeSpk));
+        require(tx.outputs[1].value >= feeDispute);
+        // explicit total-value invariant (implied by the two bounds above; see arbitrateToBuyer) — audit finding
+        require(tx.outputs[0].value + tx.outputs[1].value >= tx.inputs[this.activeInputIndex].value - feeBudget);
+    }
+
+    // Path 8: compromise verdict — split ONLY between the parties, both outputs >= MIN_OUT
+    // (anti-dust), total value is preserved (anti-theft)
+    entrypoint function arbitrateSplit(sig arbSig) {
+        require(tx.inputs.length == 1); // single-input invariant (multi-UTXO anti-siphon)
+        require(feeBudget > 0 && feeBudget <= MAX_FEE_BUDGET); // griefing-cap (audit 11.07)
+        require(mode == 1);
+        require(checkSig(arbSig, arbiter));
+        byte[] buyerSpk = new ScriptPubKeyP2PK(buyer);
+        byte[] sellerSpk = new ScriptPubKeyP2PK(seller);
+        require(tx.outputs[0].scriptPubKey == buyerSpk);
+        require(tx.outputs[0].value >= MIN_OUT);
+        require(tx.outputs[1].scriptPubKey == sellerSpk);
+        require(tx.outputs[1].value >= MIN_OUT);
+        require(tx.outputs[2].scriptPubKey == byte[](feeSpk));
+        require(tx.outputs[2].value >= feeDispute);
+        require(tx.outputs[0].value + tx.outputs[1].value + tx.outputs[2].value
+                >= tx.inputs[this.activeInputIndex].value - feeBudget);
+    }
+
+    // Paths 9/10: emergency "arbiter died" exit — no signature and no fee, strictly to the side
+    // named by timeoutTo (branching over a pair of paths gated by a parameter — the inheritAuto pattern)
+    entrypoint function timeoutToBuyer() {
+        require(tx.inputs.length == 1); // single-input invariant (multi-UTXO anti-siphon)
+        require(feeBudget > 0 && feeBudget <= MAX_FEE_BUDGET); // griefing-cap (audit 11.07)
+        require(mode == 1);
+        require(timeoutTo == 0);
+        require(this.age >= arbiterDeadline);
+        byte[] buyerSpk = new ScriptPubKeyP2PK(buyer);
+        require(tx.outputs[0].scriptPubKey == buyerSpk);
+        require(tx.outputs[0].value >= tx.inputs[this.activeInputIndex].value - feeBudget);
+    }
+
+    entrypoint function timeoutToSeller() {
+        require(tx.inputs.length == 1); // single-input invariant (multi-UTXO anti-siphon)
+        require(feeBudget > 0 && feeBudget <= MAX_FEE_BUDGET); // griefing-cap (audit 11.07)
+        require(mode == 1);
+        require(timeoutTo == 1);
+        require(this.age >= arbiterDeadline);
+        byte[] sellerSpk = new ScriptPubKeyP2PK(seller);
+        require(tx.outputs[0].scriptPubKey == sellerSpk);
+        require(tx.outputs[0].value >= tx.inputs[this.activeInputIndex].value - feeBudget);
+    }
+}

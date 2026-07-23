@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kaspaforge.org/schema/signed-tx-v1.schema.json",
+  "title": "Kaspa Forge signed transaction envelope (v1)",
+  "description": "A built, signed transaction plus the metadata dealctl re-verifies before broadcasting it. `submit` recomputes the txid and every output address from the transaction bytes and rejects any mismatch — no private key is needed to submit.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "schema_version", "network", "product", "deal_id", "path", "mode", "inputs", "input_total", "fee_budget", "outputs", "txid", "tx"],
+  "properties": {
+    "schema": { "const": "kaspa-forge-signed-tx" },
+    "schema_version": { "const": 1 },
+    "network": { "enum": ["mainnet", "testnet", "simnet"] },
+    "product": { "enum": ["escrow", "deposit"] },
+    "deal_id": { "type": "integer", "minimum": 0 },
+    "path": { "type": "string" },
+    "mode": { "type": "integer", "enum": [0, 1] },
+    "inputs": { "type": "array", "items": { "type": "string" } },
+    "input_total": { "type": "integer", "minimum": 0 },
+    "service_fee": { "type": ["integer", "null"], "minimum": 0 },
+    "fee_budget": { "type": "integer", "minimum": 0 },
+    "outputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["label", "address", "sompi"],
+        "properties": {
+          "label": { "type": "string" },
+          "address": { "type": "string" },
+          "sompi": { "type": "integer", "minimum": 0 },
+          "covenant": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "txid": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "tx": { "type": "object", "description": "The consensus transaction (rusty-kaspa Transaction serde form)." }
+  }
+}

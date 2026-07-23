@@ -1,0 +1,311 @@
+{
+  "addresses": {
+    "deposit": {
+      "note": "identical contract/addresses to escrow; role mapping holder=buyer, depositor=seller",
+      "role_mapping": {
+        "depositor": "seller",
+        "holder": "buyer"
+      }
+    },
+    "escrow": {
+      "active": {
+        "mainnet": "kaspa:pr8dq5mwnwq5x6dv0tudkdxjxfq7gmhu9ewk40e7pv6x3zd7z2zr5czdeka8d",
+        "script_sha256": "41140bf288bbbda418804bdb79b9f7df27a028c9bafb2994363c008415619e4c",
+        "simnet": "kaspasim:pr8dq5mwnwq5x6dv0tudkdxjxfq7gmhu9ewk40e7pv6x3zd7z2zr5hjsc2re7",
+        "testnet": "kaspatest:pr8dq5mwnwq5x6dv0tudkdxjxfq7gmhu9ewk40e7pv6x3zd7z2zr5eytzerkf"
+      },
+      "disputed": {
+        "mainnet": "kaspa:pp7dh9m9lf6paqq3qu83rqpr0c8x4j2657hmlprfpffwhyn2at9c5gn9uhe0a",
+        "script_sha256": "6f62e3044132821516d699cbfe1e6180d0fba87b281f9ce11fd4a03994623b32",
+        "simnet": "kaspasim:pp7dh9m9lf6paqq3qu83rqpr0c8x4j2657hmlprfpffwhyn2at9c58rcat83w",
+        "testnet": "kaspatest:pp7dh9m9lf6paqq3qu83rqpr0c8x4j2657hmlprfpffwhyn2at9c5f4r8c87e"
+      },
+      "params": {
+        "arbiter_deadline": 1200,
+        "arbiter_pk": "531fe6068134503d2723133227c867ac8fa6c83c537e9a44c3c5bdbdcb1fe337",
+        "buyer_pk": "1b84c5567b126440995d3ed5aaba0565d71e1834604819ff9c17f5e9d5dd078f",
+        "dispute_window": 600,
+        "fee_budget": 1000000,
+        "fee_dispute": 500000000,
+        "fee_pk": "462779ad4aad39514614751a71085f2f10e1c7a593e4e030efb5b8721ce55b0b",
+        "fee_resolve": 20000000,
+        "seller_pk": "4d4b6cd1361032ca9bd2aeb9d900aa4d45d9ead80ac9423374c451a7254d0766",
+        "timeout_to": 0
+      }
+    }
+  },
+  "contract": {
+    "canonical_active_sha256": "41140bf288bbbda418804bdb79b9f7df27a028c9bafb2994363c008415619e4c",
+    "canonical_disputed_sha256": "6f62e3044132821516d699cbfe1e6180d0fba87b281f9ce11fd4a03994623b32",
+    "family": "escrow",
+    "rusty_kaspa_tag": "v2.0.1",
+    "silverscript_revisions": [
+      "d25bd3427a093c17327ca3d6b9e1aa5f7688c863",
+      "26e3b9f94821b6fe47a2492755252ec4f995abb1"
+    ],
+    "source_sha256": "65d4b6bb3c516647b72a873dab1272445c498f8b17bfba19ec15519726dcb4a0",
+    "version": 1
+  },
+  "schema": "kaspa-forge-vectors",
+  "schema_version": 1,
+  "transactions": [
+    {
+      "inputs": [
+        "(f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0, 0)"
+      ],
+      "mode": 0,
+      "outputs": [
+        {
+          "covenant_id": "21f9b6b3bf575a662fdac55e76e88895d85c5713c7c74c77f949a27291eef49a",
+          "spk_sha256": "47e9698285c8d5f007811628d722c42dd2a6574901a288aecb6727e6b224bfce",
+          "spk_version": 0,
+          "value": 9999000000
+        }
+      ],
+      "path": "fund",
+      "txid": "3c89506d5940d5ef6ad75f7493da758f072d307509734ee16d4a2bee0af3c19a"
+    },
+    {
+      "inputs": [
+        "(e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5, 0)"
+      ],
+      "mode": 0,
+      "outputs": [
+        {
+          "covenant_id": null,
+          "spk_sha256": "ea35731c029cf1820f8f1fc75b932c9904c7d69c8a98e11dff74d0e746733a90",
+          "spk_version": 0,
+          "value": 9979000000
+        },
+        {
+          "covenant_id": null,
+          "spk_sha256": "55e6efcacc5be3970724574df6503352ebed2528988d9068f00c910f2402d023",
+          "spk_version": 0,
+          "value": 20000000
+        }
+      ],
+      "path": "release-active",
+      "txid": "1b9c614dbcd7c60651af037e2665d204e0447226e3751a5cbed26b4683bbb806"
+    },
+    {
+      "inputs": [
+        "(e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5, 0)"
+      ],
+      "mode": 1,
+      "outputs": [
+        {
+          "covenant_id": null,
+          "spk_sha256": "ea35731c029cf1820f8f1fc75b932c9904c7d69c8a98e11dff74d0e746733a90",
+          "spk_version": 0,
+          "value": 9979000000
+        },
+        {
+          "covenant_id": null,
+          "spk_sha256": "55e6efcacc5be3970724574df6503352ebed2528988d9068f00c910f2402d023",
+          "spk_version": 0,
+          "value": 20000000
+        }
+      ],
+      "path": "release-disputed",
+      "txid": "1b9c614dbcd7c60651af037e2665d204e0447226e3751a5cbed26b4683bbb806"
+    },
+    {
+      "inputs": [
+        "(e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5, 0)"
+      ],
+      "mode": 0,
+      "outputs": [
+        {
+          "covenant_id": null,
+          "spk_sha256": "1d1ba35e32b8c8d9781dd238156016561c4c6a0be80b0cdf813f9624b408f806",
+          "spk_version": 0,
+          "value": 9979000000
+        },
+        {
+          "covenant_id": null,
+          "spk_sha256": "55e6efcacc5be3970724574df6503352ebed2528988d9068f00c910f2402d023",
+          "spk_version": 0,
+          "value": 20000000
+        }
+      ],
+      "path": "refund-active",
+      "txid": "10d27fa0eb07d16479d40016aba21c4fd21ec975af4ba7f912c9ae23abe89466"
+    },
+    {
+      "inputs": [
+        "(e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5, 0)"
+      ],
+      "mode": 1,
+      "outputs": [
+        {
+          "covenant_id": null,
+          "spk_sha256": "1d1ba35e32b8c8d9781dd238156016561c4c6a0be80b0cdf813f9624b408f806",
+          "spk_version": 0,
+          "value": 9979000000
+        },
+        {
+          "covenant_id": null,
+          "spk_sha256": "55e6efcacc5be3970724574df6503352ebed2528988d9068f00c910f2402d023",
+          "spk_version": 0,
+          "value": 20000000
+        }
+      ],
+      "path": "refund-disputed",
+      "txid": "10d27fa0eb07d16479d40016aba21c4fd21ec975af4ba7f912c9ae23abe89466"
+    },
+    {
+      "inputs": [
+        "(e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5, 0)"
+      ],
+      "mode": 0,
+      "outputs": [
+        {
+          "covenant_id": "c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0",
+          "spk_sha256": "325167b2f2af81cdf7acca7401cfd7435244ec5d07620ae5ba5b2ffb92a733cd",
+          "spk_version": 0,
+          "value": 9999000000
+        }
+      ],
+      "path": "dispute",
+      "txid": "72e70bd17f2e868c9ab1671a11375cb96fd368349e8ded7810b72a61bd6f82a4"
+    },
+    {
+      "inputs": [
+        "(e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5, 0)"
+      ],
+      "mode": 0,
+      "outputs": [
+        {
+          "covenant_id": null,
+          "spk_sha256": "ea35731c029cf1820f8f1fc75b932c9904c7d69c8a98e11dff74d0e746733a90",
+          "spk_version": 0,
+          "value": 9979000000
+        },
+        {
+          "covenant_id": null,
+          "spk_sha256": "55e6efcacc5be3970724574df6503352ebed2528988d9068f00c910f2402d023",
+          "spk_version": 0,
+          "value": 20000000
+        }
+      ],
+      "path": "auto-release",
+      "txid": "d84e45583035495859d3de853b7493ab5b39b6368f6d7f70cf7529c47703a3cd"
+    },
+    {
+      "inputs": [
+        "(e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5, 0)"
+      ],
+      "mode": 1,
+      "outputs": [
+        {
+          "covenant_id": null,
+          "spk_sha256": "1d1ba35e32b8c8d9781dd238156016561c4c6a0be80b0cdf813f9624b408f806",
+          "spk_version": 0,
+          "value": 9999000000
+        }
+      ],
+      "path": "timeout",
+      "txid": "461faf1f706f74f44694ffb03816a56169e52dc6e6f340a7a0de9c684e78e731"
+    },
+    {
+      "inputs": [
+        "(e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5, 0)"
+      ],
+      "mode": 1,
+      "outputs": [
+        {
+          "covenant_id": null,
+          "spk_sha256": "1d1ba35e32b8c8d9781dd238156016561c4c6a0be80b0cdf813f9624b408f806",
+          "spk_version": 0,
+          "value": 9499000000
+        },
+        {
+          "covenant_id": null,
+          "spk_sha256": "55e6efcacc5be3970724574df6503352ebed2528988d9068f00c910f2402d023",
+          "spk_version": 0,
+          "value": 500000000
+        }
+      ],
+      "path": "arbitrate-to-buyer",
+      "txid": "3b8929ff7b0d6a321289a9726dc8267f7d57db7c7979bf244ba279f1ed524aad"
+    },
+    {
+      "inputs": [
+        "(e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5, 0)"
+      ],
+      "mode": 1,
+      "outputs": [
+        {
+          "covenant_id": null,
+          "spk_sha256": "ea35731c029cf1820f8f1fc75b932c9904c7d69c8a98e11dff74d0e746733a90",
+          "spk_version": 0,
+          "value": 9499000000
+        },
+        {
+          "covenant_id": null,
+          "spk_sha256": "55e6efcacc5be3970724574df6503352ebed2528988d9068f00c910f2402d023",
+          "spk_version": 0,
+          "value": 500000000
+        }
+      ],
+      "path": "arbitrate-to-seller",
+      "txid": "c516234a3dd08dbc28289b54fde241c913e5ebfd3aa2a8343c53e45033057c04"
+    },
+    {
+      "inputs": [
+        "(e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5, 0)"
+      ],
+      "mode": 1,
+      "outputs": [
+        {
+          "covenant_id": null,
+          "spk_sha256": "1d1ba35e32b8c8d9781dd238156016561c4c6a0be80b0cdf813f9624b408f806",
+          "spk_version": 0,
+          "value": 6000000000
+        },
+        {
+          "covenant_id": null,
+          "spk_sha256": "ea35731c029cf1820f8f1fc75b932c9904c7d69c8a98e11dff74d0e746733a90",
+          "spk_version": 0,
+          "value": 3499000000
+        },
+        {
+          "covenant_id": null,
+          "spk_sha256": "55e6efcacc5be3970724574df6503352ebed2528988d9068f00c910f2402d023",
+          "spk_version": 0,
+          "value": 500000000
+        }
+      ],
+      "path": "arbitrate-split",
+      "txid": "558eca2519fdcc203fd44f94c4c74f990f66f250342769c362bdb989b620c6b4"
+    },
+    {
+      "inputs": [
+        "(e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5, 0)"
+      ],
+      "mode": 1,
+      "outputs": [
+        {
+          "covenant_id": null,
+          "spk_sha256": "55e6efcacc5be3970724574df6503352ebed2528988d9068f00c910f2402d023",
+          "spk_version": 0,
+          "value": 20000000
+        },
+        {
+          "covenant_id": null,
+          "spk_sha256": "1d1ba35e32b8c8d9781dd238156016561c4c6a0be80b0cdf813f9624b408f806",
+          "spk_version": 0,
+          "value": 4000000000
+        },
+        {
+          "covenant_id": null,
+          "spk_sha256": "ea35731c029cf1820f8f1fc75b932c9904c7d69c8a98e11dff74d0e746733a90",
+          "spk_version": 0,
+          "value": 5979000000
+        }
+      ],
+      "path": "mutual",
+      "txid": "79074413e0d7145db4d0bcb403dfa1ee331e8e28021d9a7984d352991fcbfb75"
+    }
+  ]
+}

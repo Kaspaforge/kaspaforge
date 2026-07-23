@@ -1,0 +1,34 @@
+[package]
+name = "kaspa-forge-contracts"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.85"
+license = "MIT"
+repository = "https://github.com/Kaspaforge/kaspaforge"
+description = "Public core of Kaspa Forge — escrow/deposit covenant builders, recovery record schema, and a party-side recovery CLI (dealctl). No hosted-server dependencies."
+
+[dependencies]
+# Kaspa consensus primitives (pinned exactly as the product WASM crate).
+kaspa-consensus-core = { git = "https://github.com/kaspanet/rusty-kaspa", tag = "v2.0.1", default-features = false }
+kaspa-txscript = { git = "https://github.com/kaspanet/rusty-kaspa", tag = "v2.0.1", default-features = false }
+kaspa-addresses = { git = "https://github.com/kaspanet/rusty-kaspa", tag = "v2.0.1", default-features = false }
+kaspa-hashes = { git = "https://github.com/kaspanet/rusty-kaspa", tag = "v2.0.1", default-features = false }
+# SilverScript compiler — pinned to the exact public revision used by the publisher. escrow.sil
+# codegen at this commit is byte-identical to the revision recorded in the spec (d25bd342); this is
+# the commit currently compiled into the live product WASM, so the public core reproduces the
+# production covenant bytecode (proven in registry::tests).
+silverscript-lang = { git = "https://github.com/kaspanet/silverscript", rev = "26e3b9f94821b6fe47a2492755252ec4f995abb1" }
+# Schnorr signing.
+secp256k1 = { version = "0.29.0", features = ["global-context", "rand-std"] }
+hex = "0.4"
+sha2 = "0.10"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[dev-dependencies]
+kaspa-txscript-errors = { git = "https://github.com/kaspanet/rusty-kaspa", tag = "v2.0.1" }
+
+# Overflow checks in release too: a covenant tool must never let a sompi computation wrap silently.
+[profile.release]
+overflow-checks = true
+

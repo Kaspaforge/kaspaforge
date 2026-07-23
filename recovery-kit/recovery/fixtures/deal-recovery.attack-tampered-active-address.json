@@ -1,0 +1,38 @@
+{
+  "schema": "kaspa-forge-deal-recovery",
+  "schema_version": 1,
+  "product": "escrow",
+  "deal_id": 42,
+  "network": "mainnet",
+  "contract": {
+    "family": "escrow",
+    "version": 1,
+    "source_sha256": "65d4b6bb3c516647b72a873dab1272445c498f8b17bfba19ec15519726dcb4a0",
+    "silverscript_revision": "26e3b9f94821b6fe47a2492755252ec4f995abb1",
+    "rusty_kaspa_tag": "v2.0.1"
+  },
+  "role": "buyer",
+  "party_sk": "0101010101010101010101010101010101010101010101010101010101010101",
+  "party_pk": "1b84c5567b126440995d3ed5aaba0565d71e1834604819ff9c17f5e9d5dd078f",
+  "funding": {
+    "sk": "0707070707070707070707070707070707070707070707070707070707070707",
+    "pk": "989c0b76cb563971fdc9bef31ec06c3560f3249d6ee9e5d83c57625596e05f6f",
+    "address": "kaspa:qzvfczmkedtrju0aexl0x8kqds6kpueyn4hwnewc83tky4vkup0k76syn0nlc"
+  },
+  "params": {
+    "buyer_pk": "1b84c5567b126440995d3ed5aaba0565d71e1834604819ff9c17f5e9d5dd078f",
+    "seller_pk": "4d4b6cd1361032ca9bd2aeb9d900aa4d45d9ead80ac9423374c451a7254d0766",
+    "arbiter_pk": "531fe6068134503d2723133227c867ac8fa6c83c537e9a44c3c5bdbdcb1fe337",
+    "dispute_window": 600,
+    "arbiter_deadline": 1200,
+    "timeout_to": 0,
+    "fee_pk": "462779ad4aad39514614751a71085f2f10e1c7a593e4e030efb5b8721ce55b0b",
+    "fee_resolve": 20000000,
+    "fee_dispute": 500000000,
+    "fee_budget": 1000000
+  },
+  "addresses": {
+    "active": "kaspa:pp7dh9m9lf6paqq3qu83rqpr0c8x4j2657hmlprfpffwhyn2at9c5gn9uhe0a",
+    "disputed": "kaspa:pp7dh9m9lf6paqq3qu83rqpr0c8x4j2657hmlprfpffwhyn2at9c5gn9uhe0a"
+  }
+}

@@ -29,6 +29,9 @@ This repository contains:
   fonts or code from the network.
 - [`vaultctl/`](vaultctl/) — the complete standalone Safe recovery CLI. It can inspect and operate
   a vault against any Kaspa v2+ node with `--utxoindex`, without the Kaspa Forge website or API.
+- [`recovery-kit/`](recovery-kit/) — the standalone Escrow + Deposit recovery package: the shared
+  Rust transaction core, `dealctl`, versioned schemas, deterministic vectors, EN/RU guides and the
+  offline `.age` decryptor. It contains no Kaspa Forge server, hosted API or operator surface.
 - [`contracts/vault.sil`](contracts/vault.sil) and
   [`contracts/escrow.sil`](contracts/escrow.sil) — the on-chain covenant sources.
 - [`board-indexer/`](board-indexer/) — the standalone MIT KBRD v1/v2 indexer: BIP340 verification,
@@ -36,13 +39,13 @@ This repository contains:
   image storage, classifier, reports, messaging, operator/admin surface, infrastructure config or
   secrets.
 - [`web/`](web/) and [`app/`](app/) — the browser frontend and Android wrapper source.
-- [`RECOVERY-SHA256SUMS`](RECOVERY-SHA256SUMS) — checksums generated from the exact recovery kit
-  in this revision.
+- [`RECOVERY-SHA256SUMS`](RECOVERY-SHA256SUMS) — Safe recovery checksums; the Deal Recovery Kit has
+  its own complete manifest at
+  [`recovery-kit/RECOVERY-SHA256SUMS`](recovery-kit/RECOVERY-SHA256SUMS).
 
-Recovery capability is intentionally stated narrowly: **Safe has a standalone recovery CLI.**
-For Escrow and Deposit, the covenant and browser frontend are public, but a separately packaged
-party-side recovery CLI is not published yet. Do not rely on a cached or third-party `escrowctl`
-binary.
+Both product families now have standalone recovery tools: `vaultctl` for Safe and `dealctl` for
+Escrow/Deposit. Build them from this repository and verify the matching checksum manifest; do not
+rely on cached or third-party binaries.
 
 The Boards index can be rebuilt only across history available from the connected node. A normal
 pruned node does not retain the full chain history; use an archival source or retain a current
@@ -160,10 +163,16 @@ service-fee address:
 
 The encrypted Desk profile contains the deal key, chat key, service token and public escrow data;
 the offline decryptor exposes those fields. While the Kaspa Forge site is available, importing the
-`.age` file into Desk restores the deal UI. Without the site, you can still inspect the escrow
-address in any Kaspa explorer and audit the published covenant. A standalone party-side CLI for
-release/refund/dispute is **not part of this repository today**; the timeout paths remain enforced
-by the covenant, but this README does not claim an unpublished recovery tool.
+`.age` file into Desk restores the deal UI. Without the site, use
+[`recovery-kit/`](recovery-kit/): `dealctl` extracts and verifies one minimal deal record, queries
+any Kaspa v2+ node with `--utxoindex`, builds every party or keyless covenant path, verifies the
+exact inputs/outputs and submits a signed transaction without a Kaspa Forge API.
+
+For a real air-gapped flow, create `watch.json` from the recovery record on the offline machine,
+run `prepare --watch` on the online machine, bring only `lines.json` back for signing, then return
+the signed transaction for `submit`. The private recovery record never touches the online host.
+Follow the complete EN/RU guide and verify
+[`recovery-kit/RECOVERY-SHA256SUMS`](recovery-kit/RECOVERY-SHA256SUMS) before building.
 
 ## Trust and backup boundaries
 

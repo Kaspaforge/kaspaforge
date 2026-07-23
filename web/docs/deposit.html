@@ -59,6 +59,7 @@
     <a href="/docs/escrow.html" style="color:var(--ash);text-decoration:none">Escrow</a>
     <a href="/docs/deposit.html" style="color:var(--kaspa);text-decoration:none">Deposit</a>
     <a href="/docs/market.html" style="color:var(--ash);text-decoration:none">Marketplace</a>
+    <a href="/docs/boards.html" style="color:var(--ash);text-decoration:none">Boards</a>
   </nav>
 
   <h2 style="margin-top:28px">Two roles, neither with unilateral control</h2>
@@ -108,7 +109,7 @@
   <ol class="steps" style="margin-top:10px">
     <li><b>Keys remain in the browser</b> inside the password-encrypted Desk profile. Keep an offline <span class="mono">.age</span> key-file backup and its password separately; support will never ask for either.</li>
     <li><b>Forge Sync carries Deposit records as encrypted ciphertext.</b> It is useful between devices, but it does not replace a key-file backup you control.</li>
-    <li><b>The public covenant outlives the interface.</b> The contract source and browser code are in the <a href="https://github.com/Kaspaforge/kaspaforge" target="_blank" rel="noopener">public repository</a>. A separately packaged party-side Deposit/Escrow recovery CLI is not published today; do not rely on an unofficial binary.</li>
+    <li><b>The public covenant outlives the interface.</b> The contract source, browser code and hosted-independent <span class="mono">dealctl</span> recovery package are in the <a href="https://github.com/Kaspaforge/kaspaforge/tree/main/recovery-kit" target="_blank" rel="noopener">public repository</a>. Build from source, verify its checksum manifest and use any Kaspa v2+ node with <span class="mono">--utxoindex</span>.</li>
     <li><b>The server stores public deal parameters and encrypted traffic.</b> Sensitive dispute material is removed after closure. See <a href="/privacy-escrow.html">Escrow and Deposit privacy</a> for the precise boundary.</li>
   </ol>
 
@@ -131,6 +132,7 @@
       <a href="/escrow-index.html">Escrow</a>
       <a href="/deposit-index.html">Deposit</a>
       <a href="/market.html">Market</a>
+      <a href="/boards.html">Boards</a>
       <a href="/blog/">Blog</a>
       <a href="/docs/">Docs</a>
       <a href="/recover.html">Recovery</a>
